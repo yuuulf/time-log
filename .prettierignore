@@ -1,0 +1,6 @@
+# OpenSpec CLI が生成・更新するファイル（archive の自動コミットで整形差分を出さないため）
+openspec/
+.claude/
+
+# 生成物
+next-env.d.ts

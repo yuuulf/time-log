@@ -12,7 +12,7 @@
 
 ## 2. フォーマットと lint
 
-- [ ] 2.1 `prettier`・`eslint-config-prettier`・`prettier-plugin-tailwindcss` を追加し、`.prettierrc`・`.prettierignore`・`eslint.config.mjs` を設定、`format` / `format:check` / `lint` / `typecheck` スクリプトを追加する。`npm run lint` と `npm run typecheck` が通ることを確認する（コミット: Prettier と lint スクリプトを追加）
+- [x] 2.1 `prettier`・`eslint-config-prettier`・`prettier-plugin-tailwindcss` を追加し、`.prettierrc`・`.prettierignore`・`eslint.config.mjs` を設定、`format` / `format:check` / `lint` / `typecheck` スクリプトを追加する。`npm run lint` と `npm run typecheck` が通ることを確認する（コミット: Prettier と lint スクリプトを追加）
 - [ ] 2.2 `npm run format` で既存ファイルを整形し、整形だけを別コミットにする。`npm run format:check` が通ることを確認する（コミット: Prettier で整形）
 
 ## 3. 共通レイアウトとトップページ（app-shell）
