@@ -1,8 +1,8 @@
-import { render, screen } from '@testing-library/react'
-import { expect, test } from 'vitest'
-import Home from './page'
+import { render, screen } from "@testing-library/react";
+import { expect, test } from "vitest";
+import Home from "./page";
 
-test('トップページに見出しが表示される', () => {
-  render(<Home />)
-  expect(screen.getByRole('heading', { level: 1 })).toBeDefined()
-})
+test("トップページに見出しが表示される", () => {
+  render(<Home />);
+  expect(screen.getByRole("heading", { level: 1 })).toBeDefined();
+});
