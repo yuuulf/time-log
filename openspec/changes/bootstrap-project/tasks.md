@@ -6,7 +6,7 @@
 
 - [x] 1.1 作業ブランチ `bootstrap-project` を作成し、`git branch --show-current` で main 以外にいることを確認する
 - [x] 1.2 一時ディレクトリで `create-next-app`（design 決定 1 のフラグ）を実行し、`.git` と `README.md` 以外の生成物をリポジトリ直下にコピーする。`mise exec -- npm run dev` で初期ページが表示されることを確認する（コミット: Next.js プロジェクトを作成）
-- [ ] 1.3 Next.js 公式ガイドの構成で Vitest と Testing Library を導入し、`vitest.config.mts` と `test` スクリプトを追加する。仮のテスト 1 件で `npm test` が通ることを確認する（コミット: Vitest を導入）
+- [x] 1.3 Next.js 公式ガイドの構成で Vitest と Testing Library を導入し、`vitest.config.mts` と `test` スクリプトを追加する。仮のテスト 1 件で `npm test` が通ることを確認する（コミット: Vitest を導入）
 - [ ] 1.4 AGENTS.md の生成部分の後に「## プロジェクトのルール」節（design 決定 7 の全項目と各コマンド）を追記し、ユーザー指定の 11 項目がすべて含まれていることを確認する。以降のタスクのコミットはこのルールに従う（コミット: AGENTS.md に開発ルールを追記）
 - [ ] 1.5 `package.json` に `engines.node: ">=24"` を追加し、`mise exec -- node -v` が 24 系で `npm ci` と `npm test` が通ることを確認する
 
