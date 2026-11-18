@@ -3,12 +3,14 @@ import { beforeEach, describe, expect, test } from "vitest";
 import { createDb, type Db } from "@/lib/db/client";
 import { timeEntries } from "@/lib/db/schema";
 import {
+  deleteEntry,
   getEntry,
   getRunningEntry,
   listRecentEntries,
   listTaskNameSuggestions,
   startEntry,
   stopRunningEntry,
+  updateEntry,
 } from "./repository";
 
 const at = (time: string) => new Date(`2026-11-18T${time}+09:00`);
@@ -148,5 +150,74 @@ describe("タスク名の候補", () => {
     expect(suggestions).toHaveLength(20);
     expect(suggestions[0]).toBe("タスク25");
     expect(suggestions[19]).toBe("タスク6");
+  });
+});
+
+describe("記録の修正", () => {
+  const now = at("12:00:00");
+
+  test("終了した記録のタスク名・開始・終了時刻を変更できる", () => {
+    const entry = insertEntry("資料作成", at("09:00:00"), at("10:00:00"));
+
+    const updated = updateEntry(
+      db,
+      entry.id,
+      {
+        taskName: "資料レビュー",
+        startedAt: at("09:10:00"),
+        endedAt: at("10:30:00"),
+      },
+      now,
+    );
+
+    expect(updated).toMatchObject({
+      taskName: "資料レビュー",
+      startedAt: at("09:10:00"),
+      endedAt: at("10:30:00"),
+      updatedAt: now,
+    });
+  });
+
+  test("記録中の記録では終了時刻を変えない", () => {
+    const entry = insertEntry("資料作成", at("09:00:00"), null);
+
+    const updated = updateEntry(
+      db,
+      entry.id,
+      {
+        taskName: "資料作成2",
+        startedAt: at("08:50:00"),
+        endedAt: at("11:00:00"),
+      },
+      now,
+    );
+
+    expect(updated).toMatchObject({
+      taskName: "資料作成2",
+      startedAt: at("08:50:00"),
+      endedAt: null,
+    });
+    expect(getRunningEntry(db)?.id).toBe(entry.id);
+  });
+
+  test("存在しない記録の修正は undefined を返す", () => {
+    expect(
+      updateEntry(db, 999, { taskName: "x", startedAt: at("09:00:00") }, now),
+    ).toBeUndefined();
+  });
+});
+
+describe("記録の削除", () => {
+  test("削除すると一覧から消える", () => {
+    const entry = insertEntry("資料作成", at("09:00:00"), at("10:00:00"));
+    const other = insertEntry("打ち合わせ", at("10:00:00"), at("11:00:00"));
+
+    expect(deleteEntry(db, entry.id)).toBe(true);
+    expect(getEntry(db, entry.id)).toBeUndefined();
+    expect(getEntry(db, other.id)).toBeDefined();
+  });
+
+  test("存在しない記録の削除は false を返す", () => {
+    expect(deleteEntry(db, 999)).toBe(false);
   });
 });

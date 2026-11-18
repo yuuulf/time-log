@@ -73,3 +73,40 @@ export function listTaskNameSuggestions(db: Db): string[] {
     .all()
     .map((row) => row.taskName);
 }
+
+/**
+ * 記録を修正する。入力チェック済みの値を渡す。
+ * 記録中の記録では終了時刻を変えない（終了は stopRunningEntry で行う）。
+ * 記録が存在しなければ undefined を返す。
+ */
+export function updateEntry(
+  db: Db,
+  id: number,
+  input: { taskName: string; startedAt: Date; endedAt?: Date },
+  now: Date,
+): TimeEntry | undefined {
+  const entry = getEntry(db, id);
+  if (!entry) return undefined;
+  const isRunning = entry.endedAt === null;
+  return db
+    .update(timeEntries)
+    .set({
+      taskName: input.taskName,
+      startedAt: input.startedAt,
+      ...(isRunning ? {} : { endedAt: input.endedAt ?? entry.endedAt }),
+      updatedAt: now,
+    })
+    .where(eq(timeEntries.id, id))
+    .returning()
+    .get();
+}
+
+/** 記録を削除する。削除できたら true、存在しなければ false を返す */
+export function deleteEntry(db: Db, id: number): boolean {
+  const deleted = db
+    .delete(timeEntries)
+    .where(eq(timeEntries.id, id))
+    .returning({ id: timeEntries.id })
+    .get();
+  return deleted !== undefined;
+}
