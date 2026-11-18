@@ -91,3 +91,70 @@ export function parseDateTimeLocalValue(value: string): Date | null {
   }
   return date;
 }
+
+/** 年と月（月は 1〜12） */
+export type YearMonth = { year: number; month: number };
+
+const DATE_VALUE = /^(\d{4})-(\d{2})-(\d{2})$/;
+const MONTH_VALUE = /^(\d{4})-(\d{2})$/;
+
+/**
+ * `<input type="date">` の値（「2026-10-01」）を、その日の日本時間 0 時として解釈する。
+ * 形式が正しくない、または存在しない日付なら null を返す。
+ */
+export function parseDateValue(value: string): Date | null {
+  if (!DATE_VALUE.test(value)) return null;
+  return parseDateTimeLocalValue(`${value}T00:00`);
+}
+
+/** 月の値（「2026-10」）を解釈する。形式が正しくない、または 1〜12 月でなければ null を返す */
+export function parseMonthValue(value: string): YearMonth | null {
+  const match = MONTH_VALUE.exec(value);
+  if (!match) return null;
+  const year = Number(match[1]);
+  const month = Number(match[2]);
+  if (month < 1 || month > 12) return null;
+  return { year, month };
+}
+
+/** 月を「2026-10」の形にする。URL に使う */
+export function toMonthValue({ year, month }: YearMonth): string {
+  return `${String(year).padStart(4, "0")}-${String(month).padStart(2, "0")}`;
+}
+
+/** 日本時間での今月 */
+export function currentMonth(now: Date): YearMonth {
+  const { year, month } = jstParts(now);
+  return { year: Number(year), month: Number(month) };
+}
+
+/** 月を n か月ずらす（負の値で前の月） */
+export function addMonths({ year, month }: YearMonth, n: number): YearMonth {
+  const index = year * 12 + (month - 1) + n;
+  return { year: Math.floor(index / 12), month: (index % 12) + 1 };
+}
+
+/** 月を比べる。a が前なら負、同じなら 0、後なら正 */
+export function compareMonths(a: YearMonth, b: YearMonth): number {
+  return a.year * 12 + a.month - (b.year * 12 + b.month);
+}
+
+/** 月の範囲。日本時間の 1 日 0 時（from）から翌月 1 日 0 時（to、含まない）まで */
+export function monthRange(ym: YearMonth): { from: Date; to: Date } {
+  const start = (m: YearMonth) => parseDateValue(`${toMonthValue(m)}-01`)!;
+  return { from: start(ym), to: start(addMonths(ym, 1)) };
+}
+
+/** 月を「2026年10月」の形で表示する */
+export function formatMonthHeading({ year, month }: YearMonth): string {
+  return `${year}年${month}月`;
+}
+
+/** 期間を「2026年10月1日〜2026年10月15日」の形で表示する。first と last はその日の中の時刻 */
+export function formatRangeHeading(first: Date, last: Date): string {
+  const day = (date: Date) => {
+    const { year, month, day } = jstParts(date);
+    return `${year}年${Number(month)}月${Number(day)}日`;
+  };
+  return `${day(first)}〜${day(last)}`;
+}
