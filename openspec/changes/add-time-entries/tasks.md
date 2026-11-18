@@ -22,7 +22,7 @@
 ## 5. 入力チェックと Server Functions
 
 - [x] 5.1 `lib/messages.ts` に時間記録の文言（ボタン、見出し、空の一覧、「記録中」「（タスク名なし）」、エラー文言）を追加し、`lib/time-entries/validation.ts` に開始・修正の入力チェック（design 決定 7）を実装する。タスク名 200/201 文字、前後の空白、終了 ≦ 開始、未来の時刻、記録中の記録への終了時刻の指定をテストし、`npm test` が通ることを確認する（コミット: 時間記録の入力チェックを追加）
-- [ ] 5.2 `lib/time-entries/actions.ts` に開始・終了・修正・削除の Server Functions を実装する。`server-only`・`next/cache`・`getDb()` を差し替えて、入力エラー時は保存せずエラーを返すこと、成功時は保存して `refresh()` を呼ぶことをテストし、`npm test` が通ることを確認する（コミット: 時間記録の Server Functions を追加）
+- [x] 5.2 `lib/time-entries/actions.ts` に開始・終了・修正・削除の Server Functions を実装する。`server-only`・`next/cache`・`getDb()` を差し替えて、入力エラー時は保存せずエラーを返すこと、成功時は保存して `refresh()` を呼ぶことをテストし、`npm test` が通ることを確認する（コミット: 時間記録の Server Functions を追加）
 
 ## 6. 画面
 
