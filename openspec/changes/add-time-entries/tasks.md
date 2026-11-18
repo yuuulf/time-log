@@ -7,7 +7,7 @@
 ## 2. データベース
 
 - [x] 2.1 `lib/db/schema.ts` に `time_entries` テーブル（design 決定 1）を定義し、`npm run db:generate` でマイグレーションを作る。記録中を 1 件に制限する式の一意インデックスがマイグレーション SQL に含まれていることを確認し、なければ手で追記する（コミット: 時間記録のテーブルを追加）
-- [ ] 2.2 `createDb()` でマイグレーションを自動適用し、`lib/db/index.ts` を遅延生成の `getDb()` に変える（design 決定 2）。`lib/db/client.test.ts` に「インメモリの DB に `time_entries` テーブルができている」テストを追加し、`npm test` と `npm run build` が通ることを確認する（コミット: マイグレーションを自動で適用する）
+- [x] 2.2 `createDb()` でマイグレーションを自動適用し、`lib/db/index.ts` を遅延生成の `getDb()` に変える（design 決定 2）。`lib/db/client.test.ts` に「インメモリの DB に `time_entries` テーブルができている」テストを追加し、`npm test` と `npm run build` が通ることを確認する（コミット: マイグレーションを自動で適用する）
 
 ## 3. 時刻の扱い
 
