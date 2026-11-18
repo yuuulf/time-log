@@ -40,6 +40,14 @@
 
 - [x] 8.1 PR を作成し、CI のチェックがすべて成功することを確認する
 
+## 9. ボタンのアイコン化
+
+- [ ] 9.1 AGENTS.md の「UI と文言の統一」を、ボタンはアイコンで表示し名前と説明を付けること、ラベルに「する」を付けないことに更新する（コミット: ボタンの文言ルールを更新）
+- [ ] 9.2 lucide-react を追加し、`components/ui/IconButton.tsx`（アイコン・`aria-label`・`title`）を作る。名前で読み上げられること、`title` が付くこと、`type` の既定が `button` であることをテストし、`npm test` が通ることを確認する（コミット: アイコンボタンを追加）
+- [ ] 9.3 `lib/messages.ts` のボタンの名前から「する」を外し（空の一覧とエラーの文言も合わせる）、`StartStopForm`・`EntryItem` のボタンを `IconButton` に置き換えて `components/ui/Button.tsx` を削除する。既存のテストが名前で操作できたまま通ることを確認する（コミット: ボタンをアイコンにする）
+- [ ] 9.4 README.md の使い方をボタンの表記に合わせて直す。`npm run dev` で spec のシナリオをもう一度ブラウザで確認し、各ボタンにポインタを合わせると説明が出ること、幅 375px で横スクロールが出ないことを確認する（コミット: README のボタンの表記を直す）
+- [ ] 9.5 PR の CI のチェックがすべて成功することを確認する
+
 ## Workflow follow-up
 
 - レビューで spec と実装の整合を確認し、tasks.md がすべて完了していることを確かめてから、PR に `archive` ラベルを付ける。`openspec/specs/time-tracking` ができることを確認する

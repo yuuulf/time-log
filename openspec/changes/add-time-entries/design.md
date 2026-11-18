@@ -64,10 +64,10 @@
 ### 6. 画面の構成
 
 - `app/page.tsx` はアプリ名と説明の下に `<Suspense>` で `TimeTracker` を置く。`TimeTracker` は async の Server Component で、`await connection()` の後に記録中の記録・一覧・候補を読み込む
-- `StartStopForm`（Client Component）: タスク名の入力欄（`<datalist>` で候補を表示）と「開始する」を常に表示する（記録中に別のタスクを開始できるようにするため）。記録中の記録があれば、そのタスク名・開始時刻と「終了する」も表示する。`useActionState` で入力エラーと送信中の状態を表示する
+- `StartStopForm`（Client Component）: タスク名の入力欄（`<datalist>` で候補を表示）と開始ボタンを常に表示する（記録中に別のタスクを開始できるようにするため）。記録中の記録があれば、そのタスク名・開始時刻と終了ボタンも表示する。`useActionState` で入力エラーと送信中の状態を表示する
 - `EntryList`（Server Component）: 日付ごとの見出しと記録の並び。記録がなければその旨の文言を表示する
-- `EntryItem`（Client Component）: 1 件の表示。「修正する」でその場に修正フォームを開き、「削除する」は `window.confirm` で確認してから Server Function を呼ぶ
-- 文言はすべて `lib/messages.ts` に追加する。ボタンは「開始する」「終了する」「修正する」「保存する」「キャンセルする」「削除する」
+- `EntryItem`（Client Component）: 1 件の表示。修正ボタンでその場に修正フォームを開き、削除ボタンは `window.confirm` で確認してから Server Function を呼ぶ
+- 文言はすべて `lib/messages.ts` に追加する。ボタンはアイコンで表示し、名前は「開始」「終了」「修正」「保存」「キャンセル」「削除」（決定 9）
 
 ### 7. 入力チェック
 
@@ -82,12 +82,21 @@
 - Client Component（`StartStopForm`・`EntryItem`）: Testing Library で、表示の切り替え、候補、削除の確認・取り消しを確かめる（Server Function は差し替える）
 - async の `TimeTracker` は Vitest では描画できないため、上記の層ごとのテストと、ブラウザでの動作確認で補う。E2E（Playwright）は導入コストに対して、まだ画面が 1 つで層ごとのテストで十分なので、カレンダー入力の change で改めて検討する
 
+### 9. アイコンボタン
+
+- ボタンは `components/ui/IconButton.tsx` の共通部品で表示する。アイコンだけを表示し、名前（`lib/messages.ts` の「開始」「削除」など）を `aria-label`（読み上げ用）と `title`（ポインタを合わせたときの説明）の両方に付ける。文字のボタンも「する」を付けない（AGENTS.md の文言ルール）
+- アイコンは lucide-react を使う。対応は 開始=`Play`、終了=`Square`、修正=`Pencil`、保存=`Check`、キャンセル=`X`、削除=`Trash2`
+- 選定理由: 線の太さや大きさがそろったアイコンが多数あり、今後の画面（カレンダー・レポート）でも同じ見た目で増やせる。使ったアイコンだけがバンドルに入り、React 19 に対応している
+- 代替案: SVG を手書きでコンポーネントにする → 依存は増えないが、アイコンを足すたびに描き起こしが必要で見た目もそろえにくいので不採用
+- 以前の `components/ui/Button.tsx`（文字のボタン）は使わなくなるため削除する
+
 ## Risks / Trade-offs
 
 - [`cacheComponents` 下での DB 読み込みの扱いを誤ると、ビルドエラーや古い表示になる] → `connection()` + `<Suspense>` の形に統一し、`npm run build` をタスクの確認に含める
 - [式の一意インデックスを drizzle-kit が生成できない] → マイグレーション SQL に手で追記し、repository のテストで二重の記録中が作れないことを確かめる
 - [日本時間固定のため、海外から使うと時刻がずれて見える] → 今回はスコープ外。必要になったら表示用のタイムゾーンを設定にする
 - [`<datalist>` の見た目や操作はブラウザごとに異なる] → 候補を選べることだけを要件とし、見た目の統一は求めない
+- [アイコンだけでは意味が伝わりにくい] → すべてのボタンに名前と説明（`title`）を付け、削除は確認ダイアログで取り消せるようにする
 - [起動時に自動でマイグレーションするため、壊れたマイグレーションがあるとアプリが起動しない] → マイグレーションは repository のテストで毎回適用されるので、CI で検出できる
 
 ## Migration Plan
