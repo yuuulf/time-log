@@ -38,7 +38,7 @@
 - [x] 6.1 `scripts/openspec-archive.mjs` に、差分のパス一覧と存在するディレクトリからアーカイブ対象の change 名を求める関数を実装する。対象 1 つ・複数・なし・`archive/` 配下のみ・アーカイブ済み（ディレクトリが存在しない）のケースをテストし、`npm test` が通ることを確認する
 - [x] 6.2 同スクリプトに、`openspec list --json` の `completedTasks` / `totalTasks` から未完了タスクのある change を求める関数を実装する。全完了・一部未完了・複数のうち 1 つだけ未完了のケースをテストし、`npm test` が通ることを確認する
 - [x] 6.3 同スクリプトに、未完了タスクのある change が 1 つでもあれば何もアーカイブせず PR にコメントする処理、対象ごとの `openspec archive <name> --yes` 実行、全成功時のコミット・push、失敗時と対象なし時の PR コメント（`gh pr comment`）、push 後の `gh workflow run ci.yml` を実装する。外部コマンドの呼び出しを差し替えて、成功時にコミットされ、未完了タスクがある場合と失敗時にはコミットされないことをテストし、`npm test` が通ることを確認する
-- [ ] 6.4 `.github/workflows/openspec-archive.yml`（design 決定 9: `labeled` トリガー、権限、concurrency）を作成し、`npx --yes actionlint` などでワークフローの構文エラーがないことを確認する（コミット: archive ラベルでのアーカイブを追加）
+- [x] 6.4 `.github/workflows/openspec-archive.yml`（design 決定 9: `labeled` トリガー、権限、concurrency）を作成し、`npx --yes actionlint` などでワークフローの構文エラーがないことを確認する（コミット: archive ラベルでのアーカイブを追加）
 - [ ] 6.5 `gh label create archive` でラベルを作成し、`gh label list` に表示されることを確認する
 
 ## 7. ドキュメント
