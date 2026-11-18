@@ -1,0 +1,48 @@
+schema: spec-driven
+
+context: |
+  プロダクト: TimeLog — 時間記録・時間管理 Web アプリ。
+  技術スタック: Next.js（App Router） + React + TypeScript、Tailwind CSS、SQLite。
+  Node.js のバージョンは mise（mise.toml）で管理する。
+  ディレクトリ構成・コーディング規約は Next.js 公式ドキュメントに従う。
+  フォーマットは Prettier、静的解析ルールは ESLint で機械的に強制する。
+  UI コンポーネントと画面の文言（日本語）は統一する。
+  振る舞いを変える変更には自動テストを伴わせる。
+  OpenSpec の成果物（proposal / specs / design / tasks）は日本語で書く。
+
+rules:
+  proposal:
+    - スコープ外（やらないこと）を明記する
+    - README.md の更新が必要かどうかを記載する
+  specs:
+    - シナリオはユーザーから観察できる振る舞いで書く
+  design:
+    - 新しい依存パッケージを追加する場合は選定理由を書く
+  tasks:
+    - 各タスクは 1 コミット 1 目的の粒度にする
+    - フォーマットだけの変更は機能変更とは別タスクにする
+    - 振る舞いを変えるタスクには対応する自動テストのタスクを含める
+    - 最後に README.md 更新要否の確認タスクを含める
+
+operations:
+  apply:
+    guidance:
+      # 進め方
+      - タスクにない機能を追加しない
+      - 実装中に spec と食い違う点が見つかったら、コードで勝手に解決せず計画（spec / design）の更新を提案する
+      - 開発環境・コードスタイル・コミット規約は AGENTS.md に従う
+      # 検証
+      - 各タスクの完了前に npm test を実行し、失敗したままチェックを付けない
+      - グループの終わりに npm run lint を実行し、エラーを解消してから次のグループへ進む
+      # 報告
+      - テスト結果は簡潔に報告し、失敗時のみ詳細を示す
+  archive:
+    guidance:
+      - archive は PR の `archive` ラベルで GitHub Actions が実行する。spec と実装の整合をレビューで確認してから付ける
+      - npm run lint / npm run format:check / npm test / npm run build がすべて成功することを確認する
+      - tasks.md に未完了のタスクがないことを確認する
+      - 仕様（spec）と実装が整合していることを確認する
+      # 完了時
+      - アーカイブ結果（同期された spec）を要約し、追加で適用が必要なことがあれば明示する
+
+
