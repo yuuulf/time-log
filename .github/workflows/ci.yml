@@ -1,0 +1,46 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  # openspec-archive.yml がアーカイブのコミットを push した後に起動する
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    name: check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: jdx/mise-action@v5
+
+      - name: 依存パッケージをインストール
+        run: npm ci
+
+      - name: フォーマット確認
+        run: npm run format:check
+
+      - name: lint
+        run: npm run lint
+
+      - name: 型チェック
+        run: npm run typecheck
+
+      - name: テスト
+        run: npm test
+
+      - name: ビルド
+        run: npm run build
+
+      - name: OpenSpec の検証
+        run: npx openspec validate --all --strict
