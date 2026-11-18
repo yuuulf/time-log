@@ -39,11 +39,11 @@
 - [x] 6.2 同スクリプトに、`openspec list --json` の `completedTasks` / `totalTasks` から未完了タスクのある change を求める関数を実装する。全完了・一部未完了・複数のうち 1 つだけ未完了のケースをテストし、`npm test` が通ることを確認する
 - [x] 6.3 同スクリプトに、未完了タスクのある change が 1 つでもあれば何もアーカイブせず PR にコメントする処理、対象ごとの `openspec archive <name> --yes` 実行、全成功時のコミット・push、失敗時と対象なし時の PR コメント（`gh pr comment`）、push 後の `gh workflow run ci.yml` を実装する。外部コマンドの呼び出しを差し替えて、成功時にコミットされ、未完了タスクがある場合と失敗時にはコミットされないことをテストし、`npm test` が通ることを確認する
 - [x] 6.4 `.github/workflows/openspec-archive.yml`（design 決定 9: `labeled` トリガー、権限、concurrency）を作成し、`npx --yes actionlint` などでワークフローの構文エラーがないことを確認する（コミット: archive ラベルでのアーカイブを追加）
-- [ ] 6.5 `gh label create archive` でラベルを作成し、`gh label list` に表示されることを確認する
+- [x] 6.5 `gh label create archive` でラベルを作成し、`gh label list` に表示されることを確認する
 
 ## 7. ドキュメント
 
-- [ ] 7.1 README.md に概要・前提（mise）・セットアップ・開発コマンド・DB・OpenSpec の運用（`archive` ラベルと、未完了タスクがあるとアーカイブされないこと）・main 保護の推奨設定を書き、README の手順どおりにクローン直後の状態から `npm run dev` まで進められることを確認する（コミット: README を更新）
+- [x] 7.1 README.md に概要・前提（mise）・セットアップ・開発コマンド・DB・OpenSpec の運用（`archive` ラベルと、未完了タスクがあるとアーカイブされないこと）・main 保護の推奨設定を書き、README の手順どおりにクローン直後の状態から `npm run dev` まで進められることを確認する（コミット: README を更新）
 
 ## 8. 結合確認
 
