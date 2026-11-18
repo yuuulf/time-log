@@ -50,7 +50,7 @@
 
 ## 10. 差し色
 
-- [ ] 10.1 `app/globals.css` の `--primary` / `--primary-foreground` をライト・ダークとも teal（design 決定 10）に変える。`npm test` が通ること、ライト・ダークの両方で開始ボタンが teal で表示され、アイコンが見分けられることをブラウザで確認し、PR の CI が成功することを確認する（コミット: 差し色を teal にする）
+- [x] 10.1 `app/globals.css` の `--primary` / `--primary-foreground` をライト・ダークとも teal（design 決定 10）に変える。`npm test` が通ること、ライト・ダークの両方で開始ボタンが teal で表示され、アイコンが見分けられることをブラウザで確認し、PR の CI が成功することを確認する（コミット: 差し色を teal にする）
 
 ## Workflow follow-up
 
