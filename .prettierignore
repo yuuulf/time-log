@@ -4,3 +4,6 @@ openspec/
 
 # 生成物
 next-env.d.ts
+
+# drizzle-kit が生成するマイグレーション
+drizzle/
