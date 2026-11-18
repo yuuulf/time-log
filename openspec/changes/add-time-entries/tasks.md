@@ -48,6 +48,10 @@
 - [x] 9.4 README.md の使い方をボタンの表記に合わせて直す。`npm run dev` で spec のシナリオをもう一度ブラウザで確認し、各ボタンにポインタを合わせると説明が出ること、幅 375px で横スクロールが出ないことを確認する（コミット: README のボタンの表記を直す）
 - [x] 9.5 PR の CI のチェックがすべて成功することを確認する
 
+## 10. 差し色
+
+- [ ] 10.1 `app/globals.css` の `--primary` / `--primary-foreground` をライト・ダークとも teal（design 決定 10）に変える。`npm test` が通ること、ライト・ダークの両方で開始ボタンが teal で表示され、アイコンが見分けられることをブラウザで確認し、PR の CI が成功することを確認する（コミット: 差し色を teal にする）
+
 ## Workflow follow-up
 
 - レビューで spec と実装の整合を確認し、tasks.md がすべて完了していることを確かめてから、PR に `archive` ラベルを付ける。`openspec/specs/time-tracking` ができることを確認する
