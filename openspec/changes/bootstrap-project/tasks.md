@@ -30,7 +30,7 @@
 
 ## 5. CI
 
-- [ ] 5.1 `@fission-ai/openspec` を devDependency に追加し、`npx openspec validate --all --strict` が通ることを確認する
+- [x] 5.1 `@fission-ai/openspec` を devDependency に追加し、`npx openspec validate --all --strict` が通ることを確認する
 - [ ] 5.2 `.github/workflows/ci.yml`（design 決定 8）を作成する。ローカルで同じ手順（`format:check` → `lint` → `typecheck` → `test` → `build` → `openspec validate --all --strict`）を順に実行してすべて通ることを確認する（コミット: CI を追加）
 
 ## 6. archive ラベルによるアーカイブ
