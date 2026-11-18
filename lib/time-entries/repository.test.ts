@@ -6,6 +6,7 @@ import {
   deleteEntry,
   getEntry,
   getRunningEntry,
+  listEntriesBetween,
   listRecentEntries,
   listTaskNameSuggestions,
   startEntry,
@@ -127,6 +128,41 @@ describe("直近 30 日の一覧", () => {
 
   test("記録がなければ空", () => {
     expect(listRecentEntries(db, now)).toEqual([]);
+  });
+});
+
+describe("期間の一覧", () => {
+  const from = new Date("2026-10-01T00:00:00+09:00");
+  const to = new Date("2026-11-01T00:00:00+09:00");
+  /** 1 分間の終了した記録を入れる */
+  const insertAt = (taskName: string, startedAt: Date) =>
+    insertEntry(taskName, startedAt, new Date(startedAt.getTime() + 60_000));
+
+  test("from ちょうどは含み、to ちょうどは含まない", () => {
+    insertAt("from より 1 ミリ秒前", new Date(from.getTime() - 1));
+    insertAt("from ちょうど", from);
+    insertAt("to より 1 ミリ秒前", new Date(to.getTime() - 1));
+    insertAt("to ちょうど", to);
+
+    expect(listEntriesBetween(db, from, to).map((e) => e.taskName)).toEqual([
+      "to より 1 ミリ秒前",
+      "from ちょうど",
+    ]);
+  });
+
+  test("開始時刻の新しい順に並び、同じ時刻なら後から入れた記録が先", () => {
+    const noon = new Date("2026-10-15T12:00:00+09:00");
+    insertAt("先", noon);
+    insertAt("後", noon);
+    insertAt("朝", new Date("2026-10-15T09:00:00+09:00"));
+    insertAt("翌日", new Date("2026-10-16T09:00:00+09:00"));
+
+    expect(listEntriesBetween(db, from, to).map((e) => e.taskName)).toEqual([
+      "翌日",
+      "後",
+      "先",
+      "朝",
+    ]);
   });
 });
 
