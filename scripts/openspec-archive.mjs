@@ -21,3 +21,22 @@ export function findArchiveTargets(diffPaths, changeExists) {
   }
   return [...names].filter((name) => changeExists(name)).sort();
 }
+
+/**
+ * `openspec list --json` の結果から、未完了タスクのある change を求める。
+ * 完了の判定は OpenSpec CLI の集計（completedTasks / totalTasks）に従う。
+ *
+ * @param {{ changes: { name: string, completedTasks: number, totalTasks: number }[] }} list
+ * @param {string[]} targets アーカイブ対象の change 名
+ * @returns {{ name: string, remaining: number }[]}
+ */
+export function findIncompleteChanges(list, targets) {
+  return targets.flatMap((name) => {
+    const change = list.changes.find((c) => c.name === name);
+    if (!change) {
+      throw new Error(`change「${name}」のタスクの状況を取得できませんでした`);
+    }
+    const remaining = change.totalTasks - change.completedTasks;
+    return remaining > 0 ? [{ name, remaining }] : [];
+  });
+}
