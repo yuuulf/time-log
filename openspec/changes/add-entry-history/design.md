@@ -52,7 +52,7 @@
 
 ### 5. 画面の部品
 
-- `EntryHistory`（`components/time-entries/EntryHistory.tsx`）: 上に月の切り替えまたは「月ごとの表示」、その下に期間の入力欄、その下に `EntryList` を置く
+- `EntryHistory`（`components/time-entries/EntryHistory.tsx`）は URL のクエリを解釈して記録を読むだけにし、表示は `HistoryContent`（`components/time-entries/HistoryContent.tsx`）に任せる。`HistoryContent` は上に月の切り替えまたは「月ごとの表示」、その下に期間の入力欄、その下に `EntryList` を置く
 - 月の切り替え: 「前の月」「次の月」はリンクで、アイコン（lucide-react の `ChevronLeft` / `ChevronRight`）に `aria-label` と `title` を付ける。リンクを `IconButton` と同じ見た目で出すため、`components/ui/IconLink.tsx`（`next/link` を使う）を作り、見た目のクラスは `IconButton` と共有する。今月のときの「次の月」は無効にした `IconButton` を出す
 - 期間の指定中は月の切り替えの代わりに「月ごとの表示」リンク（`CalendarDays` アイコン、`/history`）を出す
 - 期間の入力欄: `next/form` の `<Form action="/history">` に `type="date"` の「開始日」「終了日」と、送信ボタン（`Search` アイコン、名前「表示」）を置く。送信は URL のクエリになり、ページの再読み込みなしで移動する。入力エラーは `EntryHistory` が `resolveHistoryQuery` の結果から表示する
