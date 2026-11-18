@@ -20,7 +20,7 @@
 
 ### Modified Capabilities
 
-- `time-tracking`: 記録の一覧から同じタスク名で記録を始める「記録の再開」の要件を追加する。既存の要件は変えない。`time-tracking` は change `add-time-entries` で作られ、まだアーカイブされていないため、この change は `add-time-entries` のアーカイブ後にアーカイブする
+- `time-tracking`: 記録の一覧から同じタスク名で記録を始める「記録の再開」の要件を追加する。既存の要件は変えない
 
 ## スコープ外
 

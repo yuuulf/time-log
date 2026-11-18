@@ -38,5 +38,4 @@
 
 ## Risks / Trade-offs
 
-- [`time-tracking` のメイン spec がまだない（`add-time-entries` が未アーカイブ）] → この change のアーカイブは `add-time-entries` のアーカイブ後に行う。ブランチも `add-time-entries` から切る
 - [隠しフィールドの値は利用者が書き換えられる] → 通常の開始と同じ入力チェックを通るため、任意のタスク名で開始できる以上の影響はない

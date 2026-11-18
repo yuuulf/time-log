@@ -15,4 +15,4 @@
 
 ## Workflow follow-up
 
-- `add-time-entries` のアーカイブ後に、レビューで spec と実装の整合を確認し、tasks.md がすべて完了していることを確かめてから PR に `archive` ラベルを付ける。`openspec/specs/time-tracking` に「記録の再開」が加わることを確認する
+- レビューで spec と実装の整合を確認し、tasks.md がすべて完了していることを確かめてから PR に `archive` ラベルを付ける。`openspec/specs/time-tracking` に「記録の再開」が加わることを確認する
