@@ -45,6 +45,16 @@ export const messages = {
     },
   },
   history: {
+    title: "過去の記録",
+    monthNav: "表示する月",
+    prevMonth: "前の月",
+    nextMonth: "次の月",
+    monthView: "月ごとの表示",
+    rangeHeading: "期間の指定",
+    from: "開始日",
+    to: "終了日",
+    show: "表示",
+    empty: "この期間の記録はありません。",
     errors: {
       dateRequired: "開始日と終了日を入力してください。",
       endBeforeStart: "終了日は開始日以降にしてください。",
