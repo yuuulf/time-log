@@ -57,7 +57,8 @@ export function EntryItem({ entry }: { entry: EntryItemData }) {
           {entry.taskName || t.untitled}
         </p>
         <div className="flex items-center gap-4">
-          <p className="text-sm text-muted tabular-nums">
+          {/* 時刻の幅は記録中かどうかで変わるため、作業時間とボタンは右端に寄せて列を揃える */}
+          <p className="mr-auto text-sm text-muted tabular-nums sm:w-28">
             {formatTime(entry.startedAt)} –{" "}
             {entry.endedAt ? formatTime(entry.endedAt) : ""}
           </p>
@@ -68,8 +69,11 @@ export function EntryItem({ entry }: { entry: EntryItemData }) {
                 )
               : t.running}
           </p>
-          <div className="ml-auto flex gap-2">
-            {!isRunning && (
+          <div className="flex gap-2">
+            {isRunning ? (
+              // 再開ボタンの代わりに同じ大きさの空きを置き、他の行と列を揃える
+              <span aria-hidden="true" className="size-10 shrink-0" />
+            ) : (
               <form action={resumeAction}>
                 <input type="hidden" name="taskName" value={entry.taskName} />
                 <IconButton

@@ -201,6 +201,19 @@ describe("再開", () => {
     expect(screen.queryByRole("button", { name: t.actions.resume })).toBeNull();
   });
 
+  test("記録中の行は再開ボタンの場所を空けて、ボタンの列を他の行と揃える", () => {
+    const { unmount } = render(<EntryItem entry={finished} />);
+    const slots = () =>
+      screen.getByRole("button", { name: t.actions.edit }).parentElement!
+        .children.length;
+    const finishedSlots = slots();
+    unmount();
+
+    render(<EntryItem entry={running} />);
+
+    expect(slots()).toBe(finishedSlots);
+  });
+
   test("再開に失敗したら理由を表示する", async () => {
     vi.mocked(startEntryAction).mockResolvedValue({
       errors: { taskName: t.errors.taskNameTooLong },
