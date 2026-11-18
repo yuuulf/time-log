@@ -26,7 +26,7 @@
 ## 4. SQLite 接続層
 
 - [x] 4.1 `better-sqlite3`・`drizzle-orm`・`drizzle-kit`・`server-only` を追加し、`lib/db/index.ts`・`lib/db/schema.ts`・`drizzle.config.ts`・`.env.example` を作成、`data/` を `.gitignore` に追加する。`db:generate` / `db:migrate` スクリプトを追加する（コミット: SQLite の接続層を追加）
-- [ ] 4.2 一時ファイルの DB に接続して `select 1` が実行できることを確かめるテストを書き、`npm test` と `npm run build` が通ることを確認する
+- [x] 4.2 一時ファイルの DB に接続して `select 1` が実行できることを確かめるテストを書き、`npm test` と `npm run build` が通ることを確認する
 
 ## 5. CI
 
