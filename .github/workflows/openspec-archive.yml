@@ -1,0 +1,48 @@
+name: OpenSpec アーカイブ
+
+# PR に `archive` ラベルが付いたら、PR が含む OpenSpec change をアーカイブして PR ブランチにコミットする。
+# push では起動しないため、アーカイブ後に PR を更新しても再実行されない。
+on:
+  pull_request:
+    types: [labeled]
+
+permissions:
+  contents: write
+  pull-requests: write
+  actions: write
+
+concurrency:
+  group: openspec-archive-${{ github.event.pull_request.number }}
+  cancel-in-progress: false
+
+jobs:
+  archive:
+    name: archive
+    # fork からの PR は対象外（GITHUB_TOKEN で PR ブランチに push できないため）
+    if: >-
+      github.event.label.name == 'archive' &&
+      github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+          fetch-depth: 0
+
+      - uses: jdx/mise-action@v5
+
+      - name: 依存パッケージをインストール
+        run: npm ci
+
+      - name: コミットの作成者を設定
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      - name: アーカイブ
+        run: node scripts/openspec-archive.mjs
+        env:
+          BASE_REF: ${{ github.event.pull_request.base.ref }}
+          HEAD_REF: ${{ github.event.pull_request.head.ref }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          GH_TOKEN: ${{ github.token }}
