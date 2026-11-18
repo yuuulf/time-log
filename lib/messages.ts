@@ -44,4 +44,11 @@ export const messages = {
       notFound: "記録が見つかりません。ページを読み込み直してください。",
     },
   },
+  history: {
+    errors: {
+      dateRequired: "開始日と終了日を入力してください。",
+      endBeforeStart: "終了日は開始日以降にしてください。",
+      rangeTooLong: "期間は366日以内にしてください。",
+    },
+  },
 } as const;
