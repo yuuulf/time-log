@@ -41,34 +41,37 @@ export function EntryItem({ entry }: { entry: EntryItemData }) {
 
   return (
     <div className="space-y-1 py-3">
-      <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
-        <p className="min-w-0 flex-1 break-words text-foreground">
+      {/* 狭い画面ではタスク名を 1 段目、時刻・作業時間・ボタンを 2 段目に置く */}
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-4">
+        <p className="min-w-0 break-words text-foreground sm:flex-1">
           {entry.taskName || t.untitled}
         </p>
-        <p className="text-sm text-muted tabular-nums">
-          {formatTime(entry.startedAt)} –{" "}
-          {entry.endedAt ? formatTime(entry.endedAt) : ""}
-        </p>
-        <p className="w-24 text-right text-sm font-medium text-foreground tabular-nums">
-          {entry.endedAt
-            ? formatDuration(
-                entry.endedAt.getTime() - entry.startedAt.getTime(),
-              )
-            : t.running}
-        </p>
-        <div className="flex gap-2">
-          <IconButton
-            icon={Pencil}
-            label={t.actions.edit}
-            onClick={() => setEditing(true)}
-          />
-          <IconButton
-            variant="danger"
-            icon={Trash2}
-            label={t.actions.delete}
-            onClick={handleDelete}
-            disabled={deleting}
-          />
+        <div className="flex items-center gap-4">
+          <p className="text-sm text-muted tabular-nums">
+            {formatTime(entry.startedAt)} –{" "}
+            {entry.endedAt ? formatTime(entry.endedAt) : ""}
+          </p>
+          <p className="w-24 text-right text-sm font-medium text-foreground tabular-nums">
+            {entry.endedAt
+              ? formatDuration(
+                  entry.endedAt.getTime() - entry.startedAt.getTime(),
+                )
+              : t.running}
+          </p>
+          <div className="ml-auto flex gap-2">
+            <IconButton
+              icon={Pencil}
+              label={t.actions.edit}
+              onClick={() => setEditing(true)}
+            />
+            <IconButton
+              variant="danger"
+              icon={Trash2}
+              label={t.actions.delete}
+              onClick={handleDelete}
+              disabled={deleting}
+            />
+          </div>
         </div>
       </div>
       {deleteError && (
