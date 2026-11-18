@@ -1,10 +1,11 @@
 "use client";
 
 import { useActionState, useId, useState, useTransition } from "react";
-import { Check, Pencil, Trash2, X } from "lucide-react";
+import { Check, Pencil, Play, Trash2, X } from "lucide-react";
 import { IconButton } from "@/components/ui/IconButton";
 import {
   deleteEntryAction,
+  startEntryAction,
   updateEntryAction,
   type ActionState,
 } from "@/lib/time-entries/actions";
@@ -21,11 +22,20 @@ export type EntryItemData = {
   endedAt: Date | null;
 };
 
-/** 記録 1 件の表示。修正ボタンでその場に修正フォームを開き、削除ボタンは確認してから削除する */
+/**
+ * 記録 1 件の表示。修正ボタンでその場に修正フォームを開き、削除ボタンは確認してから削除する。
+ * 終了した記録には再開ボタンを置き、同じタスク名で記録を始める
+ */
 export function EntryItem({ entry }: { entry: EntryItemData }) {
   const [editing, setEditing] = useState(false);
   const [deleteError, setDeleteError] = useState<string>();
   const [deleting, startDeleting] = useTransition();
+  const [resumeState, resumeAction, resuming] = useActionState(
+    startEntryAction,
+    {},
+  );
+  const resumeError = resumeState.errors?.taskName ?? resumeState.errors?.form;
+  const isRunning = entry.endedAt === null;
 
   if (editing) {
     return <EditForm entry={entry} onClose={() => setEditing(false)} />;
@@ -59,6 +69,17 @@ export function EntryItem({ entry }: { entry: EntryItemData }) {
               : t.running}
           </p>
           <div className="ml-auto flex gap-2">
+            {!isRunning && (
+              <form action={resumeAction}>
+                <input type="hidden" name="taskName" value={entry.taskName} />
+                <IconButton
+                  type="submit"
+                  icon={Play}
+                  label={t.actions.resume}
+                  disabled={resuming}
+                />
+              </form>
+            )}
             <IconButton
               icon={Pencil}
               label={t.actions.edit}
@@ -74,9 +95,9 @@ export function EntryItem({ entry }: { entry: EntryItemData }) {
           </div>
         </div>
       </div>
-      {deleteError && (
+      {(deleteError ?? resumeError) && (
         <p role="alert" className="text-sm text-danger">
-          {deleteError}
+          {deleteError ?? resumeError}
         </p>
       )}
     </div>

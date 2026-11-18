@@ -2,7 +2,7 @@
 
 ## 1. 再開ボタン
 
-- [ ] 1.1 `lib/messages.ts` にボタンの名前「再開」を追加し、`components/time-entries/EntryItem.tsx` の終了した記録に再開ボタン（design 決定 1〜3）を加える。`EntryItem.test.tsx` で、終了した記録に「再開」ボタンがあり、選ぶと記録のタスク名（空なら空）で `startEntryAction` が呼ばれること、記録中の記録にはボタンがないこと、エラーが返ったら表示することをテストし、`npm test` が通ることを確認する（コミット: 記録の再開ボタンを追加）
+- [x] 1.1 `lib/messages.ts` にボタンの名前「再開」を追加し、`components/time-entries/EntryItem.tsx` の終了した記録に再開ボタン（design 決定 1〜3）を加える。`EntryItem.test.tsx` で、終了した記録に「再開」ボタンがあり、選ぶと記録のタスク名（空なら空）で `startEntryAction` が呼ばれること、記録中の記録にはボタンがないこと、エラーが返ったら表示することをテストし、`npm test` が通ることを確認する（コミット: 記録の再開ボタンを追加）
 
 ## 2. ドキュメント
 
