@@ -20,28 +20,35 @@ mise trust      # 初回のみ。mise.toml を信頼する
 mise install    # mise.toml の Node.js をインストール
 npm ci          # 依存パッケージをインストール
 cp .env.example .env   # 必要なら DATABASE_URL を変更
-npm run db:migrate     # データベースを作成・更新
 npm run dev
 ```
 
-http://localhost:3000 を開くとトップページが表示されます。
+http://localhost:3000 を開くとトップページが表示されます。データベースは初めてアクセスしたときに自動で作られます。
 
 mise が有効になっていないシェルでは、`mise exec -- npm run dev` のように `mise exec --` を付けて実行してください。
 
+## 使い方
+
+- タスク名を入力して「開始する」を選ぶと、その時刻から記録が始まります。タスク名は省略でき、過去に使ったタスク名が入力候補に出ます
+- 「終了する」を選ぶと、その時刻で記録が終わり、作業時間が表示されます。記録中の経過時間は表示しません
+- 記録中に別のタスクを開始すると、記録中のタスクはその時刻で自動的に終了します（記録中のタスクは 1 つまで）
+- 直近 30 日の記録が日付ごとに表示されます。「修正する」でタスク名・開始時刻・終了時刻を直せ、「削除する」で記録を消せます
+- 日付と時刻は日本時間で表示します
+
 ## 開発コマンド
 
-| コマンド               | 内容                                          |
-| ---------------------- | --------------------------------------------- |
-| `npm run dev`          | 開発サーバーを起動する                        |
-| `npm run build`        | 本番ビルドを作る                              |
-| `npm test`             | 自動テスト（Vitest）を実行する                |
-| `npm run test:watch`   | 変更を監視してテストを実行する                |
-| `npm run lint`         | ESLint でチェックする                         |
-| `npm run typecheck`    | TypeScript の型チェックをする                 |
-| `npm run format`       | Prettier で整形する                           |
-| `npm run format:check` | 整形されていないファイルがないか確認する      |
-| `npm run db:generate`  | `lib/db/schema.ts` からマイグレーションを作る |
-| `npm run db:migrate`   | マイグレーションをデータベースに適用する      |
+| コマンド               | 内容                                           |
+| ---------------------- | ---------------------------------------------- |
+| `npm run dev`          | 開発サーバーを起動する                         |
+| `npm run build`        | 本番ビルドを作る                               |
+| `npm test`             | 自動テスト（Vitest）を実行する                 |
+| `npm run test:watch`   | 変更を監視してテストを実行する                 |
+| `npm run lint`         | ESLint でチェックする                          |
+| `npm run typecheck`    | TypeScript の型チェックをする                  |
+| `npm run format`       | Prettier で整形する                            |
+| `npm run format:check` | 整形されていないファイルがないか確認する       |
+| `npm run db:generate`  | `lib/db/schema.ts` からマイグレーションを作る  |
+| `npm run db:migrate`   | マイグレーションを手動で適用する（通常は不要） |
 
 PR では GitHub Actions の CI が format:check・lint・typecheck・test・build と OpenSpec の検証を実行します。
 
@@ -49,6 +56,7 @@ PR では GitHub Actions の CI が format:check・lint・typecheck・test・bui
 
 - データベースは SQLite のファイルです。場所は `.env` の `DATABASE_URL` で決まり、省略時は `data/timelog.db` です（`data/` は Git の管理外）
 - テーブル定義は `lib/db/schema.ts` に書き、`npm run db:generate` で `drizzle/` にマイグレーションを作ってコミットします
+- マイグレーションは、アプリが DB に接続するとき（初めてページを開いたとき）に自動で適用されます。テストでもインメモリの DB に同じマイグレーションが適用されます
 - better-sqlite3 はネイティブモジュールです。Node.js のメジャーバージョンを上げたときは `npm rebuild better-sqlite3` を実行してください
 - npm はインストールスクリプトを許可したパッケージだけ実行します（`package.json` の `allowScripts`）。better-sqlite3 などを更新して警告が出たら `npm install-scripts ls` で確認し、`npm install-scripts approve <パッケージ>` で許可してください
 
