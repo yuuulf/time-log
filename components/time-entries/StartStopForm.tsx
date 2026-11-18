@@ -1,7 +1,8 @@
 "use client";
 
 import { useActionState, useId, useState } from "react";
-import { Button } from "@/components/ui/Button";
+import { Play, Square } from "lucide-react";
+import { IconButton } from "@/components/ui/IconButton";
 import {
   startEntryAction,
   stopEntryAction,
@@ -19,7 +20,7 @@ type Props = {
   suggestions: string[];
 };
 
-/** 記録の開始・終了。入力欄と「開始する」は記録中でも表示し、別のタスクに切り替えられるようにする */
+/** 記録の開始・終了。入力欄と開始ボタンは記録中でも表示し、別のタスクに切り替えられるようにする */
 export function StartStopForm({ running, suggestions }: Props) {
   const id = useId();
   const [taskName, setTaskName] = useState("");
@@ -55,9 +56,12 @@ export function StartStopForm({ running, suggestions }: Props) {
             </p>
           </div>
           <form action={stopAction}>
-            <Button type="submit" variant="secondary" disabled={stopping}>
-              {t.actions.stop}
-            </Button>
+            <IconButton
+              type="submit"
+              icon={Square}
+              label={t.actions.stop}
+              disabled={stopping}
+            />
           </form>
         </section>
       )}
@@ -80,9 +84,13 @@ export function StartStopForm({ running, suggestions }: Props) {
             aria-describedby={taskNameError ? `${id}-error` : undefined}
             className="min-w-0 flex-1 rounded-md border border-border bg-background px-3 py-2 text-foreground"
           />
-          <Button type="submit" disabled={starting}>
-            {t.actions.start}
-          </Button>
+          <IconButton
+            type="submit"
+            variant="primary"
+            icon={Play}
+            label={t.actions.start}
+            disabled={starting}
+          />
         </div>
         <datalist id={`${id}-suggestions`}>
           {suggestions.map((name) => (

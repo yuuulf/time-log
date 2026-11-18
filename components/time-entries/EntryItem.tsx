@@ -1,7 +1,8 @@
 "use client";
 
 import { useActionState, useId, useState, useTransition } from "react";
-import { Button } from "@/components/ui/Button";
+import { Check, Pencil, Trash2, X } from "lucide-react";
+import { IconButton } from "@/components/ui/IconButton";
 import {
   deleteEntryAction,
   updateEntryAction,
@@ -20,7 +21,7 @@ export type EntryItemData = {
   endedAt: Date | null;
 };
 
-/** 記録 1 件の表示。「修正する」でその場に修正フォームを開き、「削除する」は確認してから削除する */
+/** 記録 1 件の表示。修正ボタンでその場に修正フォームを開き、削除ボタンは確認してから削除する */
 export function EntryItem({ entry }: { entry: EntryItemData }) {
   const [editing, setEditing] = useState(false);
   const [deleteError, setDeleteError] = useState<string>();
@@ -56,12 +57,18 @@ export function EntryItem({ entry }: { entry: EntryItemData }) {
             : t.running}
         </p>
         <div className="flex gap-2">
-          <Button variant="secondary" onClick={() => setEditing(true)}>
-            {t.actions.edit}
-          </Button>
-          <Button variant="danger" onClick={handleDelete} disabled={deleting}>
-            {t.actions.delete}
-          </Button>
+          <IconButton
+            icon={Pencil}
+            label={t.actions.edit}
+            onClick={() => setEditing(true)}
+          />
+          <IconButton
+            variant="danger"
+            icon={Trash2}
+            label={t.actions.delete}
+            onClick={handleDelete}
+            disabled={deleting}
+          />
         </div>
       </div>
       {deleteError && (
@@ -139,12 +146,14 @@ function EditForm({
         </p>
       )}
       <div className="flex gap-2">
-        <Button type="submit" disabled={saving}>
-          {t.actions.save}
-        </Button>
-        <Button variant="secondary" onClick={onClose}>
-          {t.actions.cancel}
-        </Button>
+        <IconButton
+          type="submit"
+          variant="primary"
+          icon={Check}
+          label={t.actions.save}
+          disabled={saving}
+        />
+        <IconButton icon={X} label={t.actions.cancel} onClick={onClose} />
       </div>
     </form>
   );

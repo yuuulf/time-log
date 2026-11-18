@@ -19,7 +19,7 @@ beforeEach(() => {
 });
 
 describe("記録中のタスクがないとき", () => {
-  test("入力欄と「開始する」を表示し、「終了する」は表示しない", () => {
+  test("入力欄と開始ボタンを表示し、終了ボタンは表示しない", () => {
     render(<StartStopForm running={null} suggestions={[]} />);
 
     expect(screen.getByLabelText(t.taskName)).toBeDefined();
@@ -27,7 +27,7 @@ describe("記録中のタスクがないとき", () => {
     expect(screen.queryByRole("button", { name: t.actions.stop })).toBeNull();
   });
 
-  test("「開始する」で入力したタスク名を送り、成功したら入力欄を空にする", async () => {
+  test("開始ボタンで入力したタスク名を送り、成功したら入力欄を空にする", async () => {
     render(<StartStopForm running={null} suggestions={[]} />);
     const input = screen.getByLabelText<HTMLInputElement>(t.taskName);
 
@@ -59,7 +59,7 @@ describe("記録中のタスクがないとき", () => {
 });
 
 describe("記録中のタスクがあるとき", () => {
-  test("タスク名・開始時刻・「終了する」と、別のタスクを始める入力欄を表示する", () => {
+  test("タスク名・開始時刻・終了ボタンと、別のタスクを始める入力欄を表示する", () => {
     render(
       <StartStopForm
         running={{ taskName: "資料作成", startedAt }}
@@ -81,7 +81,7 @@ describe("記録中のタスクがあるとき", () => {
     expect(screen.getByText(t.untitled)).toBeDefined();
   });
 
-  test("「終了する」で記録を終了する", async () => {
+  test("終了ボタンで記録を終了する", async () => {
     render(
       <StartStopForm
         running={{ taskName: "資料作成", startedAt }}

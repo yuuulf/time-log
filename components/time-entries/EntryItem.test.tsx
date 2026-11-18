@@ -54,7 +54,7 @@ describe("表示", () => {
 });
 
 describe("修正", () => {
-  test("「修正する」で現在の値が入ったフォームを開く", () => {
+  test("修正ボタンで現在の値が入ったフォームを開く", () => {
     render(<EntryItem entry={finished} />);
 
     fireEvent.click(screen.getByRole("button", { name: t.actions.edit }));
@@ -90,7 +90,7 @@ describe("修正", () => {
     expect(screen.queryByLabelText(t.endedAt)).toBeNull();
   });
 
-  test("「保存する」で入力を送り、成功したらフォームを閉じる", async () => {
+  test("保存ボタンで入力を送り、成功したらフォームを閉じる", async () => {
     render(<EntryItem entry={finished} />);
     fireEvent.click(screen.getByRole("button", { name: t.actions.edit }));
 
@@ -124,7 +124,7 @@ describe("修正", () => {
     expect(endedAt.getAttribute("aria-invalid")).toBe("true");
   });
 
-  test("「キャンセルする」で保存せずに閉じる", () => {
+  test("キャンセルボタンで保存せずに閉じる", () => {
     render(<EntryItem entry={finished} />);
     fireEvent.click(screen.getByRole("button", { name: t.actions.edit }));
 
