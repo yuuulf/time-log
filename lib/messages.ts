@@ -28,6 +28,7 @@ export const messages = {
     actions: {
       start: "開始",
       stop: "終了",
+      resume: "再開",
       edit: "修正",
       save: "保存",
       cancel: "キャンセル",

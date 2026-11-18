@@ -6,9 +6,10 @@ import { EntryItem, type EntryItemData } from "./EntryItem";
 vi.mock("@/lib/time-entries/actions", () => ({
   updateEntryAction: vi.fn(),
   deleteEntryAction: vi.fn(),
+  startEntryAction: vi.fn(),
 }));
 
-const { updateEntryAction, deleteEntryAction } =
+const { updateEntryAction, deleteEntryAction, startEntryAction } =
   await import("@/lib/time-entries/actions");
 const t = messages.timeEntries;
 const at = (time: string) => new Date(`2026-11-18T${time}+09:00`);
@@ -24,6 +25,7 @@ const running: EntryItemData = { ...finished, id: 2, endedAt: null };
 beforeEach(() => {
   vi.mocked(updateEntryAction).mockReset().mockResolvedValue({ ok: true });
   vi.mocked(deleteEntryAction).mockReset().mockResolvedValue({ ok: true });
+  vi.mocked(startEntryAction).mockReset().mockResolvedValue({ ok: true });
 });
 
 afterEach(() => {
@@ -166,6 +168,62 @@ describe("削除", () => {
 
     expect((await screen.findByRole("alert")).textContent).toBe(
       t.errors.notFound,
+    );
+  });
+});
+
+describe("再開", () => {
+  test("終了した記録の再開ボタンで、同じタスク名で記録を始める", async () => {
+    render(<EntryItem entry={finished} />);
+
+    fireEvent.click(screen.getByRole("button", { name: t.actions.resume }));
+
+    await vi.waitFor(() => expect(startEntryAction).toHaveBeenCalledOnce());
+    const [, formData] = vi.mocked(startEntryAction).mock.calls[0];
+    expect(formData.get("taskName")).toBe("資料作成");
+    // 元の記録の表示は変わらない
+    expect(screen.getByText("09:00 – 10:05")).toBeDefined();
+  });
+
+  test("タスク名のない記録は、タスク名を空にして記録を始める", async () => {
+    render(<EntryItem entry={{ ...finished, taskName: "" }} />);
+
+    fireEvent.click(screen.getByRole("button", { name: t.actions.resume }));
+
+    await vi.waitFor(() => expect(startEntryAction).toHaveBeenCalledOnce());
+    const [, formData] = vi.mocked(startEntryAction).mock.calls[0];
+    expect(formData.get("taskName")).toBe("");
+  });
+
+  test("記録中の記録には再開ボタンを表示しない", () => {
+    render(<EntryItem entry={running} />);
+
+    expect(screen.queryByRole("button", { name: t.actions.resume })).toBeNull();
+  });
+
+  test("記録中の行は再開ボタンの場所を空けて、ボタンの列を他の行と揃える", () => {
+    const { unmount } = render(<EntryItem entry={finished} />);
+    const slots = () =>
+      screen.getByRole("button", { name: t.actions.edit }).parentElement!
+        .children.length;
+    const finishedSlots = slots();
+    unmount();
+
+    render(<EntryItem entry={running} />);
+
+    expect(slots()).toBe(finishedSlots);
+  });
+
+  test("再開に失敗したら理由を表示する", async () => {
+    vi.mocked(startEntryAction).mockResolvedValue({
+      errors: { taskName: t.errors.taskNameTooLong },
+    });
+    render(<EntryItem entry={finished} />);
+
+    fireEvent.click(screen.getByRole("button", { name: t.actions.resume }));
+
+    expect((await screen.findByRole("alert")).textContent).toBe(
+      t.errors.taskNameTooLong,
     );
   });
 });

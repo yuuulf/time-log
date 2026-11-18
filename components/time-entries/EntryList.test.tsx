@@ -6,6 +6,7 @@ import { EntryList } from "./EntryList";
 vi.mock("@/lib/time-entries/actions", () => ({
   updateEntryAction: vi.fn(),
   deleteEntryAction: vi.fn(),
+  startEntryAction: vi.fn(),
 }));
 
 const t = messages.timeEntries;
