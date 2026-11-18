@@ -11,4 +11,36 @@ export const messages = {
   nav: {
     label: "メインメニュー",
   },
+  timeEntries: {
+    taskName: "タスク名",
+    taskNamePlaceholder: "タスク名（省略できます）",
+    startedAt: "開始時刻",
+    endedAt: "終了時刻",
+    duration: "作業時間",
+    running: "記録中",
+    untitled: "（タスク名なし）",
+    runningHeading: "記録中のタスク",
+    listHeading: "記録",
+    empty:
+      "まだ記録がありません。タスク名を入力して「開始する」を選ぶと記録が始まります。",
+    loading: "記録を読み込んでいます…",
+    confirmDelete: "この記録を削除しますか？",
+    actions: {
+      start: "開始する",
+      stop: "終了する",
+      edit: "修正する",
+      save: "保存する",
+      cancel: "キャンセルする",
+      delete: "削除する",
+    },
+    errors: {
+      taskNameTooLong: "タスク名は200文字以内で入力してください。",
+      timeRequired: "日時を入力してください。",
+      timeInvalid: "日時の形式が正しくありません。",
+      timeInFuture: "未来の時刻は入力できません。",
+      endBeforeStart: "終了時刻は開始時刻より後にしてください。",
+      endWhileRunning: "記録中の記録は「終了する」で終了してください。",
+      notFound: "記録が見つかりません。ページを読み込み直してください。",
+    },
+  },
 } as const;
