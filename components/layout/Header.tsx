@@ -11,6 +11,12 @@ export function Header() {
         <Link href="/" className="text-lg font-semibold text-foreground">
           {messages.app.name}
         </Link>
+        <Link
+          href="/history"
+          className="ml-auto text-sm text-muted hover:text-foreground"
+        >
+          {messages.history.title}
+        </Link>
       </nav>
     </header>
   );

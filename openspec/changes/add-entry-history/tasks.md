@@ -11,7 +11,7 @@
 - [x] 2.1 `components/ui/IconLink.tsx` を作り、見た目のクラスを `IconButton` と共有する（design 決定 5）。`IconLink.test.tsx` で名前で読み上げられること・`title`・`href` をテストし、既存の `IconButton.test.tsx` も通ることを確認する（コミット: アイコンのリンクを追加）
 - [x] 2.2 `EntryList` に任意の `heading` と `emptyMessage` を足す。`EntryList.test.tsx` で、渡したときはその見出しと文言、省略したときは今までどおりの表示になることをテストし、`npm test` が通ることを確認する（コミット: 記録の一覧の見出しと文言を差し替えられるようにする）
 - [x] 2.3 `components/time-entries/EntryHistory.tsx` に、月の切り替え（今月は「次の月」を無効）・「月ごとの表示」・期間の入力欄・一覧を表示する部品を作り、文言を `lib/messages.ts` に足す（design 決定 2・5）。表示部分を `resolveHistoryQuery` の結果と記録を受け取る `HistoryContent.tsx` に分けて（`EntryHistory.tsx` は DB を読むサーバー専用のモジュールを使うためテストから読み込めない）、`HistoryContent.test.tsx` で、見出し・前後の月のリンク先・次の月の無効・期間の指定中の「月ごとの表示」・入力エラーと入力値の保持・空のときの文言をテストし、`npm test` が通ることを確認する（コミット: 過去の記録の表示を追加）
-- [ ] 2.4 `app/history/page.tsx` を作り、`Header` に「過去の記録」のリンクを足す（design 決定 2・6）。`Header.test.tsx` でリンク先が `/history` であることをテストし、`app/history/page.test.tsx` でページ見出しが表示されることをテストする。`npm test` が通ること、`npm run build` が `cacheComponents` のエラーなく通ることを確認する（コミット: 過去の記録のページを追加）
+- [x] 2.4 `app/history/page.tsx` を作り、`Header` に「過去の記録」のリンクを足す（design 決定 2・6）。`Header.test.tsx` でリンク先が `/history` であることをテストし、`app/history/page.test.tsx` でページ見出しが表示されることをテストする。`npm test` が通ること、`npm run build` が `cacheComponents` のエラーなく通ることを確認する（コミット: 過去の記録のページを追加）
 
 ## 3. ドキュメント
 
