@@ -21,11 +21,11 @@
 - [x] 3.2 `components/layout/Header.tsx` を作り、アプリ名「TimeLog」を `/` へのリンクとして表示する。リンク先とアプリ名を確かめるテストを書き、`npm test` が通ることを確認する
 - [x] 3.3 `app/layout.tsx` を `lang="ja"`・タイトルに「TimeLog」を含む metadata・Header 付きのレイアウトに書き換える。metadata のタイトルを確かめるテストを書き、`npm test` が通ることを確認する
 - [x] 3.4 `app/page.tsx` を TimeLog のトップページ（アプリ名と日本語の説明）に置き換え、不要になった `public/` のテンプレート画像を削除する。アプリ名と説明が表示され、Next.js の初期表示がないことを確かめるテストを書き、`npm test` が通ることを確認する
-- [ ] 3.5 `npm run dev` で開き、ブラウザの開発者ツールで幅 375px とデスクトップ幅のどちらでも横スクロールが出ないことを目視で確認する
+- [x] 3.5 `npm run dev` で開き、ブラウザの開発者ツールで幅 375px とデスクトップ幅のどちらでも横スクロールが出ないことを目視で確認する
 
 ## 4. SQLite 接続層
 
-- [ ] 4.1 `better-sqlite3`・`drizzle-orm`・`drizzle-kit`・`server-only` を追加し、`lib/db/index.ts`・`lib/db/schema.ts`・`drizzle.config.ts`・`.env.example` を作成、`data/` を `.gitignore` に追加する。`db:generate` / `db:migrate` スクリプトを追加する（コミット: SQLite の接続層を追加）
+- [x] 4.1 `better-sqlite3`・`drizzle-orm`・`drizzle-kit`・`server-only` を追加し、`lib/db/index.ts`・`lib/db/schema.ts`・`drizzle.config.ts`・`.env.example` を作成、`data/` を `.gitignore` に追加する。`db:generate` / `db:migrate` スクリプトを追加する（コミット: SQLite の接続層を追加）
 - [ ] 4.2 一時ファイルの DB に接続して `select 1` が実行できることを確かめるテストを書き、`npm test` と `npm run build` が通ることを確認する
 
 ## 5. CI
