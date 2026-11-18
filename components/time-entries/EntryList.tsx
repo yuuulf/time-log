@@ -24,18 +24,31 @@ function groupByDate(entries: EntryItemData[]) {
   return groups;
 }
 
-/** 記録の一覧。entries は開始時刻の新しい順で渡す */
-export function EntryList({ entries }: { entries: EntryItemData[] }) {
+type Props = {
+  /** 開始時刻の新しい順に並んだ記録 */
+  entries: EntryItemData[];
+  /** 一覧の見出し。省略時は「記録」 */
+  heading?: string;
+  /** 記録がないときの文言。省略時は記録の始め方の案内 */
+  emptyMessage?: string;
+};
+
+/** 記録の一覧 */
+export function EntryList({
+  entries,
+  heading = t.listHeading,
+  emptyMessage = t.empty,
+}: Props) {
   return (
     <section aria-labelledby="entry-list-heading" className="space-y-4">
       <h2
         id="entry-list-heading"
         className="text-lg font-semibold text-foreground"
       >
-        {t.listHeading}
+        {heading}
       </h2>
       {entries.length === 0 ? (
-        <p className="text-sm text-muted">{t.empty}</p>
+        <p className="text-sm text-muted">{emptyMessage}</p>
       ) : (
         groupByDate(entries).map((group) => (
           <section key={group.key} aria-label={group.heading}>
