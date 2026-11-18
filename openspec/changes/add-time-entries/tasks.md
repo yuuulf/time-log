@@ -52,6 +52,10 @@
 
 - [x] 10.1 `app/globals.css` の `--primary` / `--primary-foreground` をライト・ダークとも teal（design 決定 10）に変える。`npm test` が通ること、ライト・ダークの両方で開始ボタンが teal で表示され、アイコンが見分けられることをブラウザで確認し、PR の CI が成功することを確認する（コミット: 差し色を teal にする）
 
+## 11. フォーム部品の配色
+
+- [ ] 11.1 `app/globals.css` の `:root` に `color-scheme: light dark` を加える（design 決定 11）。`npm test` が通ること、ダークモードで修正フォームの日時入力欄のカレンダーアイコンが見えること、ライトモードの見た目が変わらないことをブラウザで確認し、PR の CI が成功することを確認する（コミット: フォーム部品の配色をダークモードに合わせる）
+
 ## Workflow follow-up
 
 - レビューで spec と実装の整合を確認し、tasks.md がすべて完了していることを確かめてから、PR に `archive` ラベルを付ける。`openspec/specs/time-tracking` ができることを確認する
