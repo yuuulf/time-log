@@ -1,0 +1,42 @@
+# Design
+
+## Context
+
+- 記録の一覧は `EntryList` が日付ごとに `EntryItem` を並べて表示する。`EntryItem` は Client Component で、修正（鉛筆）・削除（ごみ箱）のボタンを `IconButton` で持つ
+- 記録の開始は Server Function `startEntryAction(prev, formData)` が担う。`formData` の `taskName` を `validateStartInput` で確かめ（前後の空白の除去、200 文字以内）、記録中の記録を同じ時刻で終了してから新しい記録を作り、`refresh()` で画面を更新する
+- 要件は specs/time-tracking/spec.md の「記録の再開」を参照
+
+## Goals / Non-Goals
+
+**Goals:**
+
+- 再開を既存の開始と同じ経路で処理し、記録中のタスクの終了や入力チェックの振る舞いを一か所に保つ
+
+**Non-Goals:**
+
+- 開始フォーム（`StartStopForm`）の入力欄に再開したタスク名を入れること。再開は入力欄を経由せずに記録を始める
+
+## Decisions
+
+### 1. Server Function は既存の `startEntryAction` を使う
+
+- `EntryItem` に `<form>` を置き、隠しフィールド `taskName` に記録のタスク名を入れて `startEntryAction` を送る。新しい Server Function は作らない
+- 理由: 再開は「そのタスク名で開始する」ことと同じで、記録中の記録の終了・入力チェック・画面の更新をそのまま使える。DB や repository の変更も要らない
+- 代替案: 記録の id を受け取る `resumeEntryAction(id)` を作り、サーバーで記録を読んでタスク名を使う → 画面に表示されている名前とサーバーの値が食い違う心配はなくなるが、記録が削除済みのときの扱いなどが増える。表示中のタスク名で始めれば利用者の意図どおりになるので不採用
+
+### 2. ボタンの見た目
+
+- アイコンは lucide-react の `Play`（開始ボタンと同じ）、名前は「再開」とし、`aria-label` と `title` に付ける
+- 開始ボタンと同じアイコンにして「このタスクを始める」ことが分かるようにする。一覧では差し色（`primary`）を使わず、修正ボタンと同じ通常の見た目にして、各行で目立ちすぎないようにする
+- 並びは「再開・修正・削除」の順にする
+- 代替案: `RotateCcw`（戻る矢印）→ 「元に戻す」と取られやすいので不採用
+
+### 3. 送信中とエラーの表示
+
+- `useActionState` で送信中はボタンを無効にし、二重に記録が始まらないようにする
+- 保存済みのタスク名は入力チェックを通っているため通常はエラーにならないが、エラーが返ったときは削除のエラーと同じく記録の下に `role="alert"` で表示する
+
+## Risks / Trade-offs
+
+- [`time-tracking` のメイン spec がまだない（`add-time-entries` が未アーカイブ）] → この change のアーカイブは `add-time-entries` のアーカイブ後に行う。ブランチも `add-time-entries` から切る
+- [隠しフィールドの値は利用者が書き換えられる] → 通常の開始と同じ入力チェックを通るため、任意のタスク名で開始できる以上の影響はない
