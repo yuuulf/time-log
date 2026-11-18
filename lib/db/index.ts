@@ -1,6 +1,6 @@
 import "server-only";
 import { createDb } from "./client";
-import { databasePath } from "./config";
+import { getDatabasePath } from "./config";
 
 /** アプリから使う DB 接続。サーバー側のコードからだけ import する */
-export const db = createDb(databasePath);
+export const db = createDb(getDatabasePath());
