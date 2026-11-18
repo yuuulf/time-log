@@ -5,6 +5,8 @@ import { timeEntries } from "@/lib/db/schema";
 import {
   getEntry,
   getRunningEntry,
+  listRecentEntries,
+  listTaskNameSuggestions,
   startEntry,
   stopRunningEntry,
 } from "./repository";
@@ -76,5 +78,75 @@ describe("記録の開始と終了", () => {
         })
         .run(),
     ).toThrow(/UNIQUE/);
+  });
+});
+
+/** 開始・終了時刻を指定して記録を入れる（テスト用） */
+function insertEntry(taskName: string, startedAt: Date, endedAt: Date | null) {
+  return db
+    .insert(timeEntries)
+    .values({
+      taskName,
+      startedAt,
+      endedAt,
+      createdAt: startedAt,
+      updatedAt: startedAt,
+    })
+    .returning()
+    .get();
+}
+
+describe("直近 30 日の一覧", () => {
+  const now = at("12:00:00");
+  const daysAgo = (days: number, plusMs = 0) =>
+    new Date(now.getTime() - days * 24 * 60 * 60 * 1000 + plusMs);
+
+  test("開始時刻の新しい順に並ぶ", () => {
+    insertEntry("朝", at("08:00:00"), at("09:00:00"));
+    insertEntry("昼", at("11:00:00"), null);
+    insertEntry("昨日", daysAgo(1), daysAgo(1, 60_000));
+
+    expect(listRecentEntries(db, now).map((e) => e.taskName)).toEqual([
+      "昼",
+      "朝",
+      "昨日",
+    ]);
+  });
+
+  test("ちょうど 30 日前に開始した記録は含み、それより前は含まない", () => {
+    insertEntry("30日前", daysAgo(30), daysAgo(30, 60_000));
+    insertEntry("30日前より1ミリ秒前", daysAgo(30, -1), daysAgo(30, 60_000));
+    insertEntry("31日前", daysAgo(31), daysAgo(31, 60_000));
+
+    expect(listRecentEntries(db, now).map((e) => e.taskName)).toEqual([
+      "30日前",
+    ]);
+  });
+
+  test("記録がなければ空", () => {
+    expect(listRecentEntries(db, now)).toEqual([]);
+  });
+});
+
+describe("タスク名の候補", () => {
+  test("最近使った順に重複なく並び、空のタスク名は含まない", () => {
+    insertEntry("資料作成", at("08:00:00"), at("09:00:00"));
+    insertEntry("打ち合わせ", at("09:00:00"), at("10:00:00"));
+    insertEntry("", at("10:00:00"), at("10:30:00"));
+    insertEntry("資料作成", at("11:00:00"), null);
+
+    expect(listTaskNameSuggestions(db)).toEqual(["資料作成", "打ち合わせ"]);
+  });
+
+  test("最大 20 件まで", () => {
+    for (let i = 1; i <= 25; i++) {
+      const start = new Date(at("00:00:00").getTime() + i * 60_000);
+      insertEntry(`タスク${i}`, start, new Date(start.getTime() + 30_000));
+    }
+
+    const suggestions = listTaskNameSuggestions(db);
+    expect(suggestions).toHaveLength(20);
+    expect(suggestions[0]).toBe("タスク25");
+    expect(suggestions[19]).toBe("タスク6");
   });
 });
