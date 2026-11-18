@@ -24,7 +24,7 @@
 
 ### 1. プロジェクト作成: 一時ディレクトリで `create-next-app` を実行して取り込む
 
-一時ディレクトリで `npx create-next-app@latest timelog --ts --tailwind --eslint --app --no-src-dir --import-alias "@/*" --use-npm` を実行し、生成物（`.git` を除く）をリポジトリ直下にコピーする。`README.md` は生成物で上書きせず、既存の内容をベースに書き直す。生成された `AGENTS.md` と `CLAUDE.md` はそのまま取り込み、AGENTS.md に追記する。
+一時ディレクトリで `npx create-next-app@latest timelog --ts --tailwind --eslint --app --no-src-dir --import-alias "@/*" --use-npm` を実行し、生成物（`.git` を除く）をリポジトリ直下にコピーする。`README.md` は生成物で上書きせず、既存の内容をベースに書き直す。生成された `AGENTS.md` はそのまま取り込んで追記する。`CLAUDE.md` は生成されないため、`@AGENTS.md` の 1 行だけの `CLAUDE.md` を作り、Claude Code からも同じルールを読めるようにする。
 
 - 代替案: 手作業で package.json などを作る → 公式の既定値と食い違いやすいので不採用
 - `src/` は使わない: 公式の既定（`--no-src-dir`）に合わせる。ルート直下に `app/`・`components/`・`lib/` を置く
