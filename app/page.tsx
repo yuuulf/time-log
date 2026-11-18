@@ -1,3 +1,5 @@
+import { Suspense } from "react";
+import { TimeTracker } from "@/components/time-entries/TimeTracker";
 import { messages } from "@/lib/messages";
 
 export default function Home() {
@@ -9,6 +11,15 @@ export default function Home() {
       <p className="mt-4 text-base leading-7 text-muted">
         {messages.app.description}
       </p>
+      <div className="mt-8">
+        <Suspense
+          fallback={
+            <p className="text-sm text-muted">{messages.timeEntries.loading}</p>
+          }
+        >
+          <TimeTracker />
+        </Suspense>
+      </div>
     </main>
   );
 }

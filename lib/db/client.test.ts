@@ -26,3 +26,13 @@ test("一時ファイルの DB に接続してクエリを実行できる", () =
   expect(existsSync(path)).toBe(true);
   db.$client.close();
 });
+
+test("接続するとマイグレーションが適用され、time_entries テーブルができている", () => {
+  const db = createDb(":memory:");
+  const table = db.get<{ name: string }>(
+    sql`select name from sqlite_master where type = 'table' and name = 'time_entries'`,
+  );
+
+  expect(table).toEqual({ name: "time_entries" });
+  db.$client.close();
+});

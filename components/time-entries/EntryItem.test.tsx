@@ -1,0 +1,171 @@
+import { fireEvent, render, screen } from "@testing-library/react";
+import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
+import { messages } from "@/lib/messages";
+import { EntryItem, type EntryItemData } from "./EntryItem";
+
+vi.mock("@/lib/time-entries/actions", () => ({
+  updateEntryAction: vi.fn(),
+  deleteEntryAction: vi.fn(),
+}));
+
+const { updateEntryAction, deleteEntryAction } =
+  await import("@/lib/time-entries/actions");
+const t = messages.timeEntries;
+const at = (time: string) => new Date(`2026-11-18T${time}+09:00`);
+
+const finished: EntryItemData = {
+  id: 1,
+  taskName: "資料作成",
+  startedAt: at("09:00:00"),
+  endedAt: at("10:05:00"),
+};
+const running: EntryItemData = { ...finished, id: 2, endedAt: null };
+
+beforeEach(() => {
+  vi.mocked(updateEntryAction).mockReset().mockResolvedValue({ ok: true });
+  vi.mocked(deleteEntryAction).mockReset().mockResolvedValue({ ok: true });
+});
+
+afterEach(() => {
+  vi.restoreAllMocks();
+});
+
+describe("表示", () => {
+  test("終了した記録は開始・終了時刻、タスク名、作業時間を表示する", () => {
+    render(<EntryItem entry={finished} />);
+
+    expect(screen.getByText("資料作成")).toBeDefined();
+    expect(screen.getByText("09:00 – 10:05")).toBeDefined();
+    expect(screen.getByText("1時間5分")).toBeDefined();
+  });
+
+  test("記録中の記録は作業時間の代わりに「記録中」と表示する", () => {
+    render(<EntryItem entry={running} />);
+
+    expect(screen.getByText(t.running)).toBeDefined();
+    expect(screen.queryByText(/分$/)).toBeNull();
+  });
+
+  test("タスク名が空なら「（タスク名なし）」と表示する", () => {
+    render(<EntryItem entry={{ ...finished, taskName: "" }} />);
+
+    expect(screen.getByText(t.untitled)).toBeDefined();
+  });
+});
+
+describe("修正", () => {
+  test("修正ボタンで現在の値が入ったフォームを開く", () => {
+    render(<EntryItem entry={finished} />);
+
+    fireEvent.click(screen.getByRole("button", { name: t.actions.edit }));
+
+    expect(screen.getByLabelText<HTMLInputElement>(t.taskName).value).toBe(
+      "資料作成",
+    );
+    // datetime-local の値は、秒が 0 のとき秒を省いた形に正規化される
+    expect(screen.getByLabelText<HTMLInputElement>(t.startedAt).value).toBe(
+      "2026-11-18T09:00",
+    );
+    expect(screen.getByLabelText<HTMLInputElement>(t.endedAt).value).toBe(
+      "2026-11-18T10:05",
+    );
+  });
+
+  test("秒まで表示し、時刻を変えずに保存しても秒が失われない", () => {
+    render(<EntryItem entry={{ ...finished, startedAt: at("09:00:15") }} />);
+
+    fireEvent.click(screen.getByRole("button", { name: t.actions.edit }));
+
+    expect(screen.getByLabelText<HTMLInputElement>(t.startedAt).value).toBe(
+      "2026-11-18T09:00:15",
+    );
+  });
+
+  test("記録中の記録では終了時刻の欄を表示しない", () => {
+    render(<EntryItem entry={running} />);
+
+    fireEvent.click(screen.getByRole("button", { name: t.actions.edit }));
+
+    expect(screen.getByLabelText(t.startedAt)).toBeDefined();
+    expect(screen.queryByLabelText(t.endedAt)).toBeNull();
+  });
+
+  test("保存ボタンで入力を送り、成功したらフォームを閉じる", async () => {
+    render(<EntryItem entry={finished} />);
+    fireEvent.click(screen.getByRole("button", { name: t.actions.edit }));
+
+    fireEvent.change(screen.getByLabelText(t.endedAt), {
+      target: { value: "2026-11-18T10:30:20" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: t.actions.save }));
+
+    await vi.waitFor(() => expect(updateEntryAction).toHaveBeenCalledOnce());
+    const [id, , formData] = vi.mocked(updateEntryAction).mock.calls[0];
+    expect(id).toBe(1);
+    expect(formData.get("endedAt")).toBe("2026-11-18T10:30:20");
+    expect(
+      await screen.findByRole("button", { name: t.actions.edit }),
+    ).toBeDefined();
+  });
+
+  test("入力エラーなら理由を表示し、入力した値を残す", async () => {
+    vi.mocked(updateEntryAction).mockResolvedValue({
+      errors: { endedAt: t.errors.endBeforeStart },
+    });
+    render(<EntryItem entry={finished} />);
+    fireEvent.click(screen.getByRole("button", { name: t.actions.edit }));
+    const endedAt = screen.getByLabelText<HTMLInputElement>(t.endedAt);
+
+    fireEvent.change(endedAt, { target: { value: "2026-11-18T08:30:10" } });
+    fireEvent.click(screen.getByRole("button", { name: t.actions.save }));
+
+    expect(await screen.findByText(t.errors.endBeforeStart)).toBeDefined();
+    expect(endedAt.value).toBe("2026-11-18T08:30:10");
+    expect(endedAt.getAttribute("aria-invalid")).toBe("true");
+  });
+
+  test("キャンセルボタンで保存せずに閉じる", () => {
+    render(<EntryItem entry={finished} />);
+    fireEvent.click(screen.getByRole("button", { name: t.actions.edit }));
+
+    fireEvent.click(screen.getByRole("button", { name: t.actions.cancel }));
+
+    expect(updateEntryAction).not.toHaveBeenCalled();
+    expect(screen.getByText("1時間5分")).toBeDefined();
+  });
+});
+
+describe("削除", () => {
+  test("確認で削除を選ぶと削除する", async () => {
+    const confirm = vi.spyOn(window, "confirm").mockReturnValue(true);
+    render(<EntryItem entry={finished} />);
+
+    fireEvent.click(screen.getByRole("button", { name: t.actions.delete }));
+
+    expect(confirm).toHaveBeenCalledWith(t.confirmDelete);
+    await vi.waitFor(() => expect(deleteEntryAction).toHaveBeenCalledWith(1));
+  });
+
+  test("確認で取り消すと削除しない", () => {
+    vi.spyOn(window, "confirm").mockReturnValue(false);
+    render(<EntryItem entry={finished} />);
+
+    fireEvent.click(screen.getByRole("button", { name: t.actions.delete }));
+
+    expect(deleteEntryAction).not.toHaveBeenCalled();
+  });
+
+  test("削除に失敗したら理由を表示する", async () => {
+    vi.spyOn(window, "confirm").mockReturnValue(true);
+    vi.mocked(deleteEntryAction).mockResolvedValue({
+      errors: { form: t.errors.notFound },
+    });
+    render(<EntryItem entry={finished} />);
+
+    fireEvent.click(screen.getByRole("button", { name: t.actions.delete }));
+
+    expect((await screen.findByRole("alert")).textContent).toBe(
+      t.errors.notFound,
+    );
+  });
+});
