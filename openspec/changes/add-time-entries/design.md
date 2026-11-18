@@ -64,7 +64,7 @@
 ### 6. 画面の構成
 
 - `app/page.tsx` はアプリ名と説明の下に `<Suspense>` で `TimeTracker` を置く。`TimeTracker` は async の Server Component で、`await connection()` の後に記録中の記録・一覧・候補を読み込む
-- `StartStopForm`（Client Component）: タスク名の入力欄（`<datalist>` で候補を表示）と「開始する」、記録中なら記録中のタスク名・開始時刻と「終了する」。`useActionState` で入力エラーと送信中の状態を表示する
+- `StartStopForm`（Client Component）: タスク名の入力欄（`<datalist>` で候補を表示）と「開始する」を常に表示する（記録中に別のタスクを開始できるようにするため）。記録中の記録があれば、そのタスク名・開始時刻と「終了する」も表示する。`useActionState` で入力エラーと送信中の状態を表示する
 - `EntryList`（Server Component）: 日付ごとの見出しと記録の並び。記録がなければその旨の文言を表示する
 - `EntryItem`（Client Component）: 1 件の表示。「修正する」でその場に修正フォームを開き、「削除する」は `window.confirm` で確認してから Server Function を呼ぶ
 - 文言はすべて `lib/messages.ts` に追加する。ボタンは「開始する」「終了する」「修正する」「保存する」「キャンセルする」「削除する」
