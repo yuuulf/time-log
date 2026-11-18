@@ -28,7 +28,7 @@
 
 - [x] 6.1 `components/time-entries/StartStopForm.tsx` を実装する。記録中がないときは入力欄（候補つき）と「開始する」、記録中なら記録中のタスク名・開始時刻と「終了する」を表示し、入力エラーを表示することを、Server Function を差し替えてテストする。`npm test` が通ることを確認する（コミット: 記録の開始・終了フォームを追加）
 - [x] 6.2 `components/time-entries/EntryItem.tsx` を実装する。開始・終了時刻・タスク名・作業時間（記録中は「記録中」、タスク名が空なら「（タスク名なし）」）の表示、「修正する」で開くフォーム（記録中は終了時刻の欄なし）、「削除する」の確認と取り消しをテストし、`npm test` が通ることを確認する（コミット: 記録の表示・修正・削除を追加）
-- [ ] 6.3 `components/time-entries/EntryList.tsx` を実装する。日付ごとの見出しと並び、記録がないときの文言をテストし、`npm test` が通ることを確認する（コミット: 記録の一覧を追加）
+- [x] 6.3 `components/time-entries/EntryList.tsx` を実装する。日付ごとの見出しと並び、記録がないときの文言をテストし、`npm test` が通ることを確認する（コミット: 記録の一覧を追加）
 - [ ] 6.4 `components/time-entries/TimeTracker.tsx`（`connection()` の後にデータを読む async Server Component）を作り、`app/page.tsx` のアプリ名と説明の下に `<Suspense>` で置く。既存の `app/page.test.tsx` が通ること、`npm run build` が `cacheComponents` のエラーなく通ることを確認する（コミット: トップページに時間記録を追加）
 - [ ] 6.5 `npm run dev` で開き、spec のシナリオ（開始、タスク名なしで開始、記録中の別タスク開始による自動終了、終了、候補の選択、時刻の修正とエラー、削除と取り消し、再読み込み後も残ること）をブラウザで確認する。幅 375px で横スクロールが出ないことも確認する
 
