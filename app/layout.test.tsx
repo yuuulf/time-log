@@ -8,6 +8,11 @@ vi.mock("next/font/google", () => ({
   Geist: () => ({ variable: "font-geist-sans" }),
   Geist_Mono: () => ({ variable: "font-geist-mono" }),
 }));
+// 記録中のタスクは DB を読むサーバー専用の部品なので、テストでは置き換える
+vi.mock("@/components/layout/RunningTask", () => ({
+  RunningTask: () => <p>記録中のタスク</p>,
+}));
+vi.mock("next/navigation", () => ({ usePathname: () => "/" }));
 
 test("ページのタイトルにアプリ名が含まれる", () => {
   expect(metadata.title).toEqual({
@@ -16,7 +21,7 @@ test("ページのタイトルにアプリ名が含まれる", () => {
   });
 });
 
-test("日本語の文書として、ヘッダー付きで表示される", () => {
+test("日本語の文書として、サイドバー付きで表示される", () => {
   const html = renderToStaticMarkup(
     <RootLayout params={Promise.resolve({})}>
       <p>本文</p>
@@ -24,5 +29,7 @@ test("日本語の文書として、ヘッダー付きで表示される", () =>
   );
   expect(html).toContain('<html lang="ja"');
   expect(html).toContain(`>${messages.app.name}</a>`);
+  expect(html).toContain('<aside id="sidebar"');
+  expect(html).toContain(`>${messages.nav.home}</a>`);
   expect(html).toContain("<p>本文</p>");
 });

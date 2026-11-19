@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 /** 過去の記録。月ごと、または指定した期間の記録を表示する */
 export default function HistoryPage({ searchParams }: PageProps<"/history">) {
   return (
-    <main className="mx-auto w-full max-w-3xl flex-1 px-4 py-12">
+    <main className="mx-auto w-full max-w-3xl min-w-0 flex-1 px-4 py-12">
       <h1 className="text-3xl font-bold text-foreground">
         {messages.history.title}
       </h1>

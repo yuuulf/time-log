@@ -8,7 +8,7 @@
 
 ## 2. レイアウト
 
-- [ ] 2.1 `components/layout/Sidebar.tsx` を作って `app/layout.tsx` の `Header` と置き換え、`Header.tsx` と `Header.test.tsx` を消す。各ページの `<main>` に `min-w-0` を足す（design 決定 1・2）。`npm test` が通ること、`npm run build` が `cacheComponents` のエラーなく通ることを確認する（コミット: ヘッダーをサイドバーに置き換える）
+- [x] 2.1 `components/layout/Sidebar.tsx` を作って `app/layout.tsx` の `Header` と置き換え、`Header.tsx` と `Header.test.tsx` を消す。各ページの `<main>` に `min-w-0` を足す（design 決定 1・2）。`npm test` が通ること、`npm run build` が `cacheComponents` のエラーなく通ることを確認する（コミット: ヘッダーをサイドバーに置き換える）
 
 ## 3. ドキュメント
 

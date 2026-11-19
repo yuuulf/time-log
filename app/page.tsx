@@ -4,7 +4,7 @@ import { messages } from "@/lib/messages";
 
 export default function Home() {
   return (
-    <main className="mx-auto w-full max-w-3xl flex-1 px-4 py-12">
+    <main className="mx-auto w-full max-w-3xl min-w-0 flex-1 px-4 py-12">
       <h1 className="text-3xl font-bold text-foreground">
         {messages.app.name}
       </h1>
