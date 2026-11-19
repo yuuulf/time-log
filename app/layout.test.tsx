@@ -30,6 +30,14 @@ test("日本語の文書として、サイドバー付きで表示される", ()
   expect(html).toContain('<html lang="ja"');
   expect(html).toContain(`>${messages.app.name}</a>`);
   expect(html).toContain('<aside id="sidebar"');
-  expect(html).toContain(`>${messages.nav.home}</a>`);
+  // サイドバーは上からアプリ名、記録中のタスク、ページのリンクの順
+  const aside = html.slice(html.indexOf('<aside id="sidebar"'));
+  const order = [
+    `>${messages.app.name}</a>`,
+    "<p>記録中のタスク</p>",
+    `>${messages.nav.home}</a>`,
+  ].map((part) => aside.indexOf(part));
+  expect(order.every((i) => i >= 0)).toBe(true);
+  expect(order).toEqual([...order].sort((a, b) => a - b));
   expect(html).toContain("<p>本文</p>");
 });

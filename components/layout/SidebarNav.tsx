@@ -9,18 +9,12 @@ const pages = [
   { href: "/history", label: messages.history.title },
 ] as const;
 
-/** サイドバーのアプリ名とページのリンク。今いるページのリンクに aria-current を付ける */
+/** サイドバーのページのリンク。今いるページのリンクに aria-current を付ける */
 export function SidebarNav() {
   const pathname = usePathname();
 
   return (
-    <nav aria-label={messages.nav.label} className="space-y-4">
-      <Link
-        href="/"
-        className="block px-3 text-lg font-semibold text-foreground"
-      >
-        {messages.app.name}
-      </Link>
+    <nav aria-label={messages.nav.label}>
       <ul className="space-y-1">
         {pages.map(({ href, label }) => {
           const current = pathname === href;

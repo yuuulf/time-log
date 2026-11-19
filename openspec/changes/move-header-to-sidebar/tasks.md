@@ -9,7 +9,7 @@
 ## 2. レイアウト
 
 - [x] 2.1 `components/layout/Sidebar.tsx` を作って `app/layout.tsx` の `Header` と置き換え、`Header.tsx` と `Header.test.tsx` を消す。各ページの `<main>` に `min-w-0` を足す（design 決定 1・2）。`npm test` が通ること、`npm run build` が `cacheComponents` のエラーなく通ることを確認する（コミット: ヘッダーをサイドバーに置き換える）
-- [ ] 2.2 サイドバーの並びを上からアプリ名、記録中のタスク、ページのリンクの順にする。アプリ名のリンクを `SidebarNav` から `Sidebar` に移す（design 決定 1）。`SidebarNav.test.tsx` からアプリ名のテストを外し、`app/layout.test.tsx` でアプリ名・記録中のタスク・「ホーム」がこの順に並ぶことをテストする。`npm test` が通ること、ブラウザで幅 1024px と 375px の並びを確認する（コミット: サイドバーの並びを変える）
+- [x] 2.2 サイドバーの並びを上からアプリ名、記録中のタスク、ページのリンクの順にする。アプリ名のリンクを `SidebarNav` から `Sidebar` に移す（design 決定 1）。`SidebarNav.test.tsx` からアプリ名のテストを外し、`app/layout.test.tsx` でアプリ名・記録中のタスク・「ホーム」がこの順に並ぶことをテストする。`npm test` が通ること、ブラウザで幅 1024px と 375px の並びを確認する（コミット: サイドバーの並びを変える）
 
 ## 3. ドキュメント
 
