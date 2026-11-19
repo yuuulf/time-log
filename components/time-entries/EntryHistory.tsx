@@ -1,5 +1,6 @@
 import { connection } from "next/server";
 import { getDb } from "@/lib/db";
+import { listProjects } from "@/lib/projects/repository";
 import {
   resolveHistoryQuery,
   type HistorySearchParams,
@@ -19,17 +20,24 @@ export async function EntryHistory({
   const params = await searchParams;
   // better-sqlite3 は同期 API のため、プリレンダーではなくリクエスト時に読むよう明示する
   await connection();
+  const db = getDb();
   const view = resolveHistoryQuery(params, new Date());
   const entries =
     view.mode === "rangeError"
       ? []
-      : listEntriesBetween(getDb(), view.range.from, view.range.to).map(
-          ({ id, taskName, startedAt, endedAt }) => ({
+      : listEntriesBetween(db, view.range.from, view.range.to).map(
+          ({ id, taskName, startedAt, endedAt, project }) => ({
             id,
             taskName,
             startedAt,
             endedAt,
+            project,
           }),
         );
-  return <HistoryContent view={view} entries={entries} />;
+  const projects = listProjects(db).map(({ id, name, color }) => ({
+    id,
+    name,
+    color,
+  }));
+  return <HistoryContent view={view} entries={entries} projects={projects} />;
 }

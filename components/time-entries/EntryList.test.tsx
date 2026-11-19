@@ -1,4 +1,4 @@
-import { render, screen, within } from "@testing-library/react";
+import { fireEvent, render, screen, within } from "@testing-library/react";
 import { expect, test, vi } from "vitest";
 import { messages } from "@/lib/messages";
 import { EntryList } from "./EntryList";
@@ -85,4 +85,30 @@ test("見出しと記録がないときの文言を差し替えられる", () =>
   ).toBeDefined();
   expect(screen.getByText("この期間の記録はありません。")).toBeDefined();
   expect(screen.queryByText(t.empty)).toBeNull();
+});
+
+test("プロジェクトのアイコンを出し、修正フォームにプロジェクトの選択肢を渡す", () => {
+  const project = { id: 1, name: "社内ツール", color: "teal" };
+  render(
+    <EntryList
+      entries={[
+        {
+          id: 1,
+          taskName: "資料作成",
+          startedAt: at("2026-11-18", "09:00:00"),
+          endedAt: at("2026-11-18", "10:00:00"),
+          project,
+        },
+      ]}
+      projects={[project]}
+    />,
+  );
+
+  expect(screen.getByRole("img", { name: "社内ツール" })).toBeDefined();
+  fireEvent.click(screen.getByRole("button", { name: t.actions.edit }));
+  expect(
+    [...screen.getByLabelText<HTMLSelectElement>(t.project).options].map(
+      (o) => o.textContent,
+    ),
+  ).toEqual([t.noProject, "社内ツール"]);
 });

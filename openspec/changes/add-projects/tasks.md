@@ -22,7 +22,7 @@
 - [x] 4.1 `lib/time-entries/repository.ts` の `startEntry`・`updateEntry` に `projectId` を足し、記録を読む関数がプロジェクトを付けて返すようにする（design 決定 4）。`repository.test.ts` で、プロジェクト付きの開始・修正・外すこと、一覧と記録中の記録にプロジェクトが付くこと、プロジェクトを編集すると記録の読み込み結果にも反映されることをテストする（コミット: 記録にプロジェクトを紐づけて読み書きする）
 - [x] 4.2 `startEntryAction`・`updateEntryAction` で `projectId` を受け付ける（design 決定 4）。`actions.test.ts` で、プロジェクト付きの開始・修正、「プロジェクトなし」、存在しないプロジェクト・不正な値のときに保存しないことをテストする（コミット: 記録の開始と修正でプロジェクトを受け付ける）
 - [x] 4.3 `components/projects/ProjectSelect.tsx` を作り、`StartStopForm` にプロジェクトの選択と、記録中の枠のアイコンとプロジェクト名を足す。`TimeTracker` がプロジェクトの一覧を渡す（design 決定 5）。`ProjectSelect.test.tsx` で選択肢の並びと初期値、`StartStopForm.test.tsx` で選択肢の表示、開始後に「プロジェクトなし」に戻ること、記録中の枠にアイコンとプロジェクト名の文字が出ることをテストする（コミット: 記録の開始でプロジェクトを選べるようにする）
-- [ ] 4.4 `EntryItem` にプロジェクトのアイコン、修正フォームのプロジェクトの選択、再開のフォームの `projectId` を足し、`EntryList`・`TimeTracker`・`EntryHistory`・`HistoryContent` でプロジェクトの一覧を渡す（design 決定 4・5）。`EntryItem.test.tsx` で、アイコンの有無と名前、修正フォームの初期値、再開で `projectId` を送ることをテストし、`EntryList.test.tsx`・`HistoryContent.test.tsx` が通ることを確認する（コミット: 記録の一覧と修正でプロジェクトを扱う）
+- [x] 4.4 `EntryItem` にプロジェクトのアイコン、修正フォームのプロジェクトの選択、再開のフォームの `projectId` を足し、`EntryList`・`TimeTracker`・`EntryHistory`・`HistoryContent` でプロジェクトの一覧を渡す（design 決定 4・5）。`EntryItem.test.tsx` で、アイコンの有無と名前、修正フォームの初期値、再開で `projectId` を送ることをテストし、`EntryList.test.tsx`・`HistoryContent.test.tsx` が通ることを確認する（コミット: 記録の一覧と修正でプロジェクトを扱う）
 - [ ] 4.5 `RunningTask` / `RunningTaskView` にプロジェクトのアイコンを足す（design 決定 5）。`RunningTaskView.test.tsx` でアイコンの有無と名前をテストする（コミット: サイドバーの記録中のタスクにプロジェクトを表示）
 
 ## 5. ドキュメント

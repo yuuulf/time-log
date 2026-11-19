@@ -4,6 +4,7 @@ import { IconButton } from "@/components/ui/IconButton";
 import { IconLink } from "@/components/ui/IconLink";
 import { messages } from "@/lib/messages";
 import type { HistoryView } from "@/lib/time-entries/history";
+import type { EntryProject } from "@/components/projects/types";
 import { EntryList } from "./EntryList";
 import type { EntryItemData } from "./EntryItem";
 
@@ -14,9 +15,12 @@ const HISTORY_PATH = "/history";
 export function HistoryContent({
   view,
   entries,
+  projects = [],
 }: {
   view: HistoryView;
   entries: EntryItemData[];
+  /** 修正フォームのプロジェクトの選択肢（登録順） */
+  projects?: EntryProject[];
 }) {
   return (
     <div className="space-y-6">
@@ -57,6 +61,7 @@ export function HistoryContent({
           entries={entries}
           heading={view.heading}
           emptyMessage={t.empty}
+          projects={projects}
         />
       )}
     </div>

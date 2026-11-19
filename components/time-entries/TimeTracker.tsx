@@ -40,12 +40,16 @@ export async function TimeTracker() {
         projects={projects}
       />
       <EntryList
-        entries={entries.map(({ id, taskName, startedAt, endedAt }) => ({
-          id,
-          taskName,
-          startedAt,
-          endedAt,
-        }))}
+        entries={entries.map(
+          ({ id, taskName, startedAt, endedAt, project }) => ({
+            id,
+            taskName,
+            startedAt,
+            endedAt,
+            project,
+          }),
+        )}
+        projects={projects}
       />
     </div>
   );
