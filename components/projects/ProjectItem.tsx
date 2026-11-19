@@ -2,10 +2,14 @@
 
 import { useState, useTransition } from "react";
 import Link from "next/link";
-import { MoreVertical, Trash2 } from "lucide-react";
+import { Archive, ArchiveRestore, MoreVertical, Trash2 } from "lucide-react";
 import { DropdownMenu } from "@/components/ui/DropdownMenu";
 import { messages } from "@/lib/messages";
-import { deleteProjectAction } from "@/lib/projects/actions";
+import {
+  archiveProjectAction,
+  deleteProjectAction,
+  unarchiveProjectAction,
+} from "@/lib/projects/actions";
 import { ProjectIcon } from "./ProjectIcon";
 import type { ProjectData } from "./types";
 
@@ -13,22 +17,32 @@ const t = messages.projects;
 
 /**
  * プロジェクト一覧の 1 行。色のアイコン・名前（詳細画面へのリンク）・クライアント名を出す。
- * 編集は詳細画面で行い、削除は「その他の操作」のメニューから確認してから行う
+ * 編集は詳細画面で行う。「その他の操作」のメニューには、アーカイブ（アーカイブ済みの一覧では解除）と、
+ * 確認してからの削除を置く
  */
 export function ProjectItem({
   project,
+  archived = false,
 }: {
   project: Pick<ProjectData, "id" | "name" | "color" | "clientName">;
+  /** アーカイブ済みの一覧の行なら true。メニューが「アーカイブ解除」になる */
+  archived?: boolean;
 }) {
-  const [deleteError, setDeleteError] = useState<string>();
-  const [deleting, startDeleting] = useTransition();
+  const [error, setError] = useState<string>();
+  const [pending, startTransition] = useTransition();
+
+  /** 操作を呼び、失敗の理由を行の下に出す */
+  const run = (
+    action: (id: number) => Promise<{ errors?: { form?: string } }>,
+  ) =>
+    startTransition(async () => {
+      const result = await action(project.id);
+      setError(result.errors?.form);
+    });
 
   const handleDelete = () => {
     if (!window.confirm(t.confirmDelete)) return;
-    startDeleting(async () => {
-      const result = await deleteProjectAction(project.id);
-      setDeleteError(result.errors?.form);
-    });
+    run(deleteProjectAction);
   };
 
   return (
@@ -52,8 +66,20 @@ export function ProjectItem({
         <DropdownMenu
           icon={MoreVertical}
           label={t.actions.more}
-          disabled={deleting}
+          disabled={pending}
           items={[
+            // アーカイブ・解除は元に戻せるので確認しない
+            archived
+              ? {
+                  label: t.actions.unarchive,
+                  icon: ArchiveRestore,
+                  onSelect: () => run(unarchiveProjectAction),
+                }
+              : {
+                  label: t.actions.archive,
+                  icon: Archive,
+                  onSelect: () => run(archiveProjectAction),
+                },
             {
               label: t.actions.delete,
               icon: Trash2,
@@ -63,9 +89,9 @@ export function ProjectItem({
           ]}
         />
       </div>
-      {deleteError && (
+      {error && (
         <p role="alert" className="text-sm text-danger">
-          {deleteError}
+          {error}
         </p>
       )}
     </div>

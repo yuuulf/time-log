@@ -81,7 +81,16 @@ export const messages = {
       add: "新規作成",
       createSubmit: "作成",
       more: "その他の操作",
+      archive: "アーカイブ",
+      unarchive: "アーカイブ解除",
+      archived: "アーカイブ済み",
       delete: "削除",
+    },
+    archived: {
+      title: "アーカイブ済みのプロジェクト",
+      empty: "アーカイブしたプロジェクトはありません。",
+      loading: "アーカイブ済みのプロジェクトを読み込んでいます…",
+      notice: "アーカイブ済みのプロジェクトです。",
     },
     detail: {
       backToList: "プロジェクトの一覧",
