@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, within } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import { expect, test, vi } from "vitest";
 import { messages } from "@/lib/messages";
 import { EntryList } from "./EntryList";
@@ -50,10 +50,12 @@ test("開始日ごとの見出しの下に、記録を渡された順（新し�
   expect(
     within(today)
       .getAllByRole("listitem")
-      .map((li) => li.querySelector("p")?.textContent),
+      .map((li) => li.querySelector("input")?.value),
   ).toEqual(["打ち合わせ", "資料作成"]);
   // 日をまたぐ記録は開始日にまとめる
-  expect(within(yesterday).getByText("調査")).toBeDefined();
+  expect(
+    within(yesterday).getByRole("textbox", { name: t.taskName }),
+  ).toHaveProperty("value", "調査");
 });
 
 test("記録がなければ、まだ記録がないことを伝える", () => {
@@ -87,7 +89,7 @@ test("見出しと記録がないときの文言を差し替えられる", () =>
   expect(screen.queryByText(t.empty)).toBeNull();
 });
 
-test("プロジェクトのアイコンを出し、修正フォームにプロジェクトの選択肢を渡す", () => {
+test("プロジェクトのアイコンを出す", () => {
   const project = { id: 1, name: "社内ツール", color: "teal" };
   render(
     <EntryList
@@ -105,10 +107,4 @@ test("プロジェクトのアイコンを出し、修正フォームにプロ�
   );
 
   expect(screen.getByRole("img", { name: "社内ツール" })).toBeDefined();
-  fireEvent.click(screen.getByRole("button", { name: t.actions.edit }));
-  expect(
-    [...screen.getByLabelText<HTMLSelectElement>(t.project).options].map(
-      (o) => o.textContent,
-    ),
-  ).toEqual([t.noProject, "社内ツール"]);
 });

@@ -32,108 +32,195 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
+/** 行の入力欄 */
+const field = (label: string) => screen.getByLabelText<HTMLInputElement>(label);
+
+/** 最後に送った入力値 */
+function lastSent() {
+  const calls = vi.mocked(updateEntryAction).mock.calls;
+  const [id, , formData] = calls[calls.length - 1];
+  return { id, formData };
+}
+
 describe("表示", () => {
-  test("終了した記録は開始・終了時刻、タスク名、作業時間を表示する", () => {
+  test("終了した記録は、タスク名・開始・終了時刻を入力欄に入れ、作業時間を表示する", () => {
     render(<EntryItem entry={finished} />);
 
-    expect(screen.getByText("資料作成")).toBeDefined();
-    expect(screen.getByText("09:00 – 10:05")).toBeDefined();
+    expect(field(t.taskName).value).toBe("資料作成");
+    // datetime-local の値は、秒が 0 のとき秒を省いた形に正規化される
+    expect(field(t.startedAt).value).toBe("2026-11-18T09:00");
+    expect(field(t.endedAt).value).toBe("2026-11-18T10:05");
     expect(screen.getByText("1時間5分")).toBeDefined();
   });
 
-  test("記録中の記録は作業時間の代わりに「記録中」と表示する", () => {
+  test("秒まで入力欄に出す", () => {
+    render(<EntryItem entry={{ ...finished, startedAt: at("09:00:15") }} />);
+
+    expect(field(t.startedAt).value).toBe("2026-11-18T09:00:15");
+  });
+
+  test("記録中の記録は終了時刻の欄を出さず、作業時間の代わりに「記録中」と表示する", () => {
     render(<EntryItem entry={running} />);
 
+    expect(field(t.startedAt)).toBeDefined();
+    expect(screen.queryByLabelText(t.endedAt)).toBeNull();
     expect(screen.getByText(t.running)).toBeDefined();
     expect(screen.queryByText(/分$/)).toBeNull();
   });
 
-  test("タスク名が空なら「（タスク名なし）」と表示する", () => {
+  test("タスク名が空なら入力欄に「（タスク名なし）」を薄く出す", () => {
     render(<EntryItem entry={{ ...finished, taskName: "" }} />);
 
-    expect(screen.getByText(t.untitled)).toBeDefined();
+    expect(field(t.taskName).value).toBe("");
+    expect(field(t.taskName).placeholder).toBe(t.untitled);
+  });
+
+  test("修正ボタンはない", () => {
+    render(<EntryItem entry={finished} />);
+
+    expect(screen.queryByRole("button", { name: "修正" })).toBeNull();
   });
 });
 
-describe("修正", () => {
-  test("修正ボタンで現在の値が入ったフォームを開く", () => {
+describe("直接編集", () => {
+  test("値を変えてフォーカスが外れたら、今の値をすべて送る", async () => {
     render(<EntryItem entry={finished} />);
 
-    fireEvent.click(screen.getByRole("button", { name: t.actions.edit }));
-
-    expect(screen.getByLabelText<HTMLInputElement>(t.taskName).value).toBe(
-      "資料作成",
-    );
-    // datetime-local の値は、秒が 0 のとき秒を省いた形に正規化される
-    expect(screen.getByLabelText<HTMLInputElement>(t.startedAt).value).toBe(
-      "2026-11-18T09:00",
-    );
-    expect(screen.getByLabelText<HTMLInputElement>(t.endedAt).value).toBe(
-      "2026-11-18T10:05",
-    );
-  });
-
-  test("秒まで表示し、時刻を変えずに保存しても秒が失われない", () => {
-    render(<EntryItem entry={{ ...finished, startedAt: at("09:00:15") }} />);
-
-    fireEvent.click(screen.getByRole("button", { name: t.actions.edit }));
-
-    expect(screen.getByLabelText<HTMLInputElement>(t.startedAt).value).toBe(
-      "2026-11-18T09:00:15",
-    );
-  });
-
-  test("記録中の記録では終了時刻の欄を表示しない", () => {
-    render(<EntryItem entry={running} />);
-
-    fireEvent.click(screen.getByRole("button", { name: t.actions.edit }));
-
-    expect(screen.getByLabelText(t.startedAt)).toBeDefined();
-    expect(screen.queryByLabelText(t.endedAt)).toBeNull();
-  });
-
-  test("保存ボタンで入力を送り、成功したらフォームを閉じる", async () => {
-    render(<EntryItem entry={finished} />);
-    fireEvent.click(screen.getByRole("button", { name: t.actions.edit }));
-
-    fireEvent.change(screen.getByLabelText(t.endedAt), {
-      target: { value: "2026-11-18T10:30:20" },
-    });
-    fireEvent.click(screen.getByRole("button", { name: t.actions.save }));
+    fireEvent.change(field(t.taskName), { target: { value: "資料レビュー" } });
+    fireEvent.blur(field(t.taskName));
 
     await vi.waitFor(() => expect(updateEntryAction).toHaveBeenCalledOnce());
-    const [id, , formData] = vi.mocked(updateEntryAction).mock.calls[0];
+    const { id, formData } = lastSent();
     expect(id).toBe(1);
-    expect(formData.get("endedAt")).toBe("2026-11-18T10:30:20");
-    expect(
-      await screen.findByRole("button", { name: t.actions.edit }),
-    ).toBeDefined();
+    expect(formData.get("taskName")).toBe("資料レビュー");
+    expect(formData.get("projectId")).toBe("");
+    expect(formData.get("startedAt")).toBe("2026-11-18T09:00:00");
+    expect(formData.get("endedAt")).toBe("2026-11-18T10:05:00");
   });
 
-  test("入力エラーなら理由を表示し、入力した値を残す", async () => {
+  test("時刻を変えてフォーカスが外れたら送る", async () => {
+    render(<EntryItem entry={finished} />);
+
+    fireEvent.change(field(t.endedAt), {
+      target: { value: "2026-11-18T10:30:20" },
+    });
+    fireEvent.blur(field(t.endedAt));
+
+    await vi.waitFor(() => expect(updateEntryAction).toHaveBeenCalledOnce());
+    expect(lastSent().formData.get("endedAt")).toBe("2026-11-18T10:30:20");
+  });
+
+  test("値を変えずにフォーカスが外れても送らない（秒の 0 の省略は変更とみなさない）", () => {
+    render(<EntryItem entry={finished} />);
+
+    fireEvent.focus(field(t.taskName));
+    fireEvent.blur(field(t.taskName));
+    fireEvent.change(field(t.startedAt), {
+      target: { value: "2026-11-18T09:00" },
+    });
+    fireEvent.blur(field(t.startedAt));
+
+    expect(updateEntryAction).not.toHaveBeenCalled();
+  });
+
+  test("Enter キーで確定して送る", async () => {
+    render(<EntryItem entry={finished} />);
+    const taskName = field(t.taskName);
+    taskName.focus();
+
+    fireEvent.change(taskName, { target: { value: "資料レビュー" } });
+    fireEvent.keyDown(taskName, { key: "Enter" });
+
+    await vi.waitFor(() => expect(updateEntryAction).toHaveBeenCalledOnce());
+    expect(lastSent().formData.get("taskName")).toBe("資料レビュー");
+    expect(document.activeElement).not.toBe(taskName);
+  });
+
+  test("Escape キーで保存済みの値に戻し、送らない", () => {
+    render(<EntryItem entry={finished} />);
+    const taskName = field(t.taskName);
+    taskName.focus();
+
+    fireEvent.change(taskName, { target: { value: "資料レビュー" } });
+    fireEvent.keyDown(taskName, { key: "Escape" });
+
+    expect(taskName.value).toBe("資料作成");
+    expect(updateEntryAction).not.toHaveBeenCalled();
+  });
+
+  test("記録中の記録では終了時刻を送らない", async () => {
+    render(<EntryItem entry={running} />);
+
+    fireEvent.change(field(t.taskName), { target: { value: "資料レビュー" } });
+    fireEvent.blur(field(t.taskName));
+
+    await vi.waitFor(() => expect(updateEntryAction).toHaveBeenCalledOnce());
+    expect(lastSent().formData.has("endedAt")).toBe(false);
+  });
+
+  test("入力エラーなら理由を行に表示し、入力した値を残す", async () => {
     vi.mocked(updateEntryAction).mockResolvedValue({
       errors: { endedAt: t.errors.endBeforeStart },
     });
     render(<EntryItem entry={finished} />);
-    fireEvent.click(screen.getByRole("button", { name: t.actions.edit }));
-    const endedAt = screen.getByLabelText<HTMLInputElement>(t.endedAt);
+    const endedAt = field(t.endedAt);
 
     fireEvent.change(endedAt, { target: { value: "2026-11-18T08:30:10" } });
-    fireEvent.click(screen.getByRole("button", { name: t.actions.save }));
+    fireEvent.blur(endedAt);
 
-    expect(await screen.findByText(t.errors.endBeforeStart)).toBeDefined();
+    expect((await screen.findByRole("alert")).textContent).toBe(
+      t.errors.endBeforeStart,
+    );
     expect(endedAt.value).toBe("2026-11-18T08:30:10");
     expect(endedAt.getAttribute("aria-invalid")).toBe("true");
+    expect(
+      document.getElementById(endedAt.getAttribute("aria-describedby")!)
+        ?.textContent,
+    ).toBe(t.errors.endBeforeStart);
   });
 
-  test("キャンセルボタンで保存せずに閉じる", () => {
+  test("次に保存できたらエラーを消す", async () => {
+    vi.mocked(updateEntryAction).mockResolvedValueOnce({
+      errors: { taskName: t.errors.taskNameTooLong },
+    });
     render(<EntryItem entry={finished} />);
-    fireEvent.click(screen.getByRole("button", { name: t.actions.edit }));
 
-    fireEvent.click(screen.getByRole("button", { name: t.actions.cancel }));
+    fireEvent.change(field(t.taskName), {
+      target: { value: "あ".repeat(201) },
+    });
+    fireEvent.blur(field(t.taskName));
+    await screen.findByRole("alert");
 
-    expect(updateEntryAction).not.toHaveBeenCalled();
-    expect(screen.getByText("1時間5分")).toBeDefined();
+    fireEvent.change(field(t.taskName), { target: { value: "資料レビュー" } });
+    fireEvent.blur(field(t.taskName));
+
+    await vi.waitFor(() => expect(screen.queryByRole("alert")).toBeNull());
+    expect(field(t.taskName).getAttribute("aria-invalid")).toBeNull();
+  });
+
+  test("保存の後に記録が新しくなったら、編集中でない欄だけを合わせる", () => {
+    const { rerender } = render(<EntryItem entry={finished} />);
+    // タスク名を保存したあと、開始時刻を編集している途中
+    fireEvent.change(field(t.taskName), { target: { value: "資料レビュー" } });
+    fireEvent.change(field(t.startedAt), {
+      target: { value: "2026-11-18T08:45:00" },
+    });
+
+    rerender(
+      <EntryItem
+        entry={{
+          ...finished,
+          taskName: "資料レビュー",
+          endedAt: at("10:10:00"),
+        }}
+      />,
+    );
+
+    expect(field(t.taskName).value).toBe("資料レビュー");
+    // 編集中の開始時刻は上書きしない
+    expect(field(t.startedAt).value).toBe("2026-11-18T08:45");
+    // 編集していない終了時刻は新しい値になる
+    expect(field(t.endedAt).value).toBe("2026-11-18T10:10");
   });
 });
 
@@ -182,7 +269,7 @@ describe("再開", () => {
     const [, formData] = vi.mocked(startEntryAction).mock.calls[0];
     expect(formData.get("taskName")).toBe("資料作成");
     // 元の記録の表示は変わらない
-    expect(screen.getByText("09:00 – 10:05")).toBeDefined();
+    expect(field(t.taskName).value).toBe("資料作成");
   });
 
   test("タスク名のない記録は、タスク名を空にして記録を始める", async () => {
@@ -204,7 +291,7 @@ describe("再開", () => {
   test("記録中の行は再開ボタンの場所を空けて、ボタンの列を他の行と揃える", () => {
     const { unmount } = render(<EntryItem entry={finished} />);
     const slots = () =>
-      screen.getByRole("button", { name: t.actions.edit }).parentElement!
+      screen.getByRole("button", { name: t.actions.delete }).parentElement!
         .children.length;
     const finishedSlots = slots();
     unmount();
@@ -241,11 +328,11 @@ describe("プロジェクト", () => {
     const icon = screen.getByRole("img", { name: "社内ツール" });
     expect(icon.getAttribute("title")).toBe("社内ツール");
     expect(icon.className).toContain("text-project-teal");
-    // タスク名の行の先頭にアイコンがある
-    const row = icon.closest("p")!;
-    expect(row.textContent).toBe(withProject.taskName);
-    expect(row.firstElementChild?.contains(icon)).toBe(true);
-    expect(row.firstChild).toBe(row.firstElementChild);
+    // アイコンはタスク名の入力欄より前にある
+    expect(
+      icon.compareDocumentPosition(field(t.taskName)) &
+        Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
     // 名前は文字では出さない
     expect(screen.queryByText("社内ツール")).toBeNull();
   });
@@ -256,45 +343,6 @@ describe("プロジェクト", () => {
     );
 
     expect(screen.queryByRole("img")).toBeNull();
-  });
-
-  test("修正フォームは今のプロジェクトを選んだ状態で開き、選んだ値を送る", async () => {
-    render(<EntryItem entry={withProject} projects={projects} />);
-    fireEvent.click(screen.getByRole("button", { name: t.actions.edit }));
-    const select = screen.getByLabelText<HTMLSelectElement>(t.project);
-
-    expect(select.value).toBe("1");
-    expect([...select.options].map((o) => o.textContent)).toEqual([
-      t.noProject,
-      "社内ツール",
-      "A 社サイト改修",
-    ]);
-
-    fireEvent.change(select, { target: { value: "" } });
-    fireEvent.click(screen.getByRole("button", { name: t.actions.save }));
-
-    await vi.waitFor(() => expect(updateEntryAction).toHaveBeenCalledOnce());
-    expect(vi.mocked(updateEntryAction).mock.calls[0][2].get("projectId")).toBe(
-      "",
-    );
-  });
-
-  test("修正でプロジェクトが見つからなければ理由を表示し、選んだ値を残す", async () => {
-    vi.mocked(updateEntryAction).mockResolvedValue({
-      errors: { projectId: messages.projects.errors.notFound },
-    });
-    render(<EntryItem entry={withProject} projects={projects} />);
-    fireEvent.click(screen.getByRole("button", { name: t.actions.edit }));
-    const select = screen.getByLabelText<HTMLSelectElement>(t.project);
-
-    fireEvent.change(select, { target: { value: "2" } });
-    fireEvent.click(screen.getByRole("button", { name: t.actions.save }));
-
-    expect(
-      await screen.findByText(messages.projects.errors.notFound),
-    ).toBeDefined();
-    expect(select.value).toBe("2");
-    expect(select.getAttribute("aria-invalid")).toBe("true");
   });
 
   test("再開ボタンは元の記録のプロジェクトを送る", async () => {

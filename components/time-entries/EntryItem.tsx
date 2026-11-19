@@ -1,15 +1,15 @@
 "use client";
 
 import {
-  startTransition,
   useActionState,
   useId,
+  useRef,
   useState,
   useTransition,
+  type KeyboardEvent,
 } from "react";
-import { Check, Pencil, Play, Trash2, X } from "lucide-react";
+import { Play, Trash2 } from "lucide-react";
 import { ProjectIcon } from "@/components/projects/ProjectIcon";
-import { ProjectSelect } from "@/components/projects/ProjectSelect";
 import type { EntryProject } from "@/components/projects/types";
 import { IconButton } from "@/components/ui/IconButton";
 import {
@@ -19,7 +19,11 @@ import {
   type ActionState,
 } from "@/lib/time-entries/actions";
 import { messages } from "@/lib/messages";
-import { formatDuration, formatTime, toDateTimeLocalValue } from "@/lib/time";
+import {
+  formatDuration,
+  parseDateTimeLocalValue,
+  toDateTimeLocalValue,
+} from "@/lib/time";
 
 const t = messages.timeEntries;
 
@@ -33,19 +37,71 @@ export type EntryItemData = {
   project?: EntryProject | null;
 };
 
+/** 行で直接編集する欄 */
+type Field = "taskName" | "startedAt" | "endedAt";
+type Values = Record<Field, string>;
+type Errors = NonNullable<ActionState["errors"]>;
+
+const FIELDS: Field[] = ["taskName", "startedAt", "endedAt"];
+
+/** 保存済みの記録から、入力欄の値を作る */
+function toValues(entry: EntryItemData): Values {
+  return {
+    taskName: entry.taskName,
+    startedAt: toDateTimeLocalValue(entry.startedAt),
+    endedAt: entry.endedAt ? toDateTimeLocalValue(entry.endedAt) : "",
+  };
+}
+
 /**
- * 記録 1 件の表示。修正ボタンでその場に修正フォームを開き、削除ボタンは確認してから削除する。
- * 終了した記録には再開ボタンを置き、同じタスク名・プロジェクトで記録を始める
+ * 2 つの入力値が同じかどうか。時刻はブラウザが秒の 0 を省くことがあるので、日時として比べる
+ */
+function sameValue(field: Field, a: string, b: string): boolean {
+  if (field === "taskName" || a === b) return a === b;
+  const left = parseDateTimeLocalValue(a);
+  const right = parseDateTimeLocalValue(b);
+  return left !== null && right !== null && left.getTime() === right.getTime();
+}
+
+/**
+ * 記録 1 件の行。タスク名・開始時刻・終了時刻をその場で編集し、値を変えてフォーカスが外れたとき
+ * （または Enter）に保存する。Escape でその欄を保存済みの値に戻す。
+ * 削除ボタンは確認してから削除する。終了した記録には再開ボタンを置き、同じタスク名・プロジェクトで記録を始める
  */
 export function EntryItem({
   entry,
   projects = [],
 }: {
   entry: EntryItemData;
-  /** 修正フォームのプロジェクトの選択肢（登録順） */
+  /** プロジェクトの選択肢（登録順） */
   projects?: EntryProject[];
 }) {
-  const [editing, setEditing] = useState(false);
+  void projects;
+  const id = useId();
+  const isRunning = entry.endedAt === null;
+  const saved = toValues(entry);
+
+  // 入力エラーのときに入力した値を残すため、値は state で持つ
+  const [values, setValues] = useState(saved);
+  // 保存の後に props が新しくなったら、編集中でない欄（前の保存済みの値のままの欄）だけを合わせる。
+  // 行を作り直すと、Tab で次の欄に移った直後のフォーカスや入力中の値が失われるため
+  const [prevSaved, setPrevSaved] = useState(saved);
+  if (FIELDS.some((f) => saved[f] !== prevSaved[f])) {
+    setPrevSaved(saved);
+    setValues((current) => {
+      const next = { ...current };
+      for (const f of FIELDS) {
+        if (sameValue(f, current[f], prevSaved[f])) next[f] = saved[f];
+      }
+      return next;
+    });
+  }
+
+  const [errors, setErrors] = useState<Errors>({});
+  const [, startSaving] = useTransition();
+  // Escape で戻したときは、続く blur で保存しない
+  const skipBlurSave = useRef(false);
+
   const [deleteError, setDeleteError] = useState<string>();
   const [deleting, startDeleting] = useTransition();
   const [resumeState, resumeAction, resuming] = useActionState(
@@ -53,17 +109,39 @@ export function EntryItem({
     {},
   );
   const resumeError = resumeState.errors?.taskName ?? resumeState.errors?.form;
-  const isRunning = entry.endedAt === null;
 
-  if (editing) {
-    return (
-      <EditForm
-        entry={entry}
-        projects={projects}
-        onClose={() => setEditing(false)}
-      />
-    );
-  }
+  /** 今の入力値をすべて送って保存する（サーバーはまとめて入力チェックする） */
+  const save = (next: Values) => {
+    const formData = new FormData();
+    formData.set("taskName", next.taskName);
+    formData.set("projectId", entry.project ? String(entry.project.id) : "");
+    formData.set("startedAt", next.startedAt);
+    if (!isRunning) formData.set("endedAt", next.endedAt);
+    startSaving(async () => {
+      const result = await updateEntryAction(entry.id, {}, formData);
+      setErrors(result.ok ? {} : (result.errors ?? {}));
+    });
+  };
+
+  const handleBlur = (field: Field) => {
+    if (skipBlurSave.current) {
+      skipBlurSave.current = false;
+      return;
+    }
+    if (!sameValue(field, values[field], saved[field])) save(values);
+  };
+
+  const handleKeyDown = (field: Field, e: KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      e.currentTarget.blur();
+    } else if (e.key === "Escape") {
+      e.preventDefault();
+      skipBlurSave.current = true;
+      setValues({ ...values, [field]: saved[field] });
+      e.currentTarget.blur();
+    }
+  };
 
   const handleDelete = () => {
     if (!window.confirm(t.confirmDelete)) return;
@@ -73,29 +151,60 @@ export function EntryItem({
     });
   };
 
+  const fieldErrors = FIELDS.flatMap((f) =>
+    errors[f] ? [{ field: f, message: errors[f] }] : [],
+  );
+  const rowError =
+    errors.projectId ?? errors.form ?? deleteError ?? resumeError;
+
+  const input = (field: Field, label: string, className: string) => (
+    <>
+      <label htmlFor={`${id}-${field}`} className="sr-only">
+        {label}
+      </label>
+      <input
+        id={`${id}-${field}`}
+        type={field === "taskName" ? "text" : "datetime-local"}
+        step={field === "taskName" ? undefined : 1}
+        placeholder={field === "taskName" ? t.untitled : undefined}
+        value={values[field]}
+        onChange={(e) => setValues({ ...values, [field]: e.target.value })}
+        onBlur={() => handleBlur(field)}
+        onKeyDown={(e) => handleKeyDown(field, e)}
+        aria-invalid={errors[field] ? true : undefined}
+        aria-describedby={errors[field] ? `${id}-${field}-error` : undefined}
+        className={`min-w-0 rounded-md border border-transparent bg-transparent px-2 py-1.5 text-foreground tabular-nums placeholder:text-muted hover:border-border focus:border-primary focus:outline-none aria-[invalid=true]:border-danger ${className}`}
+      />
+    </>
+  );
+
   return (
-    <div className="space-y-1 py-3">
-      {/* 狭い画面ではタスク名を 1 段目、時刻・作業時間・ボタンを 2 段目に置く */}
-      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-4">
-        <p className="min-w-0 break-words text-foreground sm:flex-1">
-          {/* プロジェクトはタスク名の左側に色のアイコンで示す（名前はポインタを合わせると出る） */}
+    <div className="space-y-1 py-2">
+      {/* 本文が広いときは 1 行に、狭いときはタスク名・時刻・作業時間とボタンの段に分ける */}
+      <div className="flex flex-col gap-1 lg:flex-row lg:items-center lg:gap-3">
+        <div className="flex min-w-0 items-center gap-2 lg:flex-1">
           {entry.project && (
-            <span className="mr-2 inline-flex align-middle">
-              <ProjectIcon
-                name={entry.project.name}
-                color={entry.project.color}
-              />
-            </span>
+            <ProjectIcon
+              name={entry.project.name}
+              color={entry.project.color}
+            />
           )}
-          {entry.taskName || t.untitled}
-        </p>
-        <div className="flex items-center gap-4">
-          {/* 時刻の幅は記録中かどうかで変わるため、作業時間とボタンは右端に寄せて列を揃える */}
-          <p className="mr-auto text-sm text-muted tabular-nums sm:w-28">
-            {formatTime(entry.startedAt)} –{" "}
-            {entry.endedAt ? formatTime(entry.endedAt) : ""}
-          </p>
-          <p className="w-24 text-right text-sm font-medium text-foreground tabular-nums">
+          {input("taskName", t.taskName, "flex-1")}
+        </div>
+        <div className="flex flex-wrap items-center gap-x-1">
+          {input("startedAt", t.startedAt, "")}
+          <span aria-hidden="true" className="text-muted">
+            –
+          </span>
+          {isRunning ? (
+            // 終了時刻の欄の代わりに空きを置き、他の行と列を揃える
+            <span aria-hidden="true" className="hidden w-[13.5rem] lg:block" />
+          ) : (
+            input("endedAt", t.endedAt, "")
+          )}
+        </div>
+        <div className="flex items-center gap-3">
+          <p className="mr-auto w-24 text-sm font-medium text-foreground tabular-nums lg:mr-0 lg:text-right">
             {entry.endedAt
               ? formatDuration(
                   entry.endedAt.getTime() - entry.startedAt.getTime(),
@@ -123,11 +232,6 @@ export function EntryItem({
               </form>
             )}
             <IconButton
-              icon={Pencil}
-              label={t.actions.edit}
-              onClick={() => setEditing(true)}
-            />
-            <IconButton
               variant="danger"
               icon={Trash2}
               label={t.actions.delete}
@@ -137,130 +241,21 @@ export function EntryItem({
           </div>
         </div>
       </div>
-      {(deleteError ?? resumeError) && (
+      {fieldErrors.map(({ field, message }) => (
+        <p
+          key={field}
+          id={`${id}-${field}-error`}
+          role="alert"
+          className="text-sm text-danger"
+        >
+          {message}
+        </p>
+      ))}
+      {rowError && (
         <p role="alert" className="text-sm text-danger">
-          {deleteError ?? resumeError}
+          {rowError}
         </p>
       )}
     </div>
-  );
-}
-
-function EditForm({
-  entry,
-  projects,
-  onClose,
-}: {
-  entry: EntryItemData;
-  projects: EntryProject[];
-  onClose: () => void;
-}) {
-  const id = useId();
-  const isRunning = entry.endedAt === null;
-  // 入力エラーのときに入力した値を残すため、値は state で持つ
-  const [values, setValues] = useState({
-    taskName: entry.taskName,
-    projectId: entry.project ? String(entry.project.id) : "",
-    startedAt: toDateTimeLocalValue(entry.startedAt),
-    endedAt: entry.endedAt ? toDateTimeLocalValue(entry.endedAt) : "",
-  });
-  const [state, action, saving] = useActionState(
-    async (prev: ActionState, formData: FormData) => {
-      const result = await updateEntryAction(entry.id, prev, formData);
-      if (result.ok) onClose();
-      return result;
-    },
-    {},
-  );
-  const errors = state.errors ?? {};
-
-  const field = (
-    name: "taskName" | "startedAt" | "endedAt",
-    label: string,
-    type: "text" | "datetime-local",
-  ) => (
-    <div className="space-y-1">
-      <label htmlFor={`${id}-${name}`} className="block text-sm text-muted">
-        {label}
-      </label>
-      <input
-        id={`${id}-${name}`}
-        name={name}
-        type={type}
-        step={type === "datetime-local" ? 1 : undefined}
-        value={values[name]}
-        onChange={(e) => setValues({ ...values, [name]: e.target.value })}
-        aria-invalid={errors[name] ? true : undefined}
-        aria-describedby={errors[name] ? `${id}-${name}-error` : undefined}
-        className="w-full rounded-md border border-border bg-background px-3 py-2 text-foreground"
-      />
-      {errors[name] && (
-        <p id={`${id}-${name}-error`} className="text-sm text-danger">
-          {errors[name]}
-        </p>
-      )}
-    </div>
-  );
-
-  return (
-    // <form action> は送信後にフォームをリセットし、選んだプロジェクトが戻ってしまう。
-    // 入力エラーのときに値を残すため、送信は onSubmit で受けて action を呼ぶ
-    <form
-      onSubmit={(e) => {
-        e.preventDefault();
-        const formData = new FormData(e.currentTarget);
-        startTransition(() => action(formData));
-      }}
-      className="space-y-3 py-3"
-    >
-      <div className="grid gap-3 sm:grid-cols-2">
-        {field("taskName", t.taskName, "text")}
-        <div className="space-y-1">
-          <label
-            htmlFor={`${id}-projectId`}
-            className="block text-sm text-muted"
-          >
-            {t.project}
-          </label>
-          <ProjectSelect
-            id={`${id}-projectId`}
-            projects={projects}
-            value={values.projectId}
-            onChange={(e) =>
-              setValues({ ...values, projectId: e.target.value })
-            }
-            aria-invalid={errors.projectId ? true : undefined}
-            aria-describedby={
-              errors.projectId ? `${id}-projectId-error` : undefined
-            }
-            className="w-full"
-          />
-          {errors.projectId && (
-            <p id={`${id}-projectId-error`} className="text-sm text-danger">
-              {errors.projectId}
-            </p>
-          )}
-        </div>
-      </div>
-      <div className="grid gap-3 sm:grid-cols-2">
-        {field("startedAt", t.startedAt, "datetime-local")}
-        {!isRunning && field("endedAt", t.endedAt, "datetime-local")}
-      </div>
-      {errors.form && (
-        <p role="alert" className="text-sm text-danger">
-          {errors.form}
-        </p>
-      )}
-      <div className="flex gap-2">
-        <IconButton
-          type="submit"
-          variant="primary"
-          icon={Check}
-          label={t.actions.save}
-          disabled={saving}
-        />
-        <IconButton icon={X} label={t.actions.cancel} onClick={onClose} />
-      </div>
-    </form>
   );
 }
