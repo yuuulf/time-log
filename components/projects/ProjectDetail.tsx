@@ -5,34 +5,23 @@ import {
   useRef,
   useState,
   useTransition,
-  type ChangeEvent,
   type KeyboardEvent,
 } from "react";
-import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
 import {
   updateProjectAction,
   type ProjectActionState,
 } from "@/lib/projects/actions";
 import { isComposing } from "@/lib/keyboard";
 import { messages } from "@/lib/messages";
-import { ProjectColorPicker } from "./ProjectColorPicker";
+import {
+  BackLink,
+  ProjectFields,
+  type ProjectFieldValues,
+  type ProjectTextField,
+} from "./ProjectFields";
 import type { ProjectData } from "./types";
 
 const t = messages.projects;
-
-/** 一覧へ戻るリンク */
-function BackLink() {
-  return (
-    <Link
-      href="/projects"
-      className="inline-flex items-center gap-1 text-sm text-muted hover:text-foreground"
-    >
-      <ArrowLeft aria-hidden="true" className="size-4" />
-      {t.detail.backToList}
-    </Link>
-  );
-}
 
 /** プロジェクトが見つからないときの表示 */
 export function ProjectNotFound() {
@@ -44,11 +33,8 @@ export function ProjectNotFound() {
   );
 }
 
-type Values = Pick<
-  ProjectData,
-  "name" | "color" | "clientName" | "description"
->;
-type TextField = "name" | "clientName" | "description";
+type Values = ProjectFieldValues;
+type TextField = ProjectTextField;
 type Errors = NonNullable<ProjectActionState["errors"]>;
 type TextElement = HTMLInputElement | HTMLTextAreaElement;
 
@@ -139,35 +125,10 @@ export function ProjectDetail({ project }: { project: ProjectData }) {
     save(next);
   };
 
-  const describedBy = (field: keyof Values) =>
-    errors[field] ? `${id}-${field}-error` : undefined;
-  const errorText = (field: keyof Values) =>
-    errors[field] && (
-      <p
-        id={`${id}-${field}-error`}
-        role="alert"
-        className="text-sm text-danger"
-      >
-        {errors[field]}
-      </p>
-    );
   const fieldProps = (field: TextField) => ({
-    id: `${id}-${field}`,
-    value: values[field],
-    onChange: (e: ChangeEvent<TextElement>) =>
-      setValues({ ...values, [field]: e.target.value }),
     onBlur: () => handleBlur(field),
     onKeyDown: (e: KeyboardEvent<TextElement>) => handleKeyDown(field, e),
-    "aria-invalid": errors[field] ? true : undefined,
-    "aria-describedby": describedBy(field),
-    className:
-      "w-full rounded-md border border-border bg-background px-3 py-2 text-foreground placeholder:text-muted aria-[invalid=true]:border-danger",
   });
-  const label = (field: TextField, text: string) => (
-    <label htmlFor={`${id}-${field}`} className="block text-sm text-muted">
-      {text}
-    </label>
-  );
 
   return (
     <div className="space-y-6">
@@ -178,37 +139,14 @@ export function ProjectDetail({ project }: { project: ProjectData }) {
         </h1>
       </div>
       <div className="space-y-4">
-        <div className="space-y-1">
-          {label("name", t.name)}
-          <input type="text" {...fieldProps("name")} />
-          {errorText("name")}
-        </div>
-        <ProjectColorPicker
-          name={`${id}-color`}
-          value={values.color}
-          onChange={handleColorChange}
-          aria-describedby={describedBy("color")}
-        >
-          {errorText("color")}
-        </ProjectColorPicker>
-        <div className="space-y-1">
-          {label("clientName", t.clientName)}
-          <input
-            type="text"
-            placeholder={t.clientNamePlaceholder}
-            {...fieldProps("clientName")}
-          />
-          {errorText("clientName")}
-        </div>
-        <div className="space-y-1">
-          {label("description", t.description)}
-          <textarea
-            rows={8}
-            placeholder={t.descriptionPlaceholder}
-            {...fieldProps("description")}
-          />
-          {errorText("description")}
-        </div>
+        <ProjectFields
+          idPrefix={id}
+          values={values}
+          errors={errors}
+          onChange={(field, value) => setValues({ ...values, [field]: value })}
+          onColorChange={handleColorChange}
+          fieldProps={fieldProps}
+        />
         {errors.form && (
           <p role="alert" className="text-sm text-danger">
             {errors.form}

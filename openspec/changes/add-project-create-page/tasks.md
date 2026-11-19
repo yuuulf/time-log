@@ -3,7 +3,7 @@
 ## 1. 共通の部品
 
 - [x] 1.1 `components/ui/TextButton.tsx`（`TextButton`・`TextLink`）を作る（design 決定 4）。`TextButton.test.tsx` で、文字とアイコンの表示、`type` の既定、リンク先、variant の見た目をテストする（コミット: アイコンと文字のボタンを追加）
-- [ ] 1.2 `ProjectFields` を作り、`ProjectDetail` をそれを使う形にする。一覧へ戻るリンクを共通にする（design 決定 1）。`ProjectFields.test.tsx` でラベル・値・エラーの表示と `name` を、既存の `ProjectDetail.test.tsx` がそのまま通ることを確かめる（コミット: プロジェクトの項目の並びを共通にする）
+- [x] 1.2 `ProjectFields` を作り、`ProjectDetail` をそれを使う形にする。一覧へ戻るリンクを共通にする（design 決定 1）。`ProjectFields.test.tsx` でラベル・値・エラーの表示と `name` を、既存の `ProjectDetail.test.tsx` がそのまま通ることを確かめる（コミット: プロジェクトの項目の並びを共通にする）
 
 ## 2. 登録画面と一覧
 
