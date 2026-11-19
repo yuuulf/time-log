@@ -62,3 +62,27 @@ test("記録がなければ、まだ記録がないことを伝える", () => {
   expect(screen.getByText(t.empty)).toBeDefined();
   expect(screen.queryAllByRole("listitem")).toHaveLength(0);
 });
+
+test("見出しを省略すると「記録」と表示する", () => {
+  render(<EntryList entries={[]} />);
+
+  expect(
+    screen.getByRole("heading", { level: 2, name: t.listHeading }),
+  ).toBeDefined();
+});
+
+test("見出しと記録がないときの文言を差し替えられる", () => {
+  render(
+    <EntryList
+      entries={[]}
+      heading="2026年10月"
+      emptyMessage="この期間の記録はありません。"
+    />,
+  );
+
+  expect(
+    screen.getByRole("heading", { level: 2, name: "2026年10月" }),
+  ).toBeDefined();
+  expect(screen.getByText("この期間の記録はありません。")).toBeDefined();
+  expect(screen.queryByText(t.empty)).toBeNull();
+});

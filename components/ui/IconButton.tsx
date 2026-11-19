@@ -10,12 +10,19 @@ const variants = {
     "border border-border bg-background text-danger hover:bg-danger/10 disabled:opacity-50",
 } as const;
 
+export type IconVariant = keyof typeof variants;
+
+/** アイコンのボタン・リンクに共通の見た目 */
+export function iconControlClassName(variant: IconVariant, className = "") {
+  return `inline-flex size-10 shrink-0 items-center justify-center rounded-md transition-colors ${variants[variant]} ${className}`;
+}
+
 type IconButtonProps = Omit<ComponentProps<"button">, "children"> & {
   /** 表示するアイコン（lucide-react） */
   icon: LucideIcon;
   /** ボタンの名前。読み上げ用（aria-label）とポインタを合わせたときの説明（title）に使う */
   label: string;
-  variant?: keyof typeof variants;
+  variant?: IconVariant;
 };
 
 /** アプリ共通のアイコンボタン。type は既定で "button"（フォーム送信には type="submit" を指定する） */
@@ -32,7 +39,7 @@ export function IconButton({
       type={type}
       aria-label={label}
       title={label}
-      className={`inline-flex size-10 shrink-0 items-center justify-center rounded-md transition-colors ${variants[variant]} ${className}`}
+      className={iconControlClassName(variant, className)}
       {...props}
     >
       <Icon aria-hidden="true" className="size-4" />

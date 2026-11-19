@@ -1,4 +1,4 @@
-import { desc, eq, gte, isNull, max, ne } from "drizzle-orm";
+import { and, desc, eq, gte, isNull, lt, max, ne } from "drizzle-orm";
 import type { Db } from "@/lib/db/client";
 import { timeEntries, type TimeEntry } from "@/lib/db/schema";
 
@@ -56,6 +56,16 @@ export function listRecentEntries(db: Db, now: Date): TimeEntry[] {
     .select()
     .from(timeEntries)
     .where(gte(timeEntries.startedAt, since))
+    .orderBy(desc(timeEntries.startedAt), desc(timeEntries.id))
+    .all();
+}
+
+/** from 以降、to より前（to は含まない）に開始した記録を新しい順に返す */
+export function listEntriesBetween(db: Db, from: Date, to: Date): TimeEntry[] {
+  return db
+    .select()
+    .from(timeEntries)
+    .where(and(gte(timeEntries.startedAt, from), lt(timeEntries.startedAt, to)))
     .orderBy(desc(timeEntries.startedAt), desc(timeEntries.id))
     .all();
 }
