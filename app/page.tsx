@@ -4,22 +4,16 @@ import { messages } from "@/lib/messages";
 
 export default function Home() {
   return (
-    <main className="mx-auto w-full max-w-3xl min-w-0 flex-1 px-4 py-12">
-      <h1 className="text-3xl font-bold text-foreground">
-        {messages.app.name}
-      </h1>
-      <p className="mt-4 text-base leading-7 text-muted">
-        {messages.app.description}
-      </p>
-      <div className="mt-8">
-        <Suspense
-          fallback={
-            <p className="text-sm text-muted">{messages.timeEntries.loading}</p>
-          }
-        >
-          <TimeTracker />
-        </Suspense>
-      </div>
+    <main className="mx-auto w-full max-w-5xl min-w-0 flex-1 px-4 py-12">
+      {/* アプリ名はサイドバーにあるので、見出しは読み上げ用にだけ置く */}
+      <h1 className="sr-only">{messages.nav.home}</h1>
+      <Suspense
+        fallback={
+          <p className="text-sm text-muted">{messages.timeEntries.loading}</p>
+        }
+      >
+        <TimeTracker />
+      </Suspense>
     </main>
   );
 }

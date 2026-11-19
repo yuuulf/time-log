@@ -38,7 +38,9 @@ describe("月の表示", () => {
     expect(
       screen.getByRole("heading", { level: 2, name: "2026年10月" }),
     ).toBeDefined();
-    expect(screen.getByText("資料作成")).toBeDefined();
+    expect(
+      screen.getByRole("textbox", { name: messages.timeEntries.taskName }),
+    ).toHaveProperty("value", "資料作成");
     expect(
       screen.getByRole("link", { name: t.prevMonth }).getAttribute("href"),
     ).toBe("/history?month=2026-09");
@@ -83,7 +85,9 @@ describe("期間の表示", () => {
         name: "2026年10月1日〜2026年10月15日",
       }),
     ).toBeDefined();
-    expect(screen.getByText("資料作成")).toBeDefined();
+    expect(
+      screen.getByRole("textbox", { name: messages.timeEntries.taskName }),
+    ).toHaveProperty("value", "資料作成");
     expect(
       screen.getByRole("link", { name: t.monthView }).getAttribute("href"),
     ).toBe("/history");

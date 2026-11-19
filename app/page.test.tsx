@@ -8,15 +8,16 @@ vi.mock("@/components/time-entries/TimeTracker", () => ({
   TimeTracker: () => <div data-testid="time-tracker" />,
 }));
 
-test("アプリ名と説明が表示される", () => {
+test("本文にアプリ名の見出しと説明を出さず、読み上げ用の見出し「ホーム」を置く", () => {
   render(<Home />);
   expect(
-    screen.getByRole("heading", { level: 1, name: messages.app.name }),
+    screen.getByRole("heading", { level: 1, name: messages.nav.home }),
   ).toBeDefined();
-  expect(screen.getByText(messages.app.description)).toBeDefined();
+  expect(screen.queryByText(messages.app.name)).toBeNull();
+  expect(screen.queryByText(messages.app.description)).toBeNull();
 });
 
-test("アプリ名と説明の下に時間記録の画面を置く", () => {
+test("本文に時間記録の画面を置く", () => {
   render(<Home />);
   expect(screen.getByTestId("time-tracker")).toBeDefined();
 });

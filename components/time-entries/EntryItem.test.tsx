@@ -32,117 +32,343 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
+/** 行の入力欄 */
+const field = (label: string) => screen.getByLabelText<HTMLInputElement>(label);
+
+/** 時刻のボタン（読み上げ名は「開始時刻 09:00:00」の形） */
+const timeButton = (label: string) =>
+  screen.getByRole("button", { name: new RegExp(`^${label} `) });
+
+/** 時刻のボタンを押して入力欄を開き、入力欄を返す */
+function openTime(label: string) {
+  fireEvent.click(timeButton(label));
+  return field(label);
+}
+
+/** 最後に送った入力値 */
+function lastSent() {
+  const calls = vi.mocked(updateEntryAction).mock.calls;
+  const [id, , formData] = calls[calls.length - 1];
+  return { id, formData };
+}
+
 describe("表示", () => {
-  test("終了した記録は開始・終了時刻、タスク名、作業時間を表示する", () => {
+  test("終了した記録は、タスク名を入力欄に入れ、開始・終了時刻を時分で、作業時間を表示する", () => {
     render(<EntryItem entry={finished} />);
 
-    expect(screen.getByText("資料作成")).toBeDefined();
-    expect(screen.getByText("09:00 – 10:05")).toBeDefined();
+    expect(field(t.taskName).value).toBe("資料作成");
+    expect(timeButton(t.startedAt).textContent).toBe("09:00");
+    expect(timeButton(t.endedAt).textContent).toBe("10:05");
+    expect(timeButton(t.startedAt).getAttribute("aria-label")).toBe(
+      "開始時刻 09:00:00",
+    );
+    // 時刻の入力欄は、選ぶまで出さない
+    expect(screen.queryByLabelText(t.startedAt)).toBeNull();
     expect(screen.getByText("1時間5分")).toBeDefined();
   });
 
-  test("記録中の記録は作業時間の代わりに「記録中」と表示する", () => {
+  test("日をまたぐ記録も時分だけを出す", () => {
+    render(
+      <EntryItem
+        entry={{
+          ...finished,
+          startedAt: at("23:30:00"),
+          endedAt: new Date("2026-11-19T00:30:00+09:00"),
+        }}
+      />,
+    );
+
+    expect(timeButton(t.startedAt).textContent).toBe("23:30");
+    expect(timeButton(t.endedAt).textContent).toBe("00:30");
+    expect(screen.getByText("1時間0分")).toBeDefined();
+  });
+
+  test("記録中の記録は終了時刻を出さず、作業時間の代わりに「記録中」と表示する", () => {
     render(<EntryItem entry={running} />);
 
+    expect(timeButton(t.startedAt)).toBeDefined();
+    expect(
+      screen.queryByRole("button", { name: new RegExp(`^${t.endedAt} `) }),
+    ).toBeNull();
     expect(screen.getByText(t.running)).toBeDefined();
     expect(screen.queryByText(/分$/)).toBeNull();
   });
 
-  test("タスク名が空なら「（タスク名なし）」と表示する", () => {
+  test("タスク名が空なら入力欄に「（タスク名なし）」を薄く出す", () => {
     render(<EntryItem entry={{ ...finished, taskName: "" }} />);
 
-    expect(screen.getByText(t.untitled)).toBeDefined();
+    expect(field(t.taskName).value).toBe("");
+    expect(field(t.taskName).placeholder).toBe(t.untitled);
+  });
+
+  test("修正ボタンはない", () => {
+    render(<EntryItem entry={finished} />);
+
+    expect(screen.queryByRole("button", { name: "修正" })).toBeNull();
   });
 });
 
-describe("修正", () => {
-  test("修正ボタンで現在の値が入ったフォームを開く", () => {
-    render(<EntryItem entry={finished} />);
-
-    fireEvent.click(screen.getByRole("button", { name: t.actions.edit }));
-
-    expect(screen.getByLabelText<HTMLInputElement>(t.taskName).value).toBe(
-      "資料作成",
-    );
-    // datetime-local の値は、秒が 0 のとき秒を省いた形に正規化される
-    expect(screen.getByLabelText<HTMLInputElement>(t.startedAt).value).toBe(
-      "2026-11-18T09:00",
-    );
-    expect(screen.getByLabelText<HTMLInputElement>(t.endedAt).value).toBe(
-      "2026-11-18T10:05",
-    );
-  });
-
-  test("秒まで表示し、時刻を変えずに保存しても秒が失われない", () => {
+describe("時刻の編集", () => {
+  test("時刻を押すと、日付と時分秒の入力欄（カレンダーのアイコンなし）にフォーカスが移る", () => {
     render(<EntryItem entry={{ ...finished, startedAt: at("09:00:15") }} />);
 
-    fireEvent.click(screen.getByRole("button", { name: t.actions.edit }));
-
-    expect(screen.getByLabelText<HTMLInputElement>(t.startedAt).value).toBe(
-      "2026-11-18T09:00:15",
+    const input = openTime(t.startedAt);
+    expect(input.type).toBe("datetime-local");
+    expect(input.step).toBe("1");
+    expect(input.value).toBe("2026-11-18T09:00:15");
+    expect(document.activeElement).toBe(input);
+    expect(input.className).toContain(
+      "[&::-webkit-calendar-picker-indicator]:hidden",
     );
+    // 時刻の表示の上に重ねるので、背景は透けさせない
+    expect(input.className).toContain("bg-background");
+    expect(input.className).not.toContain("bg-transparent");
   });
 
-  test("記録中の記録では終了時刻の欄を表示しない", () => {
-    render(<EntryItem entry={running} />);
-
-    fireEvent.click(screen.getByRole("button", { name: t.actions.edit }));
-
-    expect(screen.getByLabelText(t.startedAt)).toBeDefined();
-    expect(screen.queryByLabelText(t.endedAt)).toBeNull();
-  });
-
-  test("保存ボタンで入力を送り、成功したらフォームを閉じる", async () => {
+  test("Tab で時刻にフォーカスしても入力欄になる", () => {
     render(<EntryItem entry={finished} />);
-    fireEvent.click(screen.getByRole("button", { name: t.actions.edit }));
 
-    fireEvent.change(screen.getByLabelText(t.endedAt), {
-      target: { value: "2026-11-18T10:30:20" },
-    });
-    fireEvent.click(screen.getByRole("button", { name: t.actions.save }));
+    fireEvent.focus(timeButton(t.endedAt));
+
+    expect(document.activeElement).toBe(field(t.endedAt));
+  });
+
+  test("値を変えずにフォーカスが外れたら、保存せずに時分の表示に戻る", () => {
+    render(<EntryItem entry={finished} />);
+
+    fireEvent.blur(openTime(t.startedAt));
+
+    expect(screen.queryByLabelText(t.startedAt)).toBeNull();
+    expect(timeButton(t.startedAt).textContent).toBe("09:00");
+    expect(updateEntryAction).not.toHaveBeenCalled();
+  });
+
+  test("変えてフォーカスが外れたら保存し、入力した時刻を時分で表示する", async () => {
+    render(<EntryItem entry={finished} />);
+    const input = openTime(t.endedAt);
+
+    fireEvent.change(input, { target: { value: "2026-11-18T10:30:20" } });
+    fireEvent.blur(input);
+
+    expect(timeButton(t.endedAt).textContent).toBe("10:30");
+    await vi.waitFor(() => expect(updateEntryAction).toHaveBeenCalledOnce());
+  });
+
+  test("Escape で戻したら時分の表示に戻る", () => {
+    render(<EntryItem entry={finished} />);
+    const input = openTime(t.endedAt);
+
+    fireEvent.change(input, { target: { value: "2026-11-18T10:30:20" } });
+    fireEvent.keyDown(input, { key: "Escape" });
+    fireEvent.blur(input);
+
+    expect(timeButton(t.endedAt).textContent).toBe("10:05");
+    expect(updateEntryAction).not.toHaveBeenCalled();
+  });
+});
+
+describe("直接編集", () => {
+  test("値を変えてフォーカスが外れたら、今の値をすべて送る", async () => {
+    render(<EntryItem entry={finished} />);
+
+    fireEvent.change(field(t.taskName), { target: { value: "資料レビュー" } });
+    fireEvent.blur(field(t.taskName));
 
     await vi.waitFor(() => expect(updateEntryAction).toHaveBeenCalledOnce());
-    const [id, , formData] = vi.mocked(updateEntryAction).mock.calls[0];
+    const { id, formData } = lastSent();
     expect(id).toBe(1);
-    expect(formData.get("endedAt")).toBe("2026-11-18T10:30:20");
-    expect(
-      await screen.findByRole("button", { name: t.actions.edit }),
-    ).toBeDefined();
+    expect(formData.get("taskName")).toBe("資料レビュー");
+    expect(formData.get("projectId")).toBe("");
+    expect(formData.get("startedAt")).toBe("2026-11-18T09:00:00");
+    expect(formData.get("endedAt")).toBe("2026-11-18T10:05:00");
   });
 
-  test("入力エラーなら理由を表示し、入力した値を残す", async () => {
+  test("時刻を変えてフォーカスが外れたら送る", async () => {
+    render(<EntryItem entry={finished} />);
+
+    const endedAt = openTime(t.endedAt);
+    fireEvent.change(endedAt, { target: { value: "2026-11-18T10:30:20" } });
+    fireEvent.blur(endedAt);
+
+    await vi.waitFor(() => expect(updateEntryAction).toHaveBeenCalledOnce());
+    expect(lastSent().formData.get("endedAt")).toBe("2026-11-18T10:30:20");
+  });
+
+  test("値を変えずにフォーカスが外れても送らない（秒の 0 の省略は変更とみなさない）", () => {
+    render(<EntryItem entry={finished} />);
+
+    fireEvent.focus(field(t.taskName));
+    fireEvent.blur(field(t.taskName));
+    const startedAt = openTime(t.startedAt);
+    fireEvent.change(startedAt, { target: { value: "2026-11-18T09:00" } });
+    fireEvent.blur(startedAt);
+
+    expect(updateEntryAction).not.toHaveBeenCalled();
+  });
+
+  test("Enter キーで確定して送る", async () => {
+    render(<EntryItem entry={finished} />);
+    const taskName = field(t.taskName);
+    taskName.focus();
+
+    fireEvent.change(taskName, { target: { value: "資料レビュー" } });
+    fireEvent.keyDown(taskName, { key: "Enter" });
+
+    await vi.waitFor(() => expect(updateEntryAction).toHaveBeenCalledOnce());
+    expect(lastSent().formData.get("taskName")).toBe("資料レビュー");
+    expect(document.activeElement).not.toBe(taskName);
+  });
+
+  test("Escape キーで保存済みの値に戻し、送らない", () => {
+    render(<EntryItem entry={finished} />);
+    const taskName = field(t.taskName);
+    taskName.focus();
+
+    fireEvent.change(taskName, { target: { value: "資料レビュー" } });
+    fireEvent.keyDown(taskName, { key: "Escape" });
+
+    expect(taskName.value).toBe("資料作成");
+    expect(updateEntryAction).not.toHaveBeenCalled();
+  });
+
+  test("記録中の記録では終了時刻を送らない", async () => {
+    render(<EntryItem entry={running} />);
+
+    fireEvent.change(field(t.taskName), { target: { value: "資料レビュー" } });
+    fireEvent.blur(field(t.taskName));
+
+    await vi.waitFor(() => expect(updateEntryAction).toHaveBeenCalledOnce());
+    expect(lastSent().formData.has("endedAt")).toBe(false);
+  });
+
+  test("入力エラーなら理由を行に表示し、入力した値を入力欄のまま残す", async () => {
     vi.mocked(updateEntryAction).mockResolvedValue({
       errors: { endedAt: t.errors.endBeforeStart },
     });
     render(<EntryItem entry={finished} />);
-    fireEvent.click(screen.getByRole("button", { name: t.actions.edit }));
-    const endedAt = screen.getByLabelText<HTMLInputElement>(t.endedAt);
 
-    fireEvent.change(endedAt, { target: { value: "2026-11-18T08:30:10" } });
-    fireEvent.click(screen.getByRole("button", { name: t.actions.save }));
+    const input = openTime(t.endedAt);
+    fireEvent.change(input, { target: { value: "2026-11-18T08:30:10" } });
+    fireEvent.blur(input);
 
-    expect(await screen.findByText(t.errors.endBeforeStart)).toBeDefined();
+    expect((await screen.findByRole("alert")).textContent).toBe(
+      t.errors.endBeforeStart,
+    );
+    // エラーの欄は時分の表示に戻さず、入力欄のまま出す
+    const endedAt = field(t.endedAt);
     expect(endedAt.value).toBe("2026-11-18T08:30:10");
     expect(endedAt.getAttribute("aria-invalid")).toBe("true");
+    expect(
+      document.getElementById(endedAt.getAttribute("aria-describedby")!)
+        ?.textContent,
+    ).toBe(t.errors.endBeforeStart);
   });
 
-  test("キャンセルボタンで保存せずに閉じる", () => {
+  test("エラーの欄を保存済みの値に戻したら、保存せずにエラーを消して時分の表示に戻る", async () => {
+    vi.mocked(updateEntryAction).mockResolvedValue({
+      errors: { endedAt: t.errors.endBeforeStart },
+    });
     render(<EntryItem entry={finished} />);
-    fireEvent.click(screen.getByRole("button", { name: t.actions.edit }));
+    const input = openTime(t.endedAt);
+    fireEvent.change(input, { target: { value: "2026-11-18T08:30:10" } });
+    fireEvent.blur(input);
+    await screen.findByRole("alert");
 
-    fireEvent.click(screen.getByRole("button", { name: t.actions.cancel }));
+    fireEvent.change(field(t.endedAt), {
+      target: { value: "2026-11-18T10:05" },
+    });
+    fireEvent.blur(field(t.endedAt));
 
-    expect(updateEntryAction).not.toHaveBeenCalled();
-    expect(screen.getByText("1時間5分")).toBeDefined();
+    expect(screen.queryByRole("alert")).toBeNull();
+    expect(timeButton(t.endedAt).textContent).toBe("10:05");
+    expect(updateEntryAction).toHaveBeenCalledOnce();
+  });
+
+  test("エラーの欄で Escape を押しても、エラーを消して保存済みの値に戻る", async () => {
+    vi.mocked(updateEntryAction).mockResolvedValue({
+      errors: { taskName: t.errors.taskNameTooLong },
+    });
+    render(<EntryItem entry={finished} />);
+    fireEvent.change(field(t.taskName), {
+      target: { value: "あ".repeat(201) },
+    });
+    fireEvent.blur(field(t.taskName));
+    await screen.findByRole("alert");
+
+    fireEvent.keyDown(field(t.taskName), { key: "Escape" });
+    fireEvent.blur(field(t.taskName));
+
+    expect(screen.queryByRole("alert")).toBeNull();
+    expect(field(t.taskName).value).toBe("資料作成");
+  });
+
+  test("次に保存できたらエラーを消す", async () => {
+    vi.mocked(updateEntryAction).mockResolvedValueOnce({
+      errors: { taskName: t.errors.taskNameTooLong },
+    });
+    render(<EntryItem entry={finished} />);
+
+    fireEvent.change(field(t.taskName), {
+      target: { value: "あ".repeat(201) },
+    });
+    fireEvent.blur(field(t.taskName));
+    await screen.findByRole("alert");
+
+    fireEvent.change(field(t.taskName), { target: { value: "資料レビュー" } });
+    fireEvent.blur(field(t.taskName));
+
+    await vi.waitFor(() => expect(screen.queryByRole("alert")).toBeNull());
+    expect(field(t.taskName).getAttribute("aria-invalid")).toBeNull();
+  });
+
+  test("保存の後に記録が新しくなったら、編集中でない欄だけを合わせる", () => {
+    const { rerender } = render(<EntryItem entry={finished} />);
+    // タスク名を保存したあと、開始時刻を編集している途中
+    fireEvent.change(field(t.taskName), { target: { value: "資料レビュー" } });
+    fireEvent.change(openTime(t.startedAt), {
+      target: { value: "2026-11-18T08:45:00" },
+    });
+
+    rerender(
+      <EntryItem
+        entry={{
+          ...finished,
+          taskName: "資料レビュー",
+          endedAt: at("10:10:00"),
+        }}
+      />,
+    );
+
+    expect(field(t.taskName).value).toBe("資料レビュー");
+    // 編集中の開始時刻は上書きしない
+    expect(field(t.startedAt).value).toBe("2026-11-18T08:45");
+    // 編集していない終了時刻は新しい値になる
+    expect(timeButton(t.endedAt).textContent).toBe("10:10");
   });
 });
 
 describe("削除", () => {
+  /** その他の操作のメニューから「削除」を選ぶ */
+  const chooseDelete = () => {
+    fireEvent.click(screen.getByRole("button", { name: t.actions.more }));
+    fireEvent.click(screen.getByRole("menuitem", { name: t.actions.delete }));
+  };
+
+  test("行に削除ボタンは直接なく、その他の操作のメニューにごみ箱のアイコンと「削除」がある", () => {
+    render(<EntryItem entry={finished} />);
+
+    expect(screen.queryByRole("button", { name: t.actions.delete })).toBeNull();
+    fireEvent.click(screen.getByRole("button", { name: t.actions.more }));
+    const item = screen.getByRole("menuitem", { name: t.actions.delete });
+    expect(item.textContent).toBe(t.actions.delete);
+    expect(item.querySelector("svg.lucide-trash-2")).not.toBeNull();
+  });
+
   test("確認で削除を選ぶと削除する", async () => {
     const confirm = vi.spyOn(window, "confirm").mockReturnValue(true);
     render(<EntryItem entry={finished} />);
 
-    fireEvent.click(screen.getByRole("button", { name: t.actions.delete }));
+    chooseDelete();
 
     expect(confirm).toHaveBeenCalledWith(t.confirmDelete);
     await vi.waitFor(() => expect(deleteEntryAction).toHaveBeenCalledWith(1));
@@ -152,7 +378,7 @@ describe("削除", () => {
     vi.spyOn(window, "confirm").mockReturnValue(false);
     render(<EntryItem entry={finished} />);
 
-    fireEvent.click(screen.getByRole("button", { name: t.actions.delete }));
+    chooseDelete();
 
     expect(deleteEntryAction).not.toHaveBeenCalled();
   });
@@ -164,7 +390,7 @@ describe("削除", () => {
     });
     render(<EntryItem entry={finished} />);
 
-    fireEvent.click(screen.getByRole("button", { name: t.actions.delete }));
+    chooseDelete();
 
     expect((await screen.findByRole("alert")).textContent).toBe(
       t.errors.notFound,
@@ -182,7 +408,7 @@ describe("再開", () => {
     const [, formData] = vi.mocked(startEntryAction).mock.calls[0];
     expect(formData.get("taskName")).toBe("資料作成");
     // 元の記録の表示は変わらない
-    expect(screen.getByText("09:00 – 10:05")).toBeDefined();
+    expect(field(t.taskName).value).toBe("資料作成");
   });
 
   test("タスク名のない記録は、タスク名を空にして記録を始める", async () => {
@@ -204,8 +430,9 @@ describe("再開", () => {
   test("記録中の行は再開ボタンの場所を空けて、ボタンの列を他の行と揃える", () => {
     const { unmount } = render(<EntryItem entry={finished} />);
     const slots = () =>
-      screen.getByRole("button", { name: t.actions.edit }).parentElement!
-        .children.length;
+      screen
+        .getByRole("button", { name: t.actions.more })
+        .closest(".flex.gap-2")!.children.length;
     const finishedSlots = slots();
     unmount();
 
@@ -235,66 +462,94 @@ describe("プロジェクト", () => {
   ];
   const withProject: EntryItemData = { ...finished, project: projects[0] };
 
-  test("タスク名の左側にプロジェクトの色のアイコンを出し、名前で読み上げる", () => {
+  const pickerButton = (name: string) =>
+    screen.getByRole("button", { name: t.projectButton(name) });
+
+  test("タスク名の左側にプロジェクトの色のアイコンと名前を出す", () => {
     render(<EntryItem entry={withProject} projects={projects} />);
 
-    const icon = screen.getByRole("img", { name: "社内ツール" });
-    expect(icon.getAttribute("title")).toBe("社内ツール");
-    expect(icon.className).toContain("text-project-teal");
-    // タスク名の行の先頭にアイコンがある
-    const row = icon.closest("p")!;
-    expect(row.textContent).toBe(withProject.taskName);
-    expect(row.firstElementChild?.contains(icon)).toBe(true);
-    expect(row.firstChild).toBe(row.firstElementChild);
-    // 名前は文字では出さない
-    expect(screen.queryByText("社内ツール")).toBeNull();
+    const button = pickerButton("社内ツール");
+    expect(button.textContent).toBe("社内ツール");
+    expect(button.querySelector(".text-project-teal")).not.toBeNull();
+    // タスク名の入力欄より前にある
+    expect(
+      button.compareDocumentPosition(field(t.taskName)) &
+        Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
   });
 
-  test("プロジェクトのない記録にはアイコンを出さない", () => {
+  test("プロジェクトのない記録は「プロジェクトなし」と出し、アイコンは出さない", () => {
     render(
       <EntryItem entry={{ ...finished, project: null }} projects={projects} />,
     );
 
-    expect(screen.queryByRole("img")).toBeNull();
+    const button = pickerButton(t.noProject);
+    expect(button.querySelector('[class*="text-project-"]')).toBeNull();
   });
 
-  test("修正フォームは今のプロジェクトを選んだ状態で開き、選んだ値を送る", async () => {
+  test("プルダウンで選ぶと、選んだプロジェクトと今の値を送る", async () => {
     render(<EntryItem entry={withProject} projects={projects} />);
-    fireEvent.click(screen.getByRole("button", { name: t.actions.edit }));
-    const select = screen.getByLabelText<HTMLSelectElement>(t.project);
+    fireEvent.change(field(t.taskName), { target: { value: "資料レビュー" } });
 
-    expect(select.value).toBe("1");
-    expect([...select.options].map((o) => o.textContent)).toEqual([
-      t.noProject,
-      "社内ツール",
-      "A 社サイト改修",
-    ]);
-
-    fireEvent.change(select, { target: { value: "" } });
-    fireEvent.click(screen.getByRole("button", { name: t.actions.save }));
+    fireEvent.click(pickerButton("社内ツール"));
+    fireEvent.click(screen.getByRole("option", { name: "A 社サイト改修" }));
 
     await vi.waitFor(() => expect(updateEntryAction).toHaveBeenCalledOnce());
-    expect(vi.mocked(updateEntryAction).mock.calls[0][2].get("projectId")).toBe(
-      "",
-    );
+    const { formData } = lastSent();
+    expect(formData.get("projectId")).toBe("2");
+    expect(formData.get("taskName")).toBe("資料レビュー");
+    expect(pickerButton("A 社サイト改修")).toBeDefined();
   });
 
-  test("修正でプロジェクトが見つからなければ理由を表示し、選んだ値を残す", async () => {
+  test("「プロジェクトなし」を選ぶと空の projectId を送る", async () => {
+    render(<EntryItem entry={withProject} projects={projects} />);
+
+    fireEvent.click(pickerButton("社内ツール"));
+    fireEvent.click(screen.getByRole("option", { name: t.noProject }));
+
+    await vi.waitFor(() => expect(updateEntryAction).toHaveBeenCalledOnce());
+    expect(lastSent().formData.get("projectId")).toBe("");
+  });
+
+  test("タスク名を保存するときは今のプロジェクトを送る", async () => {
+    render(<EntryItem entry={withProject} projects={projects} />);
+
+    fireEvent.change(field(t.taskName), { target: { value: "資料レビュー" } });
+    fireEvent.blur(field(t.taskName));
+
+    await vi.waitFor(() => expect(updateEntryAction).toHaveBeenCalledOnce());
+    expect(lastSent().formData.get("projectId")).toBe("1");
+  });
+
+  test("プロジェクトが見つからなければ理由を表示し、選んだ値を残す", async () => {
     vi.mocked(updateEntryAction).mockResolvedValue({
       errors: { projectId: messages.projects.errors.notFound },
     });
     render(<EntryItem entry={withProject} projects={projects} />);
-    fireEvent.click(screen.getByRole("button", { name: t.actions.edit }));
-    const select = screen.getByLabelText<HTMLSelectElement>(t.project);
 
-    fireEvent.change(select, { target: { value: "2" } });
-    fireEvent.click(screen.getByRole("button", { name: t.actions.save }));
+    fireEvent.click(pickerButton("社内ツール"));
+    fireEvent.click(screen.getByRole("option", { name: "A 社サイト改修" }));
 
-    expect(
-      await screen.findByText(messages.projects.errors.notFound),
-    ).toBeDefined();
-    expect(select.value).toBe("2");
-    expect(select.getAttribute("aria-invalid")).toBe("true");
+    expect((await screen.findByRole("alert")).textContent).toBe(
+      messages.projects.errors.notFound,
+    );
+    const button = pickerButton("A 社サイト改修");
+    expect(button.getAttribute("aria-invalid")).toBe("true");
+  });
+
+  test("保存の後に記録のプロジェクトが変わったら、表示も合わせる", () => {
+    const { rerender } = render(
+      <EntryItem entry={withProject} projects={projects} />,
+    );
+
+    rerender(
+      <EntryItem
+        entry={{ ...withProject, project: projects[1] }}
+        projects={projects}
+      />,
+    );
+
+    expect(pickerButton("A 社サイト改修")).toBeDefined();
   });
 
   test("再開ボタンは元の記録のプロジェクトを送る", async () => {

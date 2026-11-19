@@ -20,6 +20,10 @@ export const messages = {
     taskNamePlaceholder: "タスク名（省略できます）",
     project: "プロジェクト",
     noProject: "プロジェクトなし",
+    /** 一覧のプロジェクトのボタンの読み上げ名 */
+    projectButton: (name: string) => `プロジェクト：${name}`,
+    /** 一覧の時刻のボタンの読み上げ名（例: 「開始時刻 14:58:46」） */
+    timeButton: (label: string, time: string) => `${label} ${time}`,
     startedAt: "開始時刻",
     endedAt: "終了時刻",
     duration: "作業時間",
@@ -35,9 +39,7 @@ export const messages = {
       start: "開始",
       stop: "終了",
       resume: "再開",
-      edit: "修正",
-      save: "保存",
-      cancel: "キャンセル",
+      more: "その他の操作",
       delete: "削除",
     },
     errors: {

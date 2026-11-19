@@ -112,26 +112,36 @@ describe("プロジェクト", () => {
     { id: 1, name: "社内ツール", color: "teal" },
     { id: 2, name: "A 社サイト改修", color: "blue" },
   ];
-  const select = () => screen.getByLabelText<HTMLSelectElement>(t.project);
+  const picker = (name: string) =>
+    screen.getByRole("button", { name: t.projectButton(name) });
+  const choose = (current: string, name: string) => {
+    fireEvent.click(picker(current));
+    fireEvent.click(screen.getByRole("option", { name }));
+  };
 
-  test("選択肢は「プロジェクトなし」と渡したプロジェクトで、最初は「プロジェクトなし」", () => {
+  test("選択肢は「プロジェクトなし」と渡したプロジェクトで色のアイコン付き、最初は「プロジェクトなし」", () => {
     render(
       <StartStopForm running={null} suggestions={[]} projects={projects} />,
     );
 
-    expect([...select().options].map((o) => o.textContent)).toEqual([
+    fireEvent.click(picker(t.noProject));
+    const options = screen.getAllByRole("option");
+    expect(options.map((o) => o.textContent)).toEqual([
       t.noProject,
       "社内ツール",
       "A 社サイト改修",
     ]);
-    expect(select().value).toBe("");
+    expect(options[1].querySelector(".text-project-teal")).not.toBeNull();
+    expect(options[2].querySelector(".text-project-blue")).not.toBeNull();
+    expect(options[0].getAttribute("aria-selected")).toBe("true");
   });
 
   test("選んだプロジェクトを送り、開始できたら「プロジェクトなし」に戻す", async () => {
     render(
       <StartStopForm running={null} suggestions={[]} projects={projects} />,
     );
-    fireEvent.change(select(), { target: { value: "2" } });
+    choose(t.noProject, "A 社サイト改修");
+    expect(picker("A 社サイト改修")).toBeDefined();
 
     fireEvent.click(screen.getByRole("button", { name: t.actions.start }));
 
@@ -139,7 +149,20 @@ describe("プロジェクト", () => {
     expect(vi.mocked(startEntryAction).mock.calls[0][1].get("projectId")).toBe(
       "2",
     );
-    await vi.waitFor(() => expect(select().value).toBe(""));
+    await vi.waitFor(() => expect(picker(t.noProject)).toBeDefined());
+  });
+
+  test("選ばなければ空の projectId を送る", async () => {
+    render(
+      <StartStopForm running={null} suggestions={[]} projects={projects} />,
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: t.actions.start }));
+
+    await vi.waitFor(() => expect(startEntryAction).toHaveBeenCalledOnce());
+    expect(vi.mocked(startEntryAction).mock.calls[0][1].get("projectId")).toBe(
+      "",
+    );
   });
 
   test("プロジェクトが見つからなければ理由を表示し、選んだ値を残す", async () => {
@@ -149,15 +172,14 @@ describe("プロジェクト", () => {
     render(
       <StartStopForm running={null} suggestions={[]} projects={projects} />,
     );
-    fireEvent.change(select(), { target: { value: "1" } });
+    choose(t.noProject, "社内ツール");
 
     fireEvent.click(screen.getByRole("button", { name: t.actions.start }));
 
     expect((await screen.findByRole("alert")).textContent).toBe(
       messages.projects.errors.notFound,
     );
-    expect(select().value).toBe("1");
-    expect(select().getAttribute("aria-invalid")).toBe("true");
+    expect(picker("社内ツール").getAttribute("aria-invalid")).toBe("true");
   });
 
   test("記録中の枠にはプロジェクトのアイコンと名前を文字で表示する", () => {
