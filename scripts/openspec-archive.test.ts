@@ -6,6 +6,7 @@ import {
   fillPurposes,
   parseNewCapabilities,
   run,
+  validationHints,
 } from "./openspec-archive.mjs";
 
 const exists =
@@ -153,6 +154,38 @@ describe("fillPurposes", () => {
     );
     expect(files.get("openspec/specs/app-shell/spec.md")).toBe(
       spec("全画面に共通する外枠"),
+    );
+  });
+});
+
+describe("validationHints", () => {
+  const PURPOSE =
+    "⚠ [WARNING] overview: Purpose section is too brief (less than 50 characters)";
+  const LONG =
+    "⚠ [WARNING] requirements[6]: Requirement text is very long (>500 characters).";
+
+  test("目的の誤りなら、proposal の説明を 50 文字以上で書くよう案内する", () => {
+    const hints = validationHints(PURPOSE);
+    expect(hints).toHaveLength(1);
+    expect(hints[0]).toContain("### New Capabilities");
+    expect(hints[0]).toContain("50 文字以上");
+  });
+
+  test("要件の本文が長すぎるなら、シナリオに移すか分けるよう案内し、目的の案内は出さない", () => {
+    const hints = validationHints(LONG);
+    expect(hints).toHaveLength(1);
+    expect(hints[0]).toContain("500 文字");
+    expect(hints[0]).toContain("シナリオ");
+    expect(hints.join("")).not.toContain("50 文字以上");
+  });
+
+  test("両方なら両方の案内を出す", () => {
+    expect(validationHints(`${PURPOSE}\n${LONG}`)).toHaveLength(2);
+  });
+
+  test("どちらでもなければ、検証の結果を見て直すよう案内する", () => {
+    expect(validationHints("✗ change/x\n  ✗ [ERROR] scenario missing")).toEqual(
+      ["下の検証の結果を見て、spec を直してください。"],
     );
   });
 });
@@ -354,6 +387,23 @@ describe("run", () => {
     expect(calls).toContain("git reset --hard HEAD");
     expect(comments[0]).toContain("50 文字以上");
     expect(comments[0]).toContain("Purpose section is too brief");
+  });
+
+  test("アーカイブ後の検証で要件が長すぎるときは、要件の長さの案内と結果をコメントする", () => {
+    const { result, committed, comments } = setup({
+      diff: ["openspec/changes/a-change/tasks.md"],
+      changes: [done("a-change")],
+      fail: {
+        "npx openspec validate":
+          "Requirement text is very long (>500 characters)",
+      },
+    });
+    expect(result.status).toBe("failed");
+    expect(committed).toBe(false);
+    expect(comments[0]).toContain("要件の本文が長すぎます");
+    expect(comments[0]).not.toContain("50 文字以上");
+    expect(comments[0]).toContain("Requirement text is very long");
+    expect(comments[0]).toContain("`archive` ラベルを付け直してください");
   });
 
   test("新しい spec の説明が proposal にないときはコミットせず、作業ツリーを戻してコメントする", () => {
