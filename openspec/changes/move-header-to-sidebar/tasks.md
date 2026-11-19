@@ -2,7 +2,7 @@
 
 ## 1. サイドバーの部品
 
-- [ ] 1.1 `lib/messages.ts` に「ホーム」「メニュー」「閉じる」「記録中のタスクはありません。」を足し、`components/layout/RunningTaskView.tsx` と、DB を読む `RunningTask.tsx` を作る（design 決定 1・4・5）。`RunningTaskView.test.tsx` で、記録中のタスク名と開始時刻、タスク名が空のとき、記録中のタスクがないときの表示をテストし、`npm test` が通ることを確認する（コミット: 記録中のタスクの表示を追加）
+- [x] 1.1 `lib/messages.ts` に「ホーム」「メニュー」「閉じる」「記録中のタスクはありません。」を足し、`components/layout/RunningTaskView.tsx` と、DB を読む `RunningTask.tsx` を作る（design 決定 1・4・5）。`RunningTaskView.test.tsx` で、記録中のタスク名と開始時刻、タスク名が空のとき、記録中のタスクがないときの表示をテストし、`npm test` が通ることを確認する（コミット: 記録中のタスクの表示を追加）
 - [ ] 1.2 `components/layout/SidebarNav.tsx` を作る（design 決定 1）。`SidebarNav.test.tsx` で、アプリ名と「ホーム」のリンク先が `/`、「過去の記録」のリンク先が `/history` であること、今いるページのリンクだけに `aria-current="page"` が付くことをテストし（`next/navigation` の `usePathname` を差し替える）、`npm test` が通ることを確認する（コミット: サイドバーのナビゲーションを追加）
 - [ ] 1.3 `components/layout/SidebarShell.tsx` を作る（design 決定 2・3）。`SidebarShell.test.tsx` で、メニューボタンで開くこと（`aria-expanded` と閉じるボタンへのフォーカス）、閉じるボタン・背景・Escape キー・中のリンクの選択で閉じること、閉じたらメニューボタンにフォーカスが戻ることをテストし、`npm test` が通ることを確認する（コミット: 開閉できるサイドバーの枠を追加）
 
