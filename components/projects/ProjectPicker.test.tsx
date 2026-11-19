@@ -107,3 +107,23 @@ test("Escape と外側を押したときは選ばずに閉じる", () => {
   expect(screen.queryByRole("listbox")).toBeNull();
   expect(onChange).not.toHaveBeenCalled();
 });
+
+test("一覧用はふだん枠線を出さず、フォーム用は常に枠線を出す", () => {
+  const { rerender } = render(
+    <ProjectPicker value={null} projects={projects} onChange={vi.fn()} />,
+  );
+  const button = () =>
+    screen.getByRole("button", { name: t.projectButton(t.noProject) });
+  expect(button().className).toContain("border-transparent");
+
+  rerender(
+    <ProjectPicker
+      value={null}
+      projects={projects}
+      onChange={vi.fn()}
+      variant="field"
+    />,
+  );
+  expect(button().className).toContain("border-border");
+  expect(button().className).not.toContain("border-transparent");
+});

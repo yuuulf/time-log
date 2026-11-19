@@ -9,6 +9,12 @@ import type { EntryProject } from "./types";
 
 const t = messages.timeEntries;
 
+const VARIANTS = {
+  inline:
+    "border-transparent px-2 py-2 text-sm hover:border-border focus-visible:border-border",
+  field: "border-border bg-background px-3 py-2 text-base",
+} as const;
+
 type Props = {
   /** 今のプロジェクト。なければ null */
   value: EntryProject | null;
@@ -17,6 +23,8 @@ type Props = {
   /** 選んだときに呼ぶ。「プロジェクトなし」なら null */
   onChange: (projectId: number | null) => void;
   disabled?: boolean;
+  /** 見た目。inline は一覧用（枠線はポインタを合わせたときだけ）、field はフォーム用（常に枠線、入力欄と同じ高さ） */
+  variant?: "inline" | "field";
   "aria-invalid"?: boolean;
   "aria-describedby"?: string;
 };
@@ -30,6 +38,7 @@ export function ProjectPicker({
   projects,
   onChange,
   disabled,
+  variant = "inline",
   ...aria
 }: Props) {
   const listId = useId();
@@ -73,7 +82,7 @@ export function ProjectPicker({
             setOpen(true);
           }
         }}
-        className="flex w-full min-w-0 items-center gap-2 rounded-md border border-transparent px-2 py-2 text-left text-sm hover:border-border focus-visible:border-border disabled:opacity-50"
+        className={`flex w-full min-w-0 items-center gap-2 rounded-md border text-left disabled:opacity-50 aria-[invalid=true]:border-danger ${VARIANTS[variant]}`}
         {...aria}
       >
         {value && (

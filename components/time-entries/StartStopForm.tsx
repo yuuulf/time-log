@@ -3,7 +3,7 @@
 import { startTransition, useActionState, useId, useState } from "react";
 import { Play, Square } from "lucide-react";
 import { ProjectIcon } from "@/components/projects/ProjectIcon";
-import { ProjectSelect } from "@/components/projects/ProjectSelect";
+import { ProjectPicker } from "@/components/projects/ProjectPicker";
 import type { EntryProject } from "@/components/projects/types";
 import { IconButton } from "@/components/ui/IconButton";
 import {
@@ -33,13 +33,13 @@ type Props = {
 export function StartStopForm({ running, suggestions, projects = [] }: Props) {
   const id = useId();
   const [taskName, setTaskName] = useState("");
-  const [projectId, setProjectId] = useState("");
+  const [projectId, setProjectId] = useState<number | null>(null);
   const [state, startAction, starting] = useActionState(
     async (prev: ActionState, formData: FormData) => {
       const result = await startEntryAction(prev, formData);
       if (result.ok) {
         setTaskName("");
-        setProjectId("");
+        setProjectId(null);
       }
       return result;
     },
@@ -119,18 +119,24 @@ export function StartStopForm({ running, suggestions, projects = [] }: Props) {
             aria-describedby={taskNameError ? `${id}-error` : undefined}
             className="min-w-0 flex-1 rounded-md border border-border bg-background px-3 py-2 text-foreground"
           />
-          <label htmlFor={`${id}-project`} className="sr-only">
-            {t.project}
-          </label>
-          <ProjectSelect
-            id={`${id}-project`}
-            projects={projects}
-            value={projectId}
-            onChange={(e) => setProjectId(e.target.value)}
-            aria-invalid={projectError ? true : undefined}
-            aria-describedby={projectError ? `${id}-project-error` : undefined}
-            className="order-last w-full sm:order-none sm:w-48"
-          />
+          {/* 一覧と同じ色のアイコン付きのプルダウン。選んだ id は hidden の欄で送る */}
+          <div className="order-last w-full sm:order-none sm:w-48">
+            <ProjectPicker
+              variant="field"
+              value={projects.find((p) => p.id === projectId) ?? null}
+              projects={projects}
+              onChange={setProjectId}
+              aria-invalid={projectError ? true : undefined}
+              aria-describedby={
+                projectError ? `${id}-project-error` : undefined
+              }
+            />
+            <input
+              type="hidden"
+              name="projectId"
+              value={projectId === null ? "" : String(projectId)}
+            />
+          </div>
           <IconButton
             type="submit"
             variant="primary"
