@@ -10,6 +10,10 @@ export const messages = {
   },
   nav: {
     label: "メインメニュー",
+    home: "ホーム",
+    menu: "メニュー",
+    close: "閉じる",
+    noRunning: "記録中のタスクはありません。",
   },
   timeEntries: {
     taskName: "タスク名",
