@@ -7,4 +7,4 @@ export type ProjectData = Pick<
 >;
 
 /** 記録に付けて表示するプロジェクト */
-export type EntryProject = Pick<Project, "id" | "name" | "color">;
+export type { EntryProject } from "@/lib/time-entries/repository";
