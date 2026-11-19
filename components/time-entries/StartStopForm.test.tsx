@@ -106,3 +106,87 @@ test("過去のタスク名を入力候補として示す", () => {
     [...(datalist?.querySelectorAll("option") ?? [])].map((o) => o.value),
   ).toEqual(["資料作成", "打ち合わせ"]);
 });
+
+describe("プロジェクト", () => {
+  const projects = [
+    { id: 1, name: "社内ツール", color: "teal" },
+    { id: 2, name: "A 社サイト改修", color: "blue" },
+  ];
+  const select = () => screen.getByLabelText<HTMLSelectElement>(t.project);
+
+  test("選択肢は「プロジェクトなし」と渡したプロジェクトで、最初は「プロジェクトなし」", () => {
+    render(
+      <StartStopForm running={null} suggestions={[]} projects={projects} />,
+    );
+
+    expect([...select().options].map((o) => o.textContent)).toEqual([
+      t.noProject,
+      "社内ツール",
+      "A 社サイト改修",
+    ]);
+    expect(select().value).toBe("");
+  });
+
+  test("選んだプロジェクトを送り、開始できたら「プロジェクトなし」に戻す", async () => {
+    render(
+      <StartStopForm running={null} suggestions={[]} projects={projects} />,
+    );
+    fireEvent.change(select(), { target: { value: "2" } });
+
+    fireEvent.click(screen.getByRole("button", { name: t.actions.start }));
+
+    await vi.waitFor(() => expect(startEntryAction).toHaveBeenCalledOnce());
+    expect(vi.mocked(startEntryAction).mock.calls[0][1].get("projectId")).toBe(
+      "2",
+    );
+    await vi.waitFor(() => expect(select().value).toBe(""));
+  });
+
+  test("プロジェクトが見つからなければ理由を表示し、選んだ値を残す", async () => {
+    vi.mocked(startEntryAction).mockResolvedValue({
+      errors: { projectId: messages.projects.errors.notFound },
+    });
+    render(
+      <StartStopForm running={null} suggestions={[]} projects={projects} />,
+    );
+    fireEvent.change(select(), { target: { value: "1" } });
+
+    fireEvent.click(screen.getByRole("button", { name: t.actions.start }));
+
+    expect((await screen.findByRole("alert")).textContent).toBe(
+      messages.projects.errors.notFound,
+    );
+    expect(select().value).toBe("1");
+    expect(select().getAttribute("aria-invalid")).toBe("true");
+  });
+
+  test("記録中の枠にはプロジェクトのアイコンと名前を文字で表示する", () => {
+    const { container } = render(
+      <StartStopForm
+        running={{ taskName: "資料作成", startedAt, project: projects[0] }}
+        suggestions={[]}
+        projects={projects}
+      />,
+    );
+
+    const section = screen.getByRole("region", { name: t.runningHeading });
+    expect(section.textContent).toContain("社内ツール");
+    const icon = section.querySelector('[title="社内ツール"]');
+    expect(icon?.getAttribute("aria-hidden")).toBe("true");
+    expect(container.querySelector(".bg-project-teal")).not.toBeNull();
+  });
+
+  test("プロジェクトのない記録中の枠にはアイコンを出さない", () => {
+    render(
+      <StartStopForm
+        running={{ taskName: "資料作成", startedAt, project: null }}
+        suggestions={[]}
+        projects={projects}
+      />,
+    );
+
+    const section = screen.getByRole("region", { name: t.runningHeading });
+    expect(section.querySelector('[title="社内ツール"]')).toBeNull();
+    expect(section.querySelector('[class*="bg-project-"]')).toBeNull();
+  });
+});
