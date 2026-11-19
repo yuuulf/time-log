@@ -9,6 +9,6 @@
 
 ## 2. 確認とドキュメント
 
-- [ ] 2.1 add-projects をアーカイブする前のコミット（6915af9）を一時的な worktree に取り出し、スクリプトを実行して、proposal の説明が短いままだとコミットせずに検証の結果を返すこと、説明を 50 文字以上にすると `openspec/specs/projects/spec.md` の目的がその説明になり、`openspec validate --all --strict` が通ってコミットされることを確認する
+- [x] 2.1 add-projects をアーカイブする前のコミット（6915af9）を一時的な worktree に取り出し、スクリプトを実行して、proposal の説明が短いままだとコミットせずに検証の結果を返すこと、説明を 50 文字以上にすると `openspec/specs/projects/spec.md` の目的がその説明になり、`openspec validate --all --strict` が通ってコミットされることを確認する
 - [ ] 2.2 README.md の「仕様と計画（OpenSpec）」に、新しい spec の目的は proposal の New Capabilities の説明から書き込まれること、説明がないとアーカイブしないことを追記する。README の記述が実装と一致していることを確認する（コミット: README にアーカイブでの spec の目的を追記）
 - [ ] 2.3 PR を作成し、CI のチェックがすべて成功することを確認する
