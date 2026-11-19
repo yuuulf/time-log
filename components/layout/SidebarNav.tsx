@@ -25,7 +25,11 @@ export function SidebarNavLinks({ pathname }: { pathname: string | null }) {
     <nav aria-label={messages.nav.label}>
       <ul className="space-y-1">
         {pages.map(({ href, label }) => {
-          const current = pathname === href;
+          // ホームは完全一致、それ以外はその下のページ（プロジェクトの詳細など）でも選ばれている表示にする
+          const current =
+            pathname !== null &&
+            (pathname === href ||
+              (href !== "/" && pathname.startsWith(`${href}/`)));
           return (
             <li key={href}>
               <Link

@@ -92,3 +92,25 @@ test("フォールバック（pathname が null）では、同じリンクを選
   ]);
   expect(links.some((a) => a.getAttribute("aria-current"))).toBe(false);
 });
+
+test("プロジェクトの詳細画面では「プロジェクト」が今いるページになる", () => {
+  navigation.pathname = "/projects/1";
+  render(<SidebarNav />);
+
+  const current = within(nav())
+    .getAllByRole("link")
+    .filter((a) => a.getAttribute("aria-current") === "page")
+    .map((a) => a.textContent);
+  expect(current).toEqual([messages.projects.title]);
+});
+
+test("名前が前方で一致するだけの別のページは選ばれている表示にしない", () => {
+  navigation.pathname = "/projectsx";
+  render(<SidebarNav />);
+
+  expect(
+    within(nav())
+      .getAllByRole("link")
+      .some((a) => a.getAttribute("aria-current")),
+  ).toBe(false);
+});

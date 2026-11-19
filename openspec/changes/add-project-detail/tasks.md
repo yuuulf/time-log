@@ -8,7 +8,7 @@
 
 - [x] 2.1 `app/projects/[id]/page.tsx` と `ProjectDetailView`（読み込み、見つからないとき）と `ProjectDetail` の表示（全項目、一覧へ戻るリンク）を作る（design 決定 2・5）。`ProjectDetail.test.tsx` で全項目の表示と戻るリンク、`app/projects/[id]/page.test.tsx` でページの構成をテストする。`npm run build` が `cacheComponents` のエラーなく通ることを確認する。ビルドを通すため、サイドバーの `SidebarNav` を `<Suspense>` で囲み、フォールバックに選ばれている表示なしのリンクを出す（design 決定 4。`SidebarNav.test.tsx`・`app/layout.test.tsx` で確かめる）（コミット: プロジェクトの詳細画面を追加）
 - [x] 2.2 `ProjectDetail` に、その場の編集（フォーカスが外れたら保存、名前・クライアント名の Enter、Escape で戻す、色は選んだら保存、エラーの表示と値の保持、保存後に編集中でない欄だけ合わせる）を足す（design 決定 3）。`ProjectDetail.test.tsx` で、それぞれの動きと、値を変えなければ保存しないこと、説明の Enter では保存しないことをテストする（コミット: プロジェクトの詳細画面でその場で編集できるようにする）
-- [ ] 2.3 `SidebarNav` で、詳細画面でも「プロジェクト」を選ばれている表示にする（design 決定 4）。`SidebarNav.test.tsx` で、`/projects/1` で「プロジェクト」が選ばれ、`/` のときに他が選ばれないことをテストする（コミット: プロジェクトの詳細画面でサイドバーのプロジェクトを選ばれている表示にする）
+- [x] 2.3 `SidebarNav` で、詳細画面でも「プロジェクト」を選ばれている表示にする（design 決定 4）。`SidebarNav.test.tsx` で、`/projects/1` で「プロジェクト」が選ばれ、`/` のときに他が選ばれないことをテストする（コミット: プロジェクトの詳細画面でサイドバーのプロジェクトを選ばれている表示にする）
 
 ## 3. ドキュメントと確認
 
