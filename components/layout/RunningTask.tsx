@@ -12,7 +12,11 @@ export async function RunningTask() {
     <RunningTaskView
       running={
         running
-          ? { taskName: running.taskName, startedAt: running.startedAt }
+          ? {
+              taskName: running.taskName,
+              startedAt: running.startedAt,
+              project: running.project,
+            }
           : null
       }
     />
