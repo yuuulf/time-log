@@ -8,6 +8,7 @@ import {
   stopEntryAction,
   updateEntryAction,
 } from "./actions";
+import { createProject } from "@/lib/projects/repository";
 import { getEntry, getRunningEntry, listRecentEntries } from "./repository";
 
 const mocks = vi.hoisted(() => ({ db: undefined as Db | undefined }));
@@ -154,6 +155,100 @@ describe("削除", () => {
   test("存在しない記録はエラーを返す", async () => {
     expect(await deleteEntryAction(999)).toEqual({
       errors: { form: errors.notFound },
+    });
+    expect(refresh).not.toHaveBeenCalled();
+  });
+});
+
+describe("プロジェクト", () => {
+  const notFoundState = {
+    errors: { projectId: messages.projects.errors.notFound },
+  };
+  const addProject = (name: string) =>
+    createProject(
+      db,
+      { name, color: "teal", clientName: "", description: "" },
+      now,
+    );
+
+  test("プロジェクトを選んで開始する", async () => {
+    const project = addProject("社内ツール");
+
+    const state = await startEntryAction(
+      {},
+      form({ taskName: "資料作成", projectId: String(project.id) }),
+    );
+
+    expect(state).toEqual({ ok: true });
+    expect(getRunningEntry(db)?.project?.name).toBe("社内ツール");
+  });
+
+  test("「プロジェクトなし」（空）で開始する", async () => {
+    await startEntryAction({}, form({ taskName: "資料作成", projectId: "" }));
+
+    expect(getRunningEntry(db)?.project).toBeNull();
+  });
+
+  test.each([["999"], ["abc"], ["-1"]])(
+    "存在しない・不正なプロジェクト（%j）では開始しない",
+    async (projectId) => {
+      const state = await startEntryAction(
+        {},
+        form({ taskName: "資料作成", projectId }),
+      );
+
+      expect(state).toEqual(notFoundState);
+      expect(getRunningEntry(db)).toBeUndefined();
+      expect(refresh).not.toHaveBeenCalled();
+    },
+  );
+
+  test("修正でプロジェクトを変える・外す", async () => {
+    const a = addProject("社内ツール");
+    const b = addProject("A 社サイト改修");
+    await startEntryAction(
+      {},
+      form({ taskName: "資料作成", projectId: String(a.id) }),
+    );
+    const entry = getRunningEntry(db)!;
+    const fields = { taskName: "資料作成", startedAt: "2026-11-18T12:00" };
+
+    expect(
+      await updateEntryAction(
+        entry.id,
+        {},
+        form({ ...fields, projectId: String(b.id) }),
+      ),
+    ).toEqual({ ok: true });
+    expect(getRunningEntry(db)?.project?.name).toBe("A 社サイト改修");
+
+    await updateEntryAction(entry.id, {}, form({ ...fields, projectId: "" }));
+    expect(getRunningEntry(db)?.project).toBeNull();
+  });
+
+  test("修正で存在しないプロジェクトを選ぶと保存しない", async () => {
+    const project = addProject("社内ツール");
+    await startEntryAction(
+      {},
+      form({ taskName: "資料作成", projectId: String(project.id) }),
+    );
+    const entry = getRunningEntry(db)!;
+    vi.mocked(refresh).mockClear();
+
+    const state = await updateEntryAction(
+      entry.id,
+      {},
+      form({
+        taskName: "資料レビュー",
+        startedAt: "2026-11-18T12:00",
+        projectId: "999",
+      }),
+    );
+
+    expect(state).toEqual(notFoundState);
+    expect(getRunningEntry(db)).toMatchObject({
+      taskName: "資料作成",
+      project: { name: "社内ツール" },
     });
     expect(refresh).not.toHaveBeenCalled();
   });

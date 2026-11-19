@@ -3,6 +3,9 @@
 import { refresh } from "next/cache";
 import { getDb } from "@/lib/db";
 import { messages } from "@/lib/messages";
+import { getProject } from "@/lib/projects/repository";
+import { parseProjectId } from "@/lib/projects/validation";
+import type { Db } from "@/lib/db/client";
 import {
   deleteEntry,
   getEntry,
@@ -23,20 +26,44 @@ const notFound: ActionState = {
   errors: { form: messages.timeEntries.errors.notFound },
 };
 
+/**
+ * フォームで選んだプロジェクトを読む。空ならプロジェクトなし（null）。
+ * 値が不正、またはプロジェクトが削除されていれば undefined
+ */
+function readProjectId(db: Db, value: FormDataEntryValue | null) {
+  const parsed = parseProjectId(value);
+  if (!parsed.ok) return undefined;
+  if (parsed.projectId !== null && !getProject(db, parsed.projectId)) {
+    return undefined;
+  }
+  return parsed.projectId;
+}
+
+const projectNotFound: ActionState = {
+  errors: { projectId: messages.projects.errors.notFound },
+};
+
 /** クライアントから渡された id を確かめる */
 function isValidId(id: unknown): id is number {
   return typeof id === "number" && Number.isInteger(id) && id > 0;
 }
 
-/** 記録を開始する。記録中の記録は同じ時刻で終了する */
+/** 記録を開始する。記録中の記録は同じ時刻で終了する。プロジェクトは選んでいなければなし */
 export async function startEntryAction(
   _prev: ActionState,
   formData: FormData,
 ): Promise<ActionState> {
   const result = validateStartInput({ taskName: formData.get("taskName") });
   if (!result.ok) return { errors: result.errors };
+  const db = getDb();
+  const projectId = readProjectId(db, formData.get("projectId"));
+  if (projectId === undefined) return projectNotFound;
 
-  startEntry(getDb(), { taskName: result.value.taskName, now: new Date() });
+  startEntry(db, {
+    taskName: result.value.taskName,
+    projectId,
+    now: new Date(),
+  });
   refresh();
   return { ok: true };
 }
@@ -68,8 +95,12 @@ export async function updateEntryAction(
     { isRunning: entry.endedAt === null, now },
   );
   if (!result.ok) return { errors: result.errors };
+  const projectId = readProjectId(db, formData.get("projectId"));
+  if (projectId === undefined) return projectNotFound;
 
-  if (!updateEntry(db, id, result.value, now)) return notFound;
+  if (!updateEntry(db, id, { ...result.value, projectId }, now)) {
+    return notFound;
+  }
   refresh();
   return { ok: true };
 }
