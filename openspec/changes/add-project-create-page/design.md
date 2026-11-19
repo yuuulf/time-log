@@ -26,22 +26,22 @@
 ### 2. 登録画面
 
 - `app/projects/new/page.tsx` に `<main>`（`max-w-3xl`）と `ProjectForm` を置く。DB を読まないので `<Suspense>` はいらない。タイトルは「プロジェクトの登録」
-- `ProjectForm` は、一覧へ戻るリンク（詳細画面と同じ `BackLink` を共通にして使う）・見出し「プロジェクトの登録」・`ProjectFields`・「プロジェクトを作成」ボタンの並びにする。送信は今と同じく `onSubmit` で受けて `createProjectAction` を呼ぶ（React 19 の `<form action>` のリセットで選んだ色が戻るのを避けるため）。成功したら `useRouter().push("/projects")` で一覧に戻る（作成で `refresh()` 済みなので、一覧には作ったプロジェクトが出る）。エラーのときは入力値を残す
+- `ProjectForm` は、一覧へ戻るリンク（詳細画面と同じ `BackLink` を共通にして使う）・見出し「プロジェクトの作成」・`ProjectFields`・「作成」ボタン（各項目の下に右寄せ。`flex justify-end`）の並びにする。送信は今と同じく `onSubmit` で受けて `createProjectAction` を呼ぶ（React 19 の `<form action>` のリセットで選んだ色が戻るのを避けるため）。成功したら `useRouter().push("/projects")` で一覧に戻る（作成で `refresh()` 済みなので、一覧には作ったプロジェクトが出る）。エラーのときは入力値を残す
 - 代替案: Server Function の中で `redirect("/projects")` する → 登録欄のテストや、成功・失敗で返す形が変わるので、今の返し方のまま画面側で移動する
 
 ### 3. 一覧ページ
 
-- `ProjectsContent` から登録欄をなくし、一覧の見出し（h2「プロジェクトの一覧」）の右に「追加」のリンク（`/projects/new`）を置く。プロジェクトがないときの文言は「まだプロジェクトがありません。「追加」から登録できます。」にする
+- `ProjectsContent` から登録欄をなくし、一覧の見出し（h2「プロジェクトの一覧」）の右に「新規作成」のリンク（`/projects/new`）を置く。プロジェクトがないときの文言は「まだプロジェクトがありません。「新規作成」から作成できます。」にする
 
 ### 4. 文字のあるボタン（`components/ui/TextButton.tsx`）
 
 - アイコンと文字を並べるボタン `TextButton`（`<button>`）とリンク `TextLink`（`next/link`）を作る。見た目は `IconButton` と同じ variant（primary・secondary・danger）の色で、高さ 40px（`h-10`）、左右に余白、アイコンは文字の左。文字があるので `aria-label`・`title` は付けない
-- 「追加」は `TextLink`（`Plus`、secondary）、「プロジェクトを作成」は `TextButton`（`type="submit"`、primary、アイコンなし）
-- ボタンの文言は名詞形のルールに沿う。「プロジェクトを作成」は「する」を付けない形で、ユーザーの指定どおりにする
+- 「新規作成」は `TextLink`（`Plus`、secondary）、「作成」は `TextButton`（`type="submit"`、primary、アイコンなし）
+- 言葉は「作成」でそろえる（一覧の「新規作成」、見出し「プロジェクトの作成」、ボタン「作成」）。どれも名詞形で、ボタンの文言のルールに沿う。レビューで、最初の「追加」「プロジェクトの登録」「プロジェクトを作成」がそろっていないと指摘を受け、ユーザーが「作成」を選んだ
 
 ### 5. 文言
 
-- `messages.projects` に「追加」（`actions.add`）、「プロジェクトを作成」（`actions.createSubmit`）、登録画面の見出し（`formHeading` を使う）を足し、使わなくなる `actions.create`（「登録」）を消す。`empty` を新しい文言にする
+- `messages.projects` に「新規作成」（`actions.add`）、「作成」（`actions.createSubmit`）を足し、登録画面の見出し（`formHeading`）を「プロジェクトの作成」にし、使わなくなる `actions.create`（「登録」）を消す。`empty` を新しい文言にする
 
 ## Risks / Trade-offs
 
