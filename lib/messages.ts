@@ -74,12 +74,12 @@ export const messages = {
       pink: "ピンク",
       brown: "茶",
     },
-    empty:
-      "まだプロジェクトがありません。プロジェクト名を入力して登録ボタンを押すと追加されます。",
+    empty: "まだプロジェクトがありません。「追加」から登録できます。",
     loading: "プロジェクトを読み込んでいます…",
     confirmDelete: "このプロジェクトを削除しますか？",
     actions: {
-      create: "登録",
+      add: "追加",
+      createSubmit: "プロジェクトを作成",
       more: "その他の操作",
       delete: "削除",
     },

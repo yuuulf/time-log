@@ -7,8 +7,8 @@
 
 ## 2. 登録画面と一覧
 
-- [ ] 2.1 `ProjectForm` を登録画面のフォーム（戻るリンク・見出し・`ProjectFields`・「プロジェクトを作成」、成功で一覧へ移動）にし、`app/projects/new/page.tsx` を作る。`lib/messages.ts` の文言を整える（design 決定 2・5）。`ProjectForm.test.tsx` で、項目と最初の色、送る値、成功で `/projects` へ移動すること、エラーで値を残し移動しないこと、`app/projects/new/page.test.tsx` でページの構成とタイトルをテストする（コミット: プロジェクトの登録画面を追加）
-- [ ] 2.2 `ProjectsContent` から登録欄をなくし、一覧の見出しの横に「追加」のリンクを置く。プロジェクトがないときの文言を変える（design 決定 3）。`ProjectsContent.test.tsx` で、登録欄がないこと、「追加」のリンク先、ないときの文言をテストする（コミット: プロジェクトの一覧に追加ボタンを置く）
+- [x] 2.1 `ProjectForm` を登録画面のフォーム（戻るリンク・見出し・`ProjectFields`・「プロジェクトを作成」、成功で一覧へ移動）にし、`app/projects/new/page.tsx` を作る。`lib/messages.ts` の文言を整える（design 決定 2・5）。`ProjectForm.test.tsx` で、項目と最初の色、送る値、成功で `/projects` へ移動すること、エラーで値を残し移動しないこと、`app/projects/new/page.test.tsx` でページの構成とタイトルをテストする（コミット: プロジェクトの登録を登録画面に移す。2.2 と同じコミット）
+- [x] 2.2 `ProjectsContent` から登録欄をなくし、一覧の見出しの横に「追加」のリンクを置く。プロジェクトがないときの文言を変える（design 決定 3）。`ProjectsContent.test.tsx` で、登録欄がないこと、「追加」のリンク先、ないときの文言をテストする（2.1 で一覧の登録欄が登録画面のフォームに変わり、一覧のテストが通らなくなるため、2.1 と同じコミットにした）
 
 ## 3. ドキュメントと確認
 
