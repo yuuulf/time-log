@@ -43,6 +43,7 @@
 ### 4. サイドバー
 
 - `SidebarNav` の判定を、`/` は完全一致、それ以外は `pathname === href || pathname.startsWith(href + "/")` にして、詳細画面で「プロジェクト」を選ばれている表示にする
+- `cacheComponents` では、`generateStaticParams` で決まらない動的なパラメータのページ（詳細画面）の下で `usePathname` がプリレンダー中に止まり、`<Suspense>` の外にあるとビルドが失敗する（`node_modules/next/dist/docs/01-app/03-api-reference/04-functions/use-pathname.md`。実装中のビルドで確かめた）。そこで、`Sidebar` の中で `SidebarNav` を `<Suspense>` で囲む。フォールバックは、同じリンクを選ばれている表示なしで並べたもの（`SidebarNavLinks` に `current: null` を渡す）にして、プリレンダーの時点でもリンクが出るようにする。`SidebarNav` は `usePathname` で今いるページを求めて `SidebarNavLinks` に渡すだけにする
 
 ### 5. 文言
 
