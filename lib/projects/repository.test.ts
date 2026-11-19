@@ -8,6 +8,7 @@ import {
   findProjectByName,
   getProject,
   listProjects,
+  setProjectArchived,
   updateProject,
 } from "./repository";
 
@@ -34,7 +35,7 @@ describe("プロジェクトの登録と一覧", () => {
       at("10:00:00"),
     );
 
-    expect(listProjects(db).map((p) => p.name)).toEqual([
+    expect(listProjects(db, { archived: false }).map((p) => p.name)).toEqual([
       "社内ツール",
       "A 社サイト改修",
     ]);
@@ -120,5 +121,55 @@ describe("プロジェクトの削除", () => {
 
   test("存在しない id は not-found", () => {
     expect(deleteProject(db, 999)).toBe("not-found");
+  });
+});
+
+describe("プロジェクトのアーカイブ", () => {
+  const names = (archived: boolean) =>
+    listProjects(db, { archived }).map((p) => p.name);
+
+  test("アーカイブすると、未アーカイブとアーカイブ済みの一覧に登録順で分かれる", () => {
+    const a = createProject(db, { ...input, name: "A" }, at("09:00:00"));
+    const b = createProject(db, { ...input, name: "B" }, at("09:01:00"));
+    const c = createProject(db, { ...input, name: "C" }, at("09:02:00"));
+
+    expect(setProjectArchived(db, c.id, at("10:00:00"), at("10:00:00"))).toBe(
+      true,
+    );
+    setProjectArchived(db, a.id, at("10:05:00"), at("10:05:00"));
+
+    expect(names(false)).toEqual(["B"]);
+    expect(names(true)).toEqual(["A", "C"]);
+    expect(getProject(db, a.id)).toMatchObject({
+      archivedAt: at("10:05:00"),
+      updatedAt: at("10:05:00"),
+    });
+    expect(getProject(db, b.id)?.archivedAt).toBeNull();
+  });
+
+  test("解除すると未アーカイブの一覧の登録順の位置に戻る", () => {
+    const a = createProject(db, { ...input, name: "A" }, at("09:00:00"));
+    createProject(db, { ...input, name: "B" }, at("09:01:00"));
+    setProjectArchived(db, a.id, at("10:00:00"), at("10:00:00"));
+
+    expect(setProjectArchived(db, a.id, null, at("11:00:00"))).toBe(true);
+
+    expect(names(false)).toEqual(["A", "B"]);
+    expect(names(true)).toEqual([]);
+    expect(getProject(db, a.id)?.archivedAt).toBeNull();
+  });
+
+  test("存在しない id は false", () => {
+    expect(setProjectArchived(db, 999, at("10:00:00"), at("10:00:00"))).toBe(
+      false,
+    );
+  });
+
+  test("アーカイブしたプロジェクトとも名前は重複できない", () => {
+    const a = createProject(db, input, at("09:00:00"));
+    setProjectArchived(db, a.id, at("10:00:00"), at("10:00:00"));
+
+    expect(findProjectByName(db, input.name)?.id).toBe(a.id);
+    expect(() => createProject(db, input, at("11:00:00"))).toThrow(/UNIQUE/);
   });
 });

@@ -52,7 +52,7 @@ describe("createProjectAction", () => {
     );
 
     expect(result).toEqual({ ok: true });
-    expect(listProjects(db)).toMatchObject([
+    expect(listProjects(db, { archived: false })).toMatchObject([
       { name: "社内ツール", color: "teal", clientName: "A 社" },
     ]);
     expect(refresh).toHaveBeenCalledOnce();
@@ -62,7 +62,7 @@ describe("createProjectAction", () => {
     const result = await createProjectAction({}, form({ ...fields, name: "" }));
 
     expect(result).toEqual({ errors: { name: errors.nameRequired } });
-    expect(listProjects(db)).toEqual([]);
+    expect(listProjects(db, { archived: false })).toEqual([]);
     expect(refresh).not.toHaveBeenCalled();
   });
 
@@ -75,7 +75,7 @@ describe("createProjectAction", () => {
     );
 
     expect(result).toEqual({ errors: { name: errors.nameTaken } });
-    expect(listProjects(db)).toHaveLength(1);
+    expect(listProjects(db, { archived: false })).toHaveLength(1);
   });
 });
 
