@@ -1,80 +1,47 @@
 "use client";
 
 import { startTransition, useActionState, useId, useState } from "react";
-import { Plus } from "lucide-react";
-import { IconButton } from "@/components/ui/IconButton";
+import { useRouter } from "next/navigation";
+import { TextButton } from "@/components/ui/TextButton";
 import { messages } from "@/lib/messages";
 import {
   createProjectAction,
   type ProjectActionState,
 } from "@/lib/projects/actions";
 import { DEFAULT_PROJECT_COLOR } from "@/lib/projects/colors";
-import { ProjectColorPicker } from "./ProjectColorPicker";
+import {
+  BackLink,
+  ProjectFields,
+  type ProjectFieldValues,
+} from "./ProjectFields";
 
 const t = messages.projects;
 
-type Values = {
-  name: string;
-  color: string;
-  clientName: string;
-  description: string;
-};
-
-const emptyValues: Values = {
+const emptyValues: ProjectFieldValues = {
   name: "",
   color: DEFAULT_PROJECT_COLOR,
   clientName: "",
   description: "",
 };
 
-/** プロジェクトの登録のフォーム。入力エラーのときは入力した値を残す（編集は詳細画面で行う） */
+/**
+ * プロジェクトの登録画面のフォーム。詳細画面と同じ並びで、「作成」で作成して一覧に戻る。
+ * 入力エラーのときは作成せず、入力した値を残す
+ */
 export function ProjectForm() {
   const id = useId();
-  const [values, setValues] = useState<Values>(emptyValues);
+  const router = useRouter();
+  const [values, setValues] = useState(emptyValues);
   const [state, action, saving] = useActionState(
     async (prev: ProjectActionState, formData: FormData) => {
       const result = await createProjectAction(prev, formData);
-      if (result.ok) setValues(emptyValues);
+      // 作成で一覧は読み直されているので、そのまま一覧に戻る
+      if (result.ok) router.push("/projects");
       return result;
     },
     {},
   );
   const errors = state.errors ?? {};
-
-  const describedBy = (name: keyof Values) =>
-    errors[name] ? `${id}-${name}-error` : undefined;
-  const errorText = (name: keyof Values) =>
-    errors[name] && (
-      <p id={`${id}-${name}-error`} className="text-sm text-danger">
-        {errors[name]}
-      </p>
-    );
-  const inputClass =
-    "w-full rounded-md border border-border bg-background px-3 py-2 text-foreground";
-
-  const textField = (
-    name: "name" | "clientName",
-    label: string,
-    placeholder?: string,
-  ) => (
-    <div className="space-y-1">
-      <label htmlFor={`${id}-${name}`} className="block text-sm text-muted">
-        {label}
-      </label>
-      <input
-        id={`${id}-${name}`}
-        name={name}
-        type="text"
-        value={values[name]}
-        placeholder={placeholder}
-        onChange={(e) => setValues({ ...values, [name]: e.target.value })}
-        aria-invalid={errors[name] ? true : undefined}
-        aria-describedby={describedBy(name)}
-        className={inputClass}
-      />
-      {errorText(name)}
-    </div>
-  );
 
   return (
     // <form action> は送信後にフォームをリセットし、選んだ色（ラジオボタン）が先頭に戻ってしまう。
@@ -85,55 +52,30 @@ export function ProjectForm() {
         const formData = new FormData(e.currentTarget);
         startTransition(() => action(formData));
       }}
-      className="space-y-3"
+      className="space-y-6"
     >
-      <div className="grid gap-3 sm:grid-cols-2">
-        {textField("name", t.name)}
-        {textField("clientName", t.clientName, t.clientNamePlaceholder)}
+      <div className="space-y-2">
+        <BackLink />
+        <h1 className="text-3xl font-bold text-foreground">{t.formHeading}</h1>
       </div>
-      <div className="space-y-1">
-        <label
-          htmlFor={`${id}-description`}
-          className="block text-sm text-muted"
-        >
-          {t.description}
-        </label>
-        <textarea
-          id={`${id}-description`}
-          name="description"
-          rows={2}
-          value={values.description}
-          placeholder={t.descriptionPlaceholder}
-          onChange={(e) =>
-            setValues({ ...values, description: e.target.value })
-          }
-          aria-invalid={errors.description ? true : undefined}
-          aria-describedby={describedBy("description")}
-          className={inputClass}
-        />
-        {errorText("description")}
-      </div>
-      <ProjectColorPicker
-        name="color"
-        value={values.color}
-        onChange={(color) => setValues({ ...values, color })}
-        aria-describedby={describedBy("color")}
-      >
-        {errorText("color")}
-      </ProjectColorPicker>
+      <ProjectFields
+        idPrefix={id}
+        values={values}
+        errors={errors}
+        onChange={(field, value) => setValues({ ...values, [field]: value })}
+        onColorChange={(color) => setValues({ ...values, color })}
+        named
+      />
       {errors.form && (
         <p role="alert" className="text-sm text-danger">
           {errors.form}
         </p>
       )}
-      <div className="flex gap-2">
-        <IconButton
-          type="submit"
-          variant="primary"
-          icon={Plus}
-          label={t.actions.create}
-          disabled={saving}
-        />
+      {/* 作成ボタンは各項目の下の右端に置く */}
+      <div className="flex justify-end">
+        <TextButton type="submit" variant="primary" disabled={saving}>
+          {t.actions.createSubmit}
+        </TextButton>
       </div>
     </form>
   );

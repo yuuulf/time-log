@@ -1,7 +1,8 @@
 import type { LucideIcon } from "lucide-react";
 import type { ComponentProps } from "react";
 
-const variants = {
+/** ボタン・リンクの色の種類。アイコンだけのもの（IconButton・IconLink）と文字のもの（TextButton・TextLink）で共通 */
+export const controlVariants = {
   primary:
     "bg-primary text-primary-foreground hover:opacity-90 disabled:opacity-50",
   secondary:
@@ -10,11 +11,11 @@ const variants = {
     "border border-border bg-background text-danger hover:bg-danger/10 disabled:opacity-50",
 } as const;
 
-export type IconVariant = keyof typeof variants;
+export type IconVariant = keyof typeof controlVariants;
 
 /** アイコンのボタン・リンクに共通の見た目 */
 export function iconControlClassName(variant: IconVariant, className = "") {
-  return `inline-flex size-10 shrink-0 items-center justify-center rounded-md transition-colors ${variants[variant]} ${className}`;
+  return `inline-flex size-10 shrink-0 items-center justify-center rounded-md transition-colors ${controlVariants[variant]} ${className}`;
 }
 
 type IconButtonProps = Omit<ComponentProps<"button">, "children"> & {

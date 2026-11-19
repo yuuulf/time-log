@@ -4,8 +4,6 @@ import { messages } from "@/lib/messages";
 import { ProjectsContent } from "./ProjectsContent";
 
 vi.mock("@/lib/projects/actions", () => ({
-  createProjectAction: vi.fn(),
-  updateProjectAction: vi.fn(),
   deleteProjectAction: vi.fn(),
 }));
 
@@ -18,15 +16,18 @@ const project = (id: number, name: string) => ({
   description: "",
 });
 
-test("登録欄と、渡した順の一覧を表示する", () => {
+test("「新規作成」のリンクと、渡した順の一覧を表示し、登録欄は置かない", () => {
   render(
     <ProjectsContent
       projects={[project(1, "社内ツール"), project(2, "A 社サイト改修")]}
     />,
   );
 
-  expect(screen.getByRole("heading", { name: t.formHeading })).toBeDefined();
-  expect(screen.getByRole("button", { name: t.actions.create })).toBeDefined();
+  expect(
+    screen.getByRole("link", { name: t.actions.add }).getAttribute("href"),
+  ).toBe("/projects/new");
+  expect(screen.queryByRole("heading", { name: t.formHeading })).toBeNull();
+  expect(screen.queryByLabelText(t.name)).toBeNull();
   const list = screen.getByRole("region", { name: t.listHeading });
   expect(
     within(list)
@@ -36,9 +37,11 @@ test("登録欄と、渡した順の一覧を表示する", () => {
   expect(screen.queryByText(t.empty)).toBeNull();
 });
 
-test("プロジェクトがなければ、ないことを伝える", () => {
+test("プロジェクトがなければ、ないことと「新規作成」から作成できることを伝える", () => {
   render(<ProjectsContent projects={[]} />);
 
   expect(screen.getByText(t.empty)).toBeDefined();
+  expect(t.empty).toContain(`「${t.actions.add}」`);
+  expect(screen.getByRole("link", { name: t.actions.add })).toBeDefined();
   expect(screen.queryByRole("list")).toBeNull();
 });

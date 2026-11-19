@@ -8,11 +8,15 @@ vi.mock("@/lib/projects/actions", () => ({
   createProjectAction: vi.fn(),
 }));
 
+const router = vi.hoisted(() => ({ push: vi.fn() }));
+vi.mock("next/navigation", () => ({ useRouter: () => router }));
+
 const { createProjectAction } = await import("@/lib/projects/actions");
 const t = messages.projects;
 
 beforeEach(() => {
   vi.mocked(createProjectAction).mockReset().mockResolvedValue({ ok: true });
+  router.push.mockReset();
 });
 
 const input = (label: string) => screen.getByLabelText<HTMLInputElement>(label);
@@ -22,6 +26,29 @@ const radio = (color: (typeof PROJECT_COLORS)[number]) =>
   });
 
 describe("登録", () => {
+  test("一覧へ戻るリンク・見出し・項目・「作成」を並べ、「作成」は右端に置く", () => {
+    render(<ProjectForm />);
+
+    expect(
+      screen
+        .getByRole("link", { name: t.detail.backToList })
+        .getAttribute("href"),
+    ).toBe("/projects");
+    expect(
+      screen.getByRole("heading", { level: 1, name: t.formHeading }),
+    ).toBeDefined();
+    expect(input(t.name).value).toBe("");
+    expect(input(t.description).getAttribute("rows")).toBe("8");
+    const submit = screen.getByRole("button", { name: t.actions.createSubmit });
+    expect(submit.getAttribute("type")).toBe("submit");
+    expect(submit.parentElement?.className).toContain("justify-end");
+    // 作成ボタンは項目（説明の欄）より後ろにある
+    expect(
+      input(t.description).compareDocumentPosition(submit) &
+        Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
+  });
+
   test("色の選択肢は 10 個で、最初は先頭の色を選んでいる", () => {
     render(<ProjectForm />);
 
@@ -33,14 +60,16 @@ describe("登録", () => {
     ).toBeDefined();
   });
 
-  test("入力を送り、登録できたら入力欄を空に戻す", async () => {
+  test("入力を送り、作成できたら一覧に戻る", async () => {
     render(<ProjectForm />);
     fireEvent.change(input(t.name), { target: { value: "A 社サイト改修" } });
     fireEvent.change(input(t.clientName), { target: { value: "A 社" } });
     fireEvent.change(input(t.description), { target: { value: "説明" } });
     fireEvent.click(radio("blue"));
 
-    fireEvent.click(screen.getByRole("button", { name: t.actions.create }));
+    fireEvent.click(
+      screen.getByRole("button", { name: t.actions.createSubmit }),
+    );
 
     await vi.waitFor(() => expect(createProjectAction).toHaveBeenCalledOnce());
     const [, formData] = vi.mocked(createProjectAction).mock.calls[0];
@@ -50,9 +79,9 @@ describe("登録", () => {
       description: "説明",
       color: "blue",
     });
-    await vi.waitFor(() => expect(input(t.name).value).toBe(""));
-    expect(input(t.clientName).value).toBe("");
-    expect(radio(PROJECT_COLORS[0]).checked).toBe(true);
+    await vi.waitFor(() =>
+      expect(router.push).toHaveBeenCalledWith("/projects"),
+    );
   });
 
   test("入力エラーなら理由を表示し、入力した値を残す", async () => {
@@ -63,11 +92,15 @@ describe("登録", () => {
     fireEvent.change(input(t.name), { target: { value: "社内ツール" } });
     fireEvent.click(radio("green"));
 
-    fireEvent.click(screen.getByRole("button", { name: t.actions.create }));
+    fireEvent.click(
+      screen.getByRole("button", { name: t.actions.createSubmit }),
+    );
 
     expect(await screen.findByText(t.errors.nameTaken)).toBeDefined();
     expect(input(t.name).value).toBe("社内ツール");
     expect(input(t.name).getAttribute("aria-invalid")).toBe("true");
     expect(radio("green").checked).toBe(true);
+    // エラーのときは一覧に戻らない
+    expect(router.push).not.toHaveBeenCalled();
   });
 });

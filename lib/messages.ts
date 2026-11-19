@@ -54,7 +54,7 @@ export const messages = {
   },
   projects: {
     title: "プロジェクト",
-    formHeading: "プロジェクトの登録",
+    formHeading: "プロジェクトの作成",
     listHeading: "プロジェクトの一覧",
     name: "プロジェクト名",
     color: "色",
@@ -74,12 +74,12 @@ export const messages = {
       pink: "ピンク",
       brown: "茶",
     },
-    empty:
-      "まだプロジェクトがありません。プロジェクト名を入力して登録ボタンを押すと追加されます。",
+    empty: "まだプロジェクトがありません。「新規作成」から作成できます。",
     loading: "プロジェクトを読み込んでいます…",
     confirmDelete: "このプロジェクトを削除しますか？",
     actions: {
-      create: "登録",
+      add: "新規作成",
+      createSubmit: "作成",
       more: "その他の操作",
       delete: "削除",
     },
