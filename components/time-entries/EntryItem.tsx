@@ -8,9 +8,10 @@ import {
   useTransition,
   type KeyboardEvent,
 } from "react";
-import { Play, Trash2 } from "lucide-react";
+import { MoreVertical, Play, Trash2 } from "lucide-react";
 import { ProjectPicker } from "@/components/projects/ProjectPicker";
 import type { EntryProject } from "@/components/projects/types";
+import { DropdownMenu } from "@/components/ui/DropdownMenu";
 import { IconButton } from "@/components/ui/IconButton";
 import {
   deleteEntryAction,
@@ -66,7 +67,7 @@ function sameValue(field: Field, a: string, b: string): boolean {
 /**
  * 記録 1 件の行。タスク名・開始時刻・終了時刻をその場で編集し、値を変えてフォーカスが外れたとき
  * （または Enter）に保存する。Escape でその欄を保存済みの値に戻す。
- * 削除ボタンは確認してから削除する。終了した記録には再開ボタンを置き、同じタスク名・プロジェクトで記録を始める
+ * 「その他の操作」のメニューの「削除」は確認してから削除する。終了した記録には再開ボタンを置き、同じタスク名・プロジェクトで記録を始める
  */
 export function EntryItem({
   entry,
@@ -254,12 +255,19 @@ export function EntryItem({
                 />
               </form>
             )}
-            <IconButton
-              variant="danger"
-              icon={Trash2}
-              label={t.actions.delete}
-              onClick={handleDelete}
+            {/* 記録の操作は「その他の操作」のメニューにまとめる。項目は今後増やせる */}
+            <DropdownMenu
+              icon={MoreVertical}
+              label={t.actions.more}
               disabled={deleting}
+              items={[
+                {
+                  label: t.actions.delete,
+                  icon: Trash2,
+                  onSelect: handleDelete,
+                  variant: "danger",
+                },
+              ]}
             />
           </div>
         </div>

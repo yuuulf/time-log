@@ -225,11 +225,27 @@ describe("直接編集", () => {
 });
 
 describe("削除", () => {
+  /** その他の操作のメニューから「削除」を選ぶ */
+  const chooseDelete = () => {
+    fireEvent.click(screen.getByRole("button", { name: t.actions.more }));
+    fireEvent.click(screen.getByRole("menuitem", { name: t.actions.delete }));
+  };
+
+  test("行に削除ボタンは直接なく、その他の操作のメニューにごみ箱のアイコンと「削除」がある", () => {
+    render(<EntryItem entry={finished} />);
+
+    expect(screen.queryByRole("button", { name: t.actions.delete })).toBeNull();
+    fireEvent.click(screen.getByRole("button", { name: t.actions.more }));
+    const item = screen.getByRole("menuitem", { name: t.actions.delete });
+    expect(item.textContent).toBe(t.actions.delete);
+    expect(item.querySelector("svg.lucide-trash-2")).not.toBeNull();
+  });
+
   test("確認で削除を選ぶと削除する", async () => {
     const confirm = vi.spyOn(window, "confirm").mockReturnValue(true);
     render(<EntryItem entry={finished} />);
 
-    fireEvent.click(screen.getByRole("button", { name: t.actions.delete }));
+    chooseDelete();
 
     expect(confirm).toHaveBeenCalledWith(t.confirmDelete);
     await vi.waitFor(() => expect(deleteEntryAction).toHaveBeenCalledWith(1));
@@ -239,7 +255,7 @@ describe("削除", () => {
     vi.spyOn(window, "confirm").mockReturnValue(false);
     render(<EntryItem entry={finished} />);
 
-    fireEvent.click(screen.getByRole("button", { name: t.actions.delete }));
+    chooseDelete();
 
     expect(deleteEntryAction).not.toHaveBeenCalled();
   });
@@ -251,7 +267,7 @@ describe("削除", () => {
     });
     render(<EntryItem entry={finished} />);
 
-    fireEvent.click(screen.getByRole("button", { name: t.actions.delete }));
+    chooseDelete();
 
     expect((await screen.findByRole("alert")).textContent).toBe(
       t.errors.notFound,
@@ -291,8 +307,9 @@ describe("再開", () => {
   test("記録中の行は再開ボタンの場所を空けて、ボタンの列を他の行と揃える", () => {
     const { unmount } = render(<EntryItem entry={finished} />);
     const slots = () =>
-      screen.getByRole("button", { name: t.actions.delete }).parentElement!
-        .children.length;
+      screen
+        .getByRole("button", { name: t.actions.more })
+        .closest(".flex.gap-2")!.children.length;
     const finishedSlots = slots();
     unmount();
 

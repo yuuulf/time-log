@@ -37,9 +37,7 @@ export const messages = {
       start: "開始",
       stop: "終了",
       resume: "再開",
-      edit: "修正",
-      save: "保存",
-      cancel: "キャンセル",
+      more: "その他の操作",
       delete: "削除",
     },
     errors: {
