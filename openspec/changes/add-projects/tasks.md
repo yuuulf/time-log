@@ -7,7 +7,7 @@
 ## 2. プロジェクトのロジック
 
 - [x] 2.1 `lib/projects/colors.ts` に 10 色のキー・名前・クラスを置き、`app/globals.css` に色のトークン（ライト・ダーク）を足す。色の名前とプロジェクトの文言を `lib/messages.ts` に足す（design 決定 2・6）。`colors.test.ts` で、10 色すべてに名前とクラスがあること、キーかどうかの判定をテストする（コミット: プロジェクトの色を追加）
-- [ ] 2.2 `lib/projects/validation.ts` に `validateProjectInput` と `parseProjectId` を作る（design 決定 3）。`validation.test.ts` で、名前の空・100 文字と 101 文字、前後の空白、色のキー以外、クライアント名・説明の上限、`projectId` の空・数・不正な値をテストする（コミット: プロジェクトの入力チェックを追加）
+- [x] 2.2 `lib/projects/validation.ts` に `validateProjectInput` と `parseProjectId` を作る（design 決定 3）。`validation.test.ts` で、名前の空・100 文字と 101 文字、前後の空白、色のキー以外、クライアント名・説明の上限、`projectId` の空・数・不正な値をテストする（コミット: プロジェクトの入力チェックを追加）
 - [ ] 2.3 `lib/projects/repository.ts` を作る（design 決定 3）。`repository.test.ts` で、登録順の一覧、登録・編集・取得、名前での検索、記録が紐づいていないときの削除と紐づいているときの `"in-use"` をテストする（コミット: プロジェクトの読み書きを追加）
 - [ ] 2.4 `lib/projects/actions.ts` を作る（design 決定 3）。`actions.test.ts` で、登録・編集・削除の成功と `refresh()`、入力エラー、名前の重複（編集では自分以外）、見つからない id、紐づいた記録があるときの削除をテストする（コミット: プロジェクトの登録・編集・削除の処理を追加）
 
