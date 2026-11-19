@@ -8,8 +8,9 @@
 
 - アーカイブのスクリプト（`scripts/openspec-archive.mjs`）が、アーカイブ前に各 change の proposal の「New Capabilities」から capability ごとの説明を読み、アーカイブでできた spec の仮の目的をその説明に置き換えてからコミットする
 - 仮の目的が残る capability の説明が proposal にない場合は、どの change もアーカイブせず、PR ブランチを変更せずに、capability 名と書き方を PR にコメントする
+- 置き換えた後、コミットの前に `openspec validate --all --strict`（CI と同じ検証）を実行し、失敗したときはどの change もアーカイブせず、PR ブランチを変更せずに、検証の結果を PR にコメントする。`--strict` は 50 文字未満の目的も失敗にするため、短い説明ではアーカイブできない
 - delta spec に `## Purpose` を書いた場合は OpenSpec がそれを使い、仮の文は入らないので、置き換えは行わない
-- `openspec/config.yaml` の proposal のルールに、New Capabilities の説明がアーカイブで spec の目的になることを書き、目的として読める文で書くよう求める
+- `openspec/config.yaml` の proposal のルールに、New Capabilities の説明がアーカイブで spec の目的になることを書き、目的として読める 50 文字以上の文で書くよう求める
 
 ## Capabilities
 
