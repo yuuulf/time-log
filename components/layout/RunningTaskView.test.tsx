@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import { expect, test } from "vitest";
 import { messages } from "@/lib/messages";
 import { RunningTaskView } from "./RunningTaskView";
@@ -75,4 +75,25 @@ test("プロジェクトのない記録中のタスクにはアイコンを出�
   );
 
   expect(screen.queryByRole("img")).toBeNull();
+});
+
+test("開始時刻は見出しの次にあり、プロジェクトとタスク名より前にある", () => {
+  render(
+    <RunningTaskView
+      running={{
+        taskName: "資料作成",
+        startedAt: new Date("2026-11-19T09:00:00+09:00"),
+        project: { id: 1, name: "社内ツール", color: "teal" },
+      }}
+    />,
+  );
+  const section = screen.getByRole("region", { name: t.runningHeading });
+  const heading = within(section).getByRole("heading");
+  const time = within(section).getByText(`${t.startedAt} 09:00`);
+  const task = within(section).getByText("資料作成");
+  const follows = (a: Node, b: Node) =>
+    Boolean(a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING);
+  expect(follows(heading, time)).toBe(true);
+  expect(follows(time, task)).toBe(true);
+  expect(follows(time, within(section).getByTitle("社内ツール"))).toBe(true);
 });

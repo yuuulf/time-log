@@ -59,9 +59,15 @@ export function StartStopForm({ running, suggestions, projects = [] }: Props) {
           className="flex flex-wrap items-center justify-between gap-3 rounded-md border border-border p-4"
         >
           <div className="min-w-0">
-            <h2 id={`${id}-running`} className="text-xs text-muted">
-              {t.runningHeading}
-            </h2>
+            {/* 開始時刻は見出しの右に並べる */}
+            <div className="flex flex-wrap items-baseline gap-x-2">
+              <h2 id={`${id}-running`} className="text-xs text-muted">
+                {t.runningHeading}
+              </h2>
+              <p className="text-xs text-muted tabular-nums">
+                {t.startedAt} {formatTime(running.startedAt)}
+              </p>
+            </div>
             {/* 一覧と同じくプロジェクト → タスク名の順。プロジェクトは名前も文字で出し、アイコンは読み上げの対象から外す */}
             {running.project && (
               <p className="flex min-w-0 items-center gap-1.5 text-sm text-muted">
@@ -77,9 +83,6 @@ export function StartStopForm({ running, suggestions, projects = [] }: Props) {
             )}
             <p className="font-medium break-words text-foreground">
               {running.taskName || t.untitled}
-            </p>
-            <p className="text-sm text-muted">
-              {t.startedAt} {formatTime(running.startedAt)}
             </p>
           </div>
           <form action={stopAction}>
