@@ -6,7 +6,7 @@
 
 ## 2. 共通の部品
 
-- [ ] 2.1 `components/ui/usePopover.ts` と `components/ui/DropdownMenu.tsx` を作る（design 決定 4・5）。`DropdownMenu.test.tsx` で、ボタンの名前と `title`・`aria-expanded`、開くと最初の項目にフォーカスすること、矢印キー・Home・End での移動、Enter で選ぶと `onSelect` が呼ばれて閉じること、Escape で閉じてボタンにフォーカスが戻ること、外側を押すと閉じること、項目にアイコンと文字が出ることをテストする（コミット: ドロップダウンメニューの部品を追加）
+- [x] 2.1 `components/ui/usePopover.ts` と `components/ui/DropdownMenu.tsx` を作る（design 決定 4・5）。`DropdownMenu.test.tsx` で、ボタンの名前と `title`・`aria-expanded`、開くと最初の項目にフォーカスすること、矢印キー・Home・End での移動、Enter で選ぶと `onSelect` が呼ばれて閉じること、Escape で閉じてボタンにフォーカスが戻ること、外側を押すと閉じること、項目にアイコンと文字が出ることをテストする（コミット: ドロップダウンメニューの部品を追加）
 - [ ] 2.2 `components/projects/ProjectPicker.tsx` を作り、`lib/messages.ts` にプロジェクトのボタンの読み上げ名を作る関数を足す（design 決定 5・6）。`ProjectPicker.test.tsx` で、ボタンにアイコンと名前（なしなら「プロジェクトなし」）が出ること、読み上げ名、開くと選択肢が登録順に色のアイコン付きで並び今の項目が選ばれていること、矢印キーと Enter で選ぶと `onChange` が呼ばれること、Escape と外側を押したときに選ばずに閉じることをテストする（コミット: 色のアイコン付きのプロジェクトのプルダウンを追加）
 
 ## 3. 一覧の直接編集とメニュー
