@@ -261,6 +261,44 @@ describe("直接編集", () => {
     ).toBe(t.errors.endBeforeStart);
   });
 
+  test("エラーの欄を保存済みの値に戻したら、保存せずにエラーを消して時分の表示に戻る", async () => {
+    vi.mocked(updateEntryAction).mockResolvedValue({
+      errors: { endedAt: t.errors.endBeforeStart },
+    });
+    render(<EntryItem entry={finished} />);
+    const input = openTime(t.endedAt);
+    fireEvent.change(input, { target: { value: "2026-11-18T08:30:10" } });
+    fireEvent.blur(input);
+    await screen.findByRole("alert");
+
+    fireEvent.change(field(t.endedAt), {
+      target: { value: "2026-11-18T10:05" },
+    });
+    fireEvent.blur(field(t.endedAt));
+
+    expect(screen.queryByRole("alert")).toBeNull();
+    expect(timeButton(t.endedAt).textContent).toBe("10:05");
+    expect(updateEntryAction).toHaveBeenCalledOnce();
+  });
+
+  test("エラーの欄で Escape を押しても、エラーを消して保存済みの値に戻る", async () => {
+    vi.mocked(updateEntryAction).mockResolvedValue({
+      errors: { taskName: t.errors.taskNameTooLong },
+    });
+    render(<EntryItem entry={finished} />);
+    fireEvent.change(field(t.taskName), {
+      target: { value: "あ".repeat(201) },
+    });
+    fireEvent.blur(field(t.taskName));
+    await screen.findByRole("alert");
+
+    fireEvent.keyDown(field(t.taskName), { key: "Escape" });
+    fireEvent.blur(field(t.taskName));
+
+    expect(screen.queryByRole("alert")).toBeNull();
+    expect(field(t.taskName).value).toBe("資料作成");
+  });
+
   test("次に保存できたらエラーを消す", async () => {
     vi.mocked(updateEntryAction).mockResolvedValueOnce({
       errors: { taskName: t.errors.taskNameTooLong },

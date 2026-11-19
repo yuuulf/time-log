@@ -140,12 +140,24 @@ export function EntryItem({
     });
   };
 
+  /** その欄のエラーを消す。保存済みの値に戻したときは、保存しないのでここで消す */
+  const clearError = (field: Field) => {
+    if (!errors[field]) return;
+    setErrors((current) => {
+      const next = { ...current };
+      delete next[field];
+      return next;
+    });
+  };
+
   const handleBlur = (field: Field) => {
     if (skipBlurSave.current) {
       skipBlurSave.current = false;
+      clearError(field);
       return;
     }
-    if (!sameValue(field, values[field], saved[field])) save(values);
+    if (sameValue(field, values[field], saved[field])) clearError(field);
+    else save(values);
   };
 
   const handleKeyDown = (field: Field, e: KeyboardEvent<HTMLInputElement>) => {
