@@ -48,6 +48,16 @@ test("見出しにプロジェクト名を出し、全項目と一覧へ戻る�
   ).toBe("/projects");
 });
 
+test("アーカイブしたプロジェクトなら、見出しの下にその旨を表示する", () => {
+  const { rerender } = render(<ProjectDetail project={project} />);
+  expect(screen.queryByText(t.archived.notice)).toBeNull();
+
+  rerender(<ProjectDetail project={project} archived />);
+  expect(screen.getByText(t.archived.notice)).toBeDefined();
+  // アーカイブしていても編集できる
+  expect(input(t.name).hasAttribute("disabled")).toBe(false);
+});
+
 test("見つからないときは、その旨と一覧へ戻るリンクを表示する", () => {
   render(<ProjectNotFound />);
 

@@ -10,7 +10,7 @@
 
 - [x] 2.1 `ProjectItem` のメニューに「アーカイブ」（アーカイブ済みでは「アーカイブ解除」）を足し、一覧の見出しの横に「アーカイブ済み」のアイコンボタンを置く。文言を足す（design 決定 3・5）。`ProjectItem.test.tsx` でメニューの項目の並びと、選ぶと確認なしで処理を呼ぶこと、失敗の理由、`ProjectsContent.test.tsx` でボタンのリンク先と名前をテストする（コミット: プロジェクトの一覧からアーカイブできるようにする）
 - [x] 2.2 `app/projects/archived/page.tsx` と `ArchivedProjectsView`・`ArchivedProjectsContent` を作る（design 決定 3）。`ArchivedProjectsContent.test.tsx` で、戻るリンク・見出し・登録順の一覧・メニュー（「アーカイブ解除」「削除」）・ないときの文言、`page.test.tsx` でページの構成をテストする。`npm run build` が通ることを確認する（コミット: アーカイブ済みのプロジェクトの画面を追加）
-- [ ] 2.3 詳細画面にアーカイブ済みである旨を出す（design 決定 3）。`ProjectDetail.test.tsx` で、アーカイブ済みのときだけ出ることをテストする（コミット: 詳細画面にアーカイブ済みであることを表示する）
+- [x] 2.3 詳細画面にアーカイブ済みである旨を出す（design 決定 3）。`ProjectDetail.test.tsx` で、アーカイブ済みのときだけ出ることをテストする（コミット: 詳細画面にアーカイブ済みであることを表示する）
 - [ ] 2.4 `ProjectPicker` で、今の値が選択肢にないとき、ボタンに今の値を出し、どの選択肢も選ばれている表示にしない（design 決定 4）。`ProjectPicker.test.tsx` と `EntryItem.test.tsx` で、アーカイブしたプロジェクトの記録のボタンの表示と、タスク名の保存でプロジェクトの id がそのまま送られることをテストする（コミット: 選択肢にない今のプロジェクトをプルダウンで表示する）
 
 ## 3. ドキュメントと確認
