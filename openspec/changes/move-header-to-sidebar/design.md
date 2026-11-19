@@ -25,9 +25,9 @@
 ### 1. 部品の分け方
 
 - `SidebarShell`（`components/layout/SidebarShell.tsx`、クライアント）: 開閉の状態を持つ枠。幅 768px 未満で上部の行（メニューボタンとアプリ名）、背景、閉じるボタンを出す。サイドバーの中身は `children` で受け取る
-- `SidebarNav`（`components/layout/SidebarNav.tsx`、クライアント）: アプリ名のリンクとページのリンク。`usePathname()` で今いるページのリンクに `aria-current="page"` を付け、見た目も変える
+- `SidebarNav`（`components/layout/SidebarNav.tsx`、クライアント）: ページのリンク（「ホーム」「過去の記録」）。`usePathname()` で今いるページのリンクに `aria-current="page"` を付け、見た目も変える
 - `RunningTask`（`components/layout/RunningTask.tsx`、async Server Component）: `connection()` の後に `getRunningEntry` で読み、表示は `RunningTaskView`（`RunningTaskView.tsx`）に渡す。`RunningTask` は DB を読むサーバー専用のモジュールを使うためテストから読み込めないので、表示を分けてテストする（`EntryHistory` / `HistoryContent` と同じ分け方）
-- `Sidebar`（`components/layout/Sidebar.tsx`、Server Component）: `SidebarShell` の中に `SidebarNav` と `<Suspense>` で囲んだ `RunningTask` を並べる。`app/layout.tsx` は `Header` の代わりに `Sidebar` を置く
+- `Sidebar`（`components/layout/Sidebar.tsx`、Server Component）: `SidebarShell` の中に、上からアプリ名のリンク、`<Suspense>` で囲んだ `RunningTask`、`SidebarNav` の順に並べる。アプリ名のリンクは今いるページで変わらないので、`SidebarNav` から分けて `Sidebar` に置く。`app/layout.tsx` は `Header` の代わりに `Sidebar` を置く
 - 理由: Server Component を `children` としてクライアント部品に渡すと、開閉の状態はクライアントで持ちながら、記録中のタスクはサーバーで読める（Next.js のドキュメント「Interleaving Server and Client Components」）
 
 ### 2. レイアウトと幅による出し分け
