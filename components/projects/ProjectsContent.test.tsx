@@ -16,7 +16,7 @@ const project = (id: number, name: string) => ({
   description: "",
 });
 
-test("「追加」のリンクと、渡した順の一覧を表示し、登録欄は置かない", () => {
+test("「新規作成」のリンクと、渡した順の一覧を表示し、登録欄は置かない", () => {
   render(
     <ProjectsContent
       projects={[project(1, "社内ツール"), project(2, "A 社サイト改修")]}
@@ -37,11 +37,11 @@ test("「追加」のリンクと、渡した順の一覧を表示し、登録�
   expect(screen.queryByText(t.empty)).toBeNull();
 });
 
-test("プロジェクトがなければ、ないことと「追加」から登録できることを伝える", () => {
+test("プロジェクトがなければ、ないことと「新規作成」から作成できることを伝える", () => {
   render(<ProjectsContent projects={[]} />);
 
   expect(screen.getByText(t.empty)).toBeDefined();
-  expect(t.empty).toContain("「追加」");
+  expect(t.empty).toContain(`「${t.actions.add}」`);
   expect(screen.getByRole("link", { name: t.actions.add })).toBeDefined();
   expect(screen.queryByRole("list")).toBeNull();
 });

@@ -25,7 +25,7 @@ const emptyValues: ProjectFieldValues = {
 };
 
 /**
- * プロジェクトの登録画面のフォーム。詳細画面と同じ並びで、「プロジェクトを作成」で作成して一覧に戻る。
+ * プロジェクトの登録画面のフォーム。詳細画面と同じ並びで、「作成」で作成して一覧に戻る。
  * 入力エラーのときは作成せず、入力した値を残す
  */
 export function ProjectForm() {
@@ -71,9 +71,12 @@ export function ProjectForm() {
           {errors.form}
         </p>
       )}
-      <TextButton type="submit" variant="primary" disabled={saving}>
-        {t.actions.createSubmit}
-      </TextButton>
+      {/* 作成ボタンは各項目の下の右端に置く */}
+      <div className="flex justify-end">
+        <TextButton type="submit" variant="primary" disabled={saving}>
+          {t.actions.createSubmit}
+        </TextButton>
+      </div>
     </form>
   );
 }

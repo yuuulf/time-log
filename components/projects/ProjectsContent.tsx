@@ -6,7 +6,7 @@ import type { ProjectData } from "./types";
 
 const t = messages.projects;
 
-/** プロジェクトのページの中身。登録した順の一覧と、登録画面へ移る「追加」を置く */
+/** プロジェクトのページの中身。登録した順の一覧と、登録画面へ移る「新規作成」を置く */
 export function ProjectsContent({ projects }: { projects: ProjectData[] }) {
   return (
     <section aria-labelledby="project-list-heading" className="space-y-2">

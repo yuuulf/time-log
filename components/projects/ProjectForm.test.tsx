@@ -26,7 +26,7 @@ const radio = (color: (typeof PROJECT_COLORS)[number]) =>
   });
 
 describe("登録", () => {
-  test("一覧へ戻るリンク・見出し・項目・「プロジェクトを作成」を並べる", () => {
+  test("一覧へ戻るリンク・見出し・項目・「作成」を並べ、「作成」は右端に置く", () => {
     render(<ProjectForm />);
 
     expect(
@@ -39,11 +39,14 @@ describe("登録", () => {
     ).toBeDefined();
     expect(input(t.name).value).toBe("");
     expect(input(t.description).getAttribute("rows")).toBe("8");
+    const submit = screen.getByRole("button", { name: t.actions.createSubmit });
+    expect(submit.getAttribute("type")).toBe("submit");
+    expect(submit.parentElement?.className).toContain("justify-end");
+    // 作成ボタンは項目（説明の欄）より後ろにある
     expect(
-      screen
-        .getByRole("button", { name: t.actions.createSubmit })
-        .getAttribute("type"),
-    ).toBe("submit");
+      input(t.description).compareDocumentPosition(submit) &
+        Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
   });
 
   test("色の選択肢は 10 個で、最初は先頭の色を選んでいる", () => {
