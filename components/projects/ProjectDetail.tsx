@@ -203,7 +203,7 @@ export function ProjectDetail({ project }: { project: ProjectData }) {
         <div className="space-y-1">
           {label("description", t.description)}
           <textarea
-            rows={4}
+            rows={8}
             placeholder={t.descriptionPlaceholder}
             {...fieldProps("description")}
           />

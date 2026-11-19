@@ -33,6 +33,8 @@ test("見出しにプロジェクト名を出し、全項目と一覧へ戻る�
   expect(input(t.name).value).toBe("社内ツール");
   expect(input(t.clientName).value).toBe("自社");
   expect(input(t.description).value).toBe("社内向けの管理ツール");
+  // 説明の欄は 8 行分の高さ
+  expect(input(t.description).getAttribute("rows")).toBe("8");
   expect(
     screen.getByRole<HTMLInputElement>("radio", {
       name: projectColorName("violet"),
