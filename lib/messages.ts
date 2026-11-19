@@ -66,11 +66,11 @@ export const messages = {
       amber: "黄",
       green: "緑",
       teal: "青緑",
+      sky: "水色",
       blue: "青",
       violet: "紫",
       pink: "ピンク",
       brown: "茶",
-      sky: "水色",
     },
     empty:
       "まだプロジェクトがありません。プロジェクト名を入力して登録ボタンを押すと追加されます。",

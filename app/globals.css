@@ -17,11 +17,11 @@
   --project-amber: #ca8a04;
   --project-green: #16a34a;
   --project-teal: #0d9488;
+  --project-sky: #0ea5e9;
   --project-blue: #2563eb;
   --project-violet: #7c3aed;
   --project-pink: #db2777;
   --project-brown: #8b5a2b;
-  --project-sky: #0ea5e9;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -39,11 +39,11 @@
     --project-amber: #facc15;
     --project-green: #4ade80;
     --project-teal: #2dd4bf;
+    --project-sky: #7dd3fc;
     --project-blue: #3b82f6;
     --project-violet: #a78bfa;
     --project-pink: #f472b6;
     --project-brown: #c08457;
-    --project-sky: #7dd3fc;
   }
 }
 
@@ -60,11 +60,11 @@
   --color-project-amber: var(--project-amber);
   --color-project-green: var(--project-green);
   --color-project-teal: var(--project-teal);
+  --color-project-sky: var(--project-sky);
   --color-project-blue: var(--project-blue);
   --color-project-violet: var(--project-violet);
   --color-project-pink: var(--project-pink);
   --color-project-brown: var(--project-brown);
-  --color-project-sky: var(--project-sky);
   --font-sans:
     var(--font-geist-sans), "Hiragino Sans", "Hiragino Kaku Gothic ProN",
     "Noto Sans JP", "Yu Gothic", sans-serif;
