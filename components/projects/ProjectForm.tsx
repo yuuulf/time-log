@@ -1,21 +1,15 @@
 "use client";
 
 import { startTransition, useActionState, useId, useState } from "react";
-import { Check, Plus, X } from "lucide-react";
+import { Plus } from "lucide-react";
 import { IconButton } from "@/components/ui/IconButton";
 import { messages } from "@/lib/messages";
 import {
   createProjectAction,
-  updateProjectAction,
   type ProjectActionState,
 } from "@/lib/projects/actions";
-import {
-  DEFAULT_PROJECT_COLOR,
-  PROJECT_COLORS,
-  projectColorClass,
-  projectColorName,
-} from "@/lib/projects/colors";
-import type { ProjectData } from "./types";
+import { DEFAULT_PROJECT_COLOR } from "@/lib/projects/colors";
+import { ProjectColorPicker } from "./ProjectColorPicker";
 
 const t = messages.projects;
 
@@ -33,34 +27,14 @@ const emptyValues: Values = {
   description: "",
 };
 
-type Props =
-  /** 登録 */
-  | { project?: undefined; onClose?: undefined }
-  /** 編集。保存できたら、またはキャンセルで onClose を呼ぶ */
-  | { project: ProjectData; onClose: () => void };
-
-/** プロジェクトの登録・編集のフォーム。入力エラーのときは入力した値を残す */
-export function ProjectForm({ project, onClose }: Props) {
+/** プロジェクトの登録のフォーム。入力エラーのときは入力した値を残す（編集は詳細画面で行う） */
+export function ProjectForm() {
   const id = useId();
-  const [values, setValues] = useState<Values>(
-    project
-      ? {
-          name: project.name,
-          color: project.color,
-          clientName: project.clientName,
-          description: project.description,
-        }
-      : emptyValues,
-  );
+  const [values, setValues] = useState<Values>(emptyValues);
   const [state, action, saving] = useActionState(
     async (prev: ProjectActionState, formData: FormData) => {
-      const result = project
-        ? await updateProjectAction(project.id, prev, formData)
-        : await createProjectAction(prev, formData);
-      if (result.ok) {
-        if (onClose) onClose();
-        else setValues(emptyValues);
-      }
+      const result = await createProjectAction(prev, formData);
+      if (result.ok) setValues(emptyValues);
       return result;
     },
     {},
@@ -139,56 +113,27 @@ export function ProjectForm({ project, onClose }: Props) {
         />
         {errorText("description")}
       </div>
-      <fieldset className="space-y-1" aria-describedby={describedBy("color")}>
-        <legend className="text-sm text-muted">{t.color}</legend>
-        <div className="flex flex-wrap gap-2">
-          {PROJECT_COLORS.map((color) => (
-            <label key={color} title={projectColorName(color)}>
-              <input
-                type="radio"
-                name="color"
-                value={color}
-                checked={values.color === color}
-                onChange={() => setValues({ ...values, color })}
-                className="peer sr-only"
-              />
-              <span className="sr-only">{projectColorName(color)}</span>
-              {/* 選んだ色は外側の輪で示す */}
-              <span
-                aria-hidden="true"
-                className={`block size-8 cursor-pointer rounded-full border-2 border-background ring-1 ring-border peer-checked:ring-2 peer-checked:ring-foreground peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-foreground ${projectColorClass(color)}`}
-              />
-            </label>
-          ))}
-        </div>
+      <ProjectColorPicker
+        name="color"
+        value={values.color}
+        onChange={(color) => setValues({ ...values, color })}
+        aria-describedby={describedBy("color")}
+      >
         {errorText("color")}
-      </fieldset>
+      </ProjectColorPicker>
       {errors.form && (
         <p role="alert" className="text-sm text-danger">
           {errors.form}
         </p>
       )}
       <div className="flex gap-2">
-        {project ? (
-          <>
-            <IconButton
-              type="submit"
-              variant="primary"
-              icon={Check}
-              label={t.actions.save}
-              disabled={saving}
-            />
-            <IconButton icon={X} label={t.actions.cancel} onClick={onClose} />
-          </>
-        ) : (
-          <IconButton
-            type="submit"
-            variant="primary"
-            icon={Plus}
-            label={t.actions.create}
-            disabled={saving}
-          />
-        )}
+        <IconButton
+          type="submit"
+          variant="primary"
+          icon={Plus}
+          label={t.actions.create}
+          disabled={saving}
+        />
       </div>
     </form>
   );

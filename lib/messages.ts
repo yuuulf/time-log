@@ -80,10 +80,13 @@ export const messages = {
     confirmDelete: "このプロジェクトを削除しますか？",
     actions: {
       create: "登録",
-      edit: "編集",
-      save: "保存",
-      cancel: "キャンセル",
+      more: "その他の操作",
       delete: "削除",
+    },
+    detail: {
+      backToList: "プロジェクトの一覧",
+      loading: "プロジェクトを読み込んでいます…",
+      notFound: "プロジェクトが見つかりません。削除された可能性があります。",
     },
     errors: {
       nameRequired: "プロジェクト名を入力してください。",

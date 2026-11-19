@@ -1,7 +1,7 @@
 import { render, screen, within } from "@testing-library/react";
 import { beforeEach, expect, test, vi } from "vitest";
 import { messages } from "@/lib/messages";
-import { SidebarNav } from "./SidebarNav";
+import { SidebarNav, SidebarNavLinks } from "./SidebarNav";
 
 const navigation = vi.hoisted(() => ({ pathname: "/" }));
 vi.mock("next/navigation", () => ({
@@ -78,5 +78,39 @@ test("プロジェクトのページでは「プロジェクト」だけが今�
     screen
       .getByRole("link", { name: messages.history.title })
       .hasAttribute("aria-current"),
+  ).toBe(false);
+});
+
+test("フォールバック（pathname が null）では、同じリンクを選ばれている表示なしで出す", () => {
+  render(<SidebarNavLinks pathname={null} />);
+
+  const links = within(nav()).getAllByRole("link");
+  expect(links.map((a) => a.textContent)).toEqual([
+    messages.nav.home,
+    messages.history.title,
+    messages.projects.title,
+  ]);
+  expect(links.some((a) => a.getAttribute("aria-current"))).toBe(false);
+});
+
+test("プロジェクトの詳細画面では「プロジェクト」が今いるページになる", () => {
+  navigation.pathname = "/projects/1";
+  render(<SidebarNav />);
+
+  const current = within(nav())
+    .getAllByRole("link")
+    .filter((a) => a.getAttribute("aria-current") === "page")
+    .map((a) => a.textContent);
+  expect(current).toEqual([messages.projects.title]);
+});
+
+test("名前が前方で一致するだけの別のページは選ばれている表示にしない", () => {
+  navigation.pathname = "/projectsx";
+  render(<SidebarNav />);
+
+  expect(
+    within(nav())
+      .getAllByRole("link")
+      .some((a) => a.getAttribute("aria-current")),
   ).toBe(false);
 });

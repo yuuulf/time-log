@@ -19,6 +19,7 @@ import {
   updateEntryAction,
   type ActionState,
 } from "@/lib/time-entries/actions";
+import { isComposing } from "@/lib/keyboard";
 import { messages } from "@/lib/messages";
 import {
   formatDuration,
@@ -161,6 +162,8 @@ export function EntryItem({
   };
 
   const handleKeyDown = (field: Field, e: KeyboardEvent<HTMLInputElement>) => {
+    // 変換の確定の Enter などは入力の操作として扱わない（blur すると確定中の文字が二重に入る）
+    if (isComposing(e)) return;
     if (e.key === "Enter") {
       e.preventDefault();
       e.currentTarget.blur();
