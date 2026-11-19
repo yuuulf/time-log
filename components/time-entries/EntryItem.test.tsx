@@ -549,6 +549,24 @@ describe("プロジェクト", () => {
     expect(button.getAttribute("aria-invalid")).toBe("true");
   });
 
+  test("アーカイブして選択肢にないプロジェクトの記録は、ボタンに名前を出し、タスク名の保存でもプロジェクトを変えない", async () => {
+    const archived = { id: 9, name: "旧案件", color: "brown" };
+    render(
+      <EntryItem
+        entry={{ ...finished, project: archived }}
+        projects={projects}
+      />,
+    );
+
+    expect(pickerButton("旧案件").textContent).toBe("旧案件");
+
+    fireEvent.change(field(t.taskName), { target: { value: "資料レビュー" } });
+    fireEvent.blur(field(t.taskName));
+
+    await vi.waitFor(() => expect(updateEntryAction).toHaveBeenCalledOnce());
+    expect(lastSent().formData.get("projectId")).toBe("9");
+  });
+
   test("保存の後に記録のプロジェクトが変わったら、表示も合わせる", () => {
     const { rerender } = render(
       <EntryItem entry={withProject} projects={projects} />,

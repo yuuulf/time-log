@@ -127,3 +127,33 @@ test("一覧用はふだん枠線を出さず、フォーム用は常に枠線�
   expect(button().className).toContain("border-border");
   expect(button().className).not.toContain("border-transparent");
 });
+
+test("今の値が選択肢にない（アーカイブした）ときは、ボタンに今の値を出し、どの選択肢も選ばれている表示にしない", () => {
+  const archived = { id: 9, name: "旧案件", color: "brown" };
+  const onChange = vi.fn();
+  render(
+    <ProjectPicker value={archived} projects={projects} onChange={onChange} />,
+  );
+
+  const trigger = screen.getByRole("button", {
+    name: t.projectButton("旧案件"),
+  });
+  expect(trigger.textContent).toBe("旧案件");
+  expect(trigger.querySelector(".text-project-brown")).not.toBeNull();
+
+  fireEvent.click(trigger);
+  const options = screen.getAllByRole("option");
+  expect(options.map((o) => o.textContent)).toEqual([
+    t.noProject,
+    "社内ツール",
+    "A 社サイト改修",
+  ]);
+  expect(options.some((o) => o.getAttribute("aria-selected") === "true")).toBe(
+    false,
+  );
+  expect(document.activeElement).toBe(options[0]);
+
+  // 「プロジェクトなし」を選ぶと外せる
+  fireEvent.click(options[0]);
+  expect(onChange).toHaveBeenCalledWith(null);
+});
