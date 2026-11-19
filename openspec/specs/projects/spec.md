@@ -1,7 +1,7 @@
 # projects Specification
 
 ## Purpose
-TBD - created by archiving change add-projects. Update Purpose after archive.
+記録をまとめる単位としてプロジェクト（名前・色・クライアント名・説明）を登録・編集・削除できるようにする。記録とプロジェクトの紐づけと、その表示は time-tracking で定める。
 
 ## Requirements
 
