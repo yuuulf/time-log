@@ -3,7 +3,7 @@
 ## 1. アーカイブのスクリプト
 
 - [x] 1.1 `scripts/openspec-archive.mjs` に `parseNewCapabilities` と、アーカイブ後に仮の目的を proposal の説明に置き換える処理を足す（design 決定 1・2）。`openspec-archive.test.ts` で、New Capabilities の読み取り（複数・「（なし）」・コメント・空の説明）、置き換えてからコミットすること、説明がないときにコミットせず作業ツリーを戻してコメントすること、既存の capability だけのときに spec を変えないことをテストする（コミット: アーカイブで新しい spec の目的を proposal から書き込む）
-- [ ] 1.2 `openspec/config.yaml` の proposal のルールに、New Capabilities の説明が spec の目的になることを足す（design 決定 3）（コミット: proposal のルールに capability の説明の書き方を足す）
+- [x] 1.2 `openspec/config.yaml` の proposal のルールに、New Capabilities の説明が spec の目的になることを足す（design 決定 3）（コミット: proposal のルールに capability の説明の書き方を足す）
 
 ## 2. 確認とドキュメント
 
