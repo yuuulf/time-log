@@ -7,7 +7,7 @@ vi.mock("@/components/projects/ProjectForm", () => ({
   ProjectForm: () => <div data-testid="project-form" />,
 }));
 
-test("登録のフォームを置き、タイトルは「プロジェクトの登録」にする", () => {
+test("作成のフォームを置き、タイトルは「プロジェクトの作成」にする", () => {
   render(<NewProjectPage />);
 
   expect(screen.getByRole("main")).toBeDefined();
