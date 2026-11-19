@@ -22,6 +22,7 @@ import {
 import { messages } from "@/lib/messages";
 import {
   formatDuration,
+  formatTime,
   parseDateTimeLocalValue,
   toDateTimeLocalValue,
 } from "@/lib/time";
@@ -44,9 +45,6 @@ type Values = Record<Field, string>;
 type Errors = NonNullable<ActionState["errors"]>;
 
 const FIELDS: Field[] = ["taskName", "startedAt", "endedAt"];
-
-/** 時刻の欄の追加のクラス。1 行に並べるとき（xl）は文字を小さくし、記録中の行の空きと幅をそろえる */
-const DATE_TIME_CLASS = "xl:w-52 xl:text-sm";
 
 /** 保存済みの記録から、入力欄の値を作る */
 function toValues(entry: EntryItemData): Values {
@@ -112,6 +110,8 @@ export function EntryItem({
     (entry.project?.id === projectId ? entry.project : null);
 
   const [errors, setErrors] = useState<Errors>({});
+  // 入力欄で編集している時刻の欄。ふだんは時分だけを表示する
+  const [editingTime, setEditingTime] = useState<"startedAt" | "endedAt">();
   const [, startSaving] = useTransition();
   // Escape で戻したときは、続く blur で保存しない
   const skipBlurSave = useRef(false);
@@ -190,23 +190,58 @@ export function EntryItem({
         placeholder={field === "taskName" ? t.untitled : undefined}
         value={values[field]}
         onChange={(e) => setValues({ ...values, [field]: e.target.value })}
-        onBlur={() => handleBlur(field)}
+        autoFocus={field !== "taskName" && editingTime === field}
+        onBlur={() => {
+          handleBlur(field);
+          if (field !== "taskName") setEditingTime(undefined);
+        }}
         onKeyDown={(e) => handleKeyDown(field, e)}
         aria-invalid={errors[field] ? true : undefined}
         aria-describedby={errors[field] ? `${id}-${field}-error` : undefined}
-        className={`min-w-0 rounded-md border border-transparent bg-transparent px-2 py-1.5 text-foreground tabular-nums placeholder:text-muted hover:border-border focus:border-primary focus:outline-none aria-[invalid=true]:border-danger ${className}`}
+        className={`min-w-0 rounded-md border border-transparent bg-transparent px-2 py-1.5 text-foreground tabular-nums placeholder:text-muted hover:border-border focus:border-primary focus:outline-none aria-[invalid=true]:border-danger [&::-webkit-calendar-picker-indicator]:hidden ${className}`}
       />
     </>
   );
 
+  /**
+   * 時刻の欄。ふだんは時分を出すボタンで、押すかフォーカスすると同じ位置に日付と時分秒の入力欄を重ねて出す。
+   * 入力エラーのある欄は、保存済みに見えないよう、直すまで入力欄のまま（行の流れの中に）出す
+   */
+  const timeField = (field: "startedAt" | "endedAt", label: string) => {
+    const hasError = Boolean(errors[field]);
+    const showInput = editingTime === field || hasError;
+    const date = parseDateTimeLocalValue(values[field]);
+    return (
+      <div className={`relative shrink-0 ${hasError ? "" : "w-14"}`}>
+        {!hasError && (
+          <button
+            type="button"
+            aria-label={t.timeButton(label, values[field].slice(11))}
+            onClick={() => setEditingTime(field)}
+            onFocus={() => setEditingTime(field)}
+            tabIndex={showInput ? -1 : 0}
+            className={`w-full rounded-md border border-transparent px-2 py-1.5 text-left text-foreground tabular-nums hover:border-border ${showInput ? "invisible" : ""}`}
+          >
+            {date ? formatTime(date) : "--:--"}
+          </button>
+        )}
+        {showInput &&
+          input(
+            field,
+            label,
+            hasError
+              ? "w-56"
+              : "absolute top-1/2 left-0 z-10 w-56 -translate-y-1/2 border-primary bg-background shadow-lg",
+          )}
+      </div>
+    );
+  };
+
   return (
     <div className="space-y-1 py-2">
-      {/*
-        本文が広いとき（xl）は 1 行に、狭いときはプロジェクトとタスク名の段と、時刻・作業時間・ボタンの段に分ける。
-        時刻の欄は日付と秒まで出すため幅をとるので、1 行のときは文字を小さくし幅をそろえる
-      */}
-      <div className="flex flex-col gap-1 xl:flex-row xl:items-center xl:gap-3">
-        <div className="flex min-w-0 items-center gap-2 xl:flex-1">
+      {/* 本文が広いとき（lg）は 1 行に、狭いときはプロジェクトとタスク名の段と、時刻・作業時間・ボタンの段に分ける */}
+      <div className="flex flex-col gap-1 lg:flex-row lg:items-center lg:gap-3">
+        <div className="flex min-w-0 items-center gap-2 lg:flex-1">
           {/* プロジェクトはタスク名の左側に、色のアイコンと名前で示す。選ぶと保存する */}
           <div className="w-40 shrink-0">
             <ProjectPicker
@@ -223,15 +258,15 @@ export function EntryItem({
         </div>
         <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
           <div className="flex flex-wrap items-center gap-x-1">
-            {input("startedAt", t.startedAt, DATE_TIME_CLASS)}
+            {timeField("startedAt", t.startedAt)}
             <span aria-hidden="true" className="text-muted">
               –
             </span>
             {isRunning ? (
               // 終了時刻の欄の代わりに空きを置き、他の行と列を揃える
-              <span aria-hidden="true" className="hidden xl:block xl:w-52" />
+              <span aria-hidden="true" className="w-14 shrink-0" />
             ) : (
-              input("endedAt", t.endedAt, DATE_TIME_CLASS)
+              timeField("endedAt", t.endedAt)
             )}
           </div>
           <div className="ml-auto flex items-center gap-3">

@@ -22,6 +22,8 @@ export const messages = {
     noProject: "プロジェクトなし",
     /** 一覧のプロジェクトのボタンの読み上げ名 */
     projectButton: (name: string) => `プロジェクト：${name}`,
+    /** 一覧の時刻のボタンの読み上げ名（例: 「開始時刻 14:58:46」） */
+    timeButton: (label: string, time: string) => `${label} ${time}`,
     startedAt: "開始時刻",
     endedAt: "終了時刻",
     duration: "作業時間",

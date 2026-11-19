@@ -35,6 +35,16 @@ afterEach(() => {
 /** 行の入力欄 */
 const field = (label: string) => screen.getByLabelText<HTMLInputElement>(label);
 
+/** 時刻のボタン（読み上げ名は「開始時刻 09:00:00」の形） */
+const timeButton = (label: string) =>
+  screen.getByRole("button", { name: new RegExp(`^${label} `) });
+
+/** 時刻のボタンを押して入力欄を開き、入力欄を返す */
+function openTime(label: string) {
+  fireEvent.click(timeButton(label));
+  return field(label);
+}
+
 /** 最後に送った入力値 */
 function lastSent() {
   const calls = vi.mocked(updateEntryAction).mock.calls;
@@ -43,27 +53,43 @@ function lastSent() {
 }
 
 describe("表示", () => {
-  test("終了した記録は、タスク名・開始・終了時刻を入力欄に入れ、作業時間を表示する", () => {
+  test("終了した記録は、タスク名を入力欄に入れ、開始・終了時刻を時分で、作業時間を表示する", () => {
     render(<EntryItem entry={finished} />);
 
     expect(field(t.taskName).value).toBe("資料作成");
-    // datetime-local の値は、秒が 0 のとき秒を省いた形に正規化される
-    expect(field(t.startedAt).value).toBe("2026-11-18T09:00");
-    expect(field(t.endedAt).value).toBe("2026-11-18T10:05");
+    expect(timeButton(t.startedAt).textContent).toBe("09:00");
+    expect(timeButton(t.endedAt).textContent).toBe("10:05");
+    expect(timeButton(t.startedAt).getAttribute("aria-label")).toBe(
+      "開始時刻 09:00:00",
+    );
+    // 時刻の入力欄は、選ぶまで出さない
+    expect(screen.queryByLabelText(t.startedAt)).toBeNull();
     expect(screen.getByText("1時間5分")).toBeDefined();
   });
 
-  test("秒まで入力欄に出す", () => {
-    render(<EntryItem entry={{ ...finished, startedAt: at("09:00:15") }} />);
+  test("日をまたぐ記録も時分だけを出す", () => {
+    render(
+      <EntryItem
+        entry={{
+          ...finished,
+          startedAt: at("23:30:00"),
+          endedAt: new Date("2026-11-19T00:30:00+09:00"),
+        }}
+      />,
+    );
 
-    expect(field(t.startedAt).value).toBe("2026-11-18T09:00:15");
+    expect(timeButton(t.startedAt).textContent).toBe("23:30");
+    expect(timeButton(t.endedAt).textContent).toBe("00:30");
+    expect(screen.getByText("1時間0分")).toBeDefined();
   });
 
-  test("記録中の記録は終了時刻の欄を出さず、作業時間の代わりに「記録中」と表示する", () => {
+  test("記録中の記録は終了時刻を出さず、作業時間の代わりに「記録中」と表示する", () => {
     render(<EntryItem entry={running} />);
 
-    expect(field(t.startedAt)).toBeDefined();
-    expect(screen.queryByLabelText(t.endedAt)).toBeNull();
+    expect(timeButton(t.startedAt)).toBeDefined();
+    expect(
+      screen.queryByRole("button", { name: new RegExp(`^${t.endedAt} `) }),
+    ).toBeNull();
     expect(screen.getByText(t.running)).toBeDefined();
     expect(screen.queryByText(/分$/)).toBeNull();
   });
@@ -79,6 +105,62 @@ describe("表示", () => {
     render(<EntryItem entry={finished} />);
 
     expect(screen.queryByRole("button", { name: "修正" })).toBeNull();
+  });
+});
+
+describe("時刻の編集", () => {
+  test("時刻を押すと、日付と時分秒の入力欄（カレンダーのアイコンなし）にフォーカスが移る", () => {
+    render(<EntryItem entry={{ ...finished, startedAt: at("09:00:15") }} />);
+
+    const input = openTime(t.startedAt);
+    expect(input.type).toBe("datetime-local");
+    expect(input.step).toBe("1");
+    expect(input.value).toBe("2026-11-18T09:00:15");
+    expect(document.activeElement).toBe(input);
+    expect(input.className).toContain(
+      "[&::-webkit-calendar-picker-indicator]:hidden",
+    );
+  });
+
+  test("Tab で時刻にフォーカスしても入力欄になる", () => {
+    render(<EntryItem entry={finished} />);
+
+    fireEvent.focus(timeButton(t.endedAt));
+
+    expect(document.activeElement).toBe(field(t.endedAt));
+  });
+
+  test("値を変えずにフォーカスが外れたら、保存せずに時分の表示に戻る", () => {
+    render(<EntryItem entry={finished} />);
+
+    fireEvent.blur(openTime(t.startedAt));
+
+    expect(screen.queryByLabelText(t.startedAt)).toBeNull();
+    expect(timeButton(t.startedAt).textContent).toBe("09:00");
+    expect(updateEntryAction).not.toHaveBeenCalled();
+  });
+
+  test("変えてフォーカスが外れたら保存し、入力した時刻を時分で表示する", async () => {
+    render(<EntryItem entry={finished} />);
+    const input = openTime(t.endedAt);
+
+    fireEvent.change(input, { target: { value: "2026-11-18T10:30:20" } });
+    fireEvent.blur(input);
+
+    expect(timeButton(t.endedAt).textContent).toBe("10:30");
+    await vi.waitFor(() => expect(updateEntryAction).toHaveBeenCalledOnce());
+  });
+
+  test("Escape で戻したら時分の表示に戻る", () => {
+    render(<EntryItem entry={finished} />);
+    const input = openTime(t.endedAt);
+
+    fireEvent.change(input, { target: { value: "2026-11-18T10:30:20" } });
+    fireEvent.keyDown(input, { key: "Escape" });
+    fireEvent.blur(input);
+
+    expect(timeButton(t.endedAt).textContent).toBe("10:05");
+    expect(updateEntryAction).not.toHaveBeenCalled();
   });
 });
 
@@ -101,10 +183,9 @@ describe("直接編集", () => {
   test("時刻を変えてフォーカスが外れたら送る", async () => {
     render(<EntryItem entry={finished} />);
 
-    fireEvent.change(field(t.endedAt), {
-      target: { value: "2026-11-18T10:30:20" },
-    });
-    fireEvent.blur(field(t.endedAt));
+    const endedAt = openTime(t.endedAt);
+    fireEvent.change(endedAt, { target: { value: "2026-11-18T10:30:20" } });
+    fireEvent.blur(endedAt);
 
     await vi.waitFor(() => expect(updateEntryAction).toHaveBeenCalledOnce());
     expect(lastSent().formData.get("endedAt")).toBe("2026-11-18T10:30:20");
@@ -115,10 +196,9 @@ describe("直接編集", () => {
 
     fireEvent.focus(field(t.taskName));
     fireEvent.blur(field(t.taskName));
-    fireEvent.change(field(t.startedAt), {
-      target: { value: "2026-11-18T09:00" },
-    });
-    fireEvent.blur(field(t.startedAt));
+    const startedAt = openTime(t.startedAt);
+    fireEvent.change(startedAt, { target: { value: "2026-11-18T09:00" } });
+    fireEvent.blur(startedAt);
 
     expect(updateEntryAction).not.toHaveBeenCalled();
   });
@@ -158,19 +238,21 @@ describe("直接編集", () => {
     expect(lastSent().formData.has("endedAt")).toBe(false);
   });
 
-  test("入力エラーなら理由を行に表示し、入力した値を残す", async () => {
+  test("入力エラーなら理由を行に表示し、入力した値を入力欄のまま残す", async () => {
     vi.mocked(updateEntryAction).mockResolvedValue({
       errors: { endedAt: t.errors.endBeforeStart },
     });
     render(<EntryItem entry={finished} />);
-    const endedAt = field(t.endedAt);
 
-    fireEvent.change(endedAt, { target: { value: "2026-11-18T08:30:10" } });
-    fireEvent.blur(endedAt);
+    const input = openTime(t.endedAt);
+    fireEvent.change(input, { target: { value: "2026-11-18T08:30:10" } });
+    fireEvent.blur(input);
 
     expect((await screen.findByRole("alert")).textContent).toBe(
       t.errors.endBeforeStart,
     );
+    // エラーの欄は時分の表示に戻さず、入力欄のまま出す
+    const endedAt = field(t.endedAt);
     expect(endedAt.value).toBe("2026-11-18T08:30:10");
     expect(endedAt.getAttribute("aria-invalid")).toBe("true");
     expect(
@@ -202,7 +284,7 @@ describe("直接編集", () => {
     const { rerender } = render(<EntryItem entry={finished} />);
     // タスク名を保存したあと、開始時刻を編集している途中
     fireEvent.change(field(t.taskName), { target: { value: "資料レビュー" } });
-    fireEvent.change(field(t.startedAt), {
+    fireEvent.change(openTime(t.startedAt), {
       target: { value: "2026-11-18T08:45:00" },
     });
 
@@ -220,7 +302,7 @@ describe("直接編集", () => {
     // 編集中の開始時刻は上書きしない
     expect(field(t.startedAt).value).toBe("2026-11-18T08:45");
     // 編集していない終了時刻は新しい値になる
-    expect(field(t.endedAt).value).toBe("2026-11-18T10:10");
+    expect(timeButton(t.endedAt).textContent).toBe("10:10");
   });
 });
 
