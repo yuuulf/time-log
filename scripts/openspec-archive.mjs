@@ -2,10 +2,15 @@
 // .github/workflows/openspec-archive.yml から実行する。
 
 import { spawnSync } from "node:child_process";
-import { existsSync } from "node:fs";
+import { existsSync, readFileSync, readdirSync, writeFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 
 const CHANGES_DIR = "openspec/changes/";
+const SPECS_DIR = "openspec/specs/";
+
+/** OpenSpec が新しい capability の spec の目的に入れる仮の文 */
+const PURPOSE_PLACEHOLDER =
+  /^TBD - created by archiving change .*\. Update Purpose after archive\.$/m;
 
 /**
  * PR の差分に含まれるパスから、アーカイブ対象の change 名を求める。
@@ -45,6 +50,63 @@ export function findIncompleteChanges(list, targets) {
   });
 }
 
+/**
+ * proposal の「### New Capabilities」から、capability 名 → 説明を読む。
+ * `` - `<name>`: <説明> `` の行だけを対象にし、HTML コメントと「（なし）」などは無視する。
+ *
+ * @param {string} proposal proposal.md の内容
+ * @returns {Map<string, string>}
+ */
+export function parseNewCapabilities(proposal) {
+  const capabilities = new Map();
+  const body = proposal.replace(/<!--[\s\S]*?-->/g, "");
+  const start = body.search(/^### New Capabilities\s*$/m);
+  if (start === -1) return capabilities;
+  const lines = body.slice(start).split("\n").slice(1);
+  for (const line of lines) {
+    if (line.startsWith("#")) break;
+    const match = line.match(/^\s*[-*]\s+`([^`]+)`\s*[:：]\s*(.*)$/);
+    const description = match?.[2].trim();
+    if (match && description) capabilities.set(match[1], description);
+  }
+  return capabilities;
+}
+
+/**
+ * 仮の目的のままの spec に、proposal の説明を目的として書き込む。
+ *
+ * @param {{
+ *   capabilities: Map<string, string>,
+ *   listSpecFiles: () => string[],
+ *   readFile: (path: string) => string,
+ *   writeFile: (path: string, content: string) => void,
+ * }} deps
+ * @returns {string[]} 説明が見つからなかった capability 名
+ */
+export function fillPurposes({
+  capabilities,
+  listSpecFiles,
+  readFile,
+  writeFile,
+}) {
+  const missing = [];
+  for (const path of listSpecFiles()) {
+    const content = readFile(path);
+    if (!PURPOSE_PLACEHOLDER.test(content)) continue;
+    const name = path.slice(SPECS_DIR.length).replace(/\/spec\.md$/, "");
+    const description = capabilities.get(name);
+    if (description === undefined) {
+      missing.push(name);
+      continue;
+    }
+    writeFile(
+      path,
+      content.replace(PURPOSE_PLACEHOLDER, () => description),
+    );
+  }
+  return missing.sort();
+}
+
 /** PR コメントに載せるコマンド出力の最大文字数 */
 const MAX_OUTPUT_LENGTH = 3000;
 
@@ -71,13 +133,25 @@ function formatOutput(result) {
  * @param {{
  *   exec: Exec,
  *   changeExists: (name: string) => boolean,
+ *   listSpecFiles: () => string[],
+ *   readFile: (path: string) => string,
+ *   writeFile: (path: string, content: string) => void,
  *   baseRef: string,
  *   headRef: string,
  *   prNumber: string,
  * }} deps
  * @returns {{ status: RunStatus, archived: string[] }}
  */
-export function run({ exec, changeExists, baseRef, headRef, prNumber }) {
+export function run({
+  exec,
+  changeExists,
+  listSpecFiles,
+  readFile,
+  writeFile,
+  baseRef,
+  headRef,
+  prNumber,
+}) {
   /** @param {string} body */
   const comment = (body) => {
     exec("gh", ["pr", "comment", prNumber, "--body", body]);
@@ -128,16 +202,45 @@ export function run({ exec, changeExists, baseRef, headRef, prNumber }) {
     return done("incomplete");
   }
 
+  // アーカイブすると change が archive/ に移るので、proposal は先に読む
+  const capabilities = new Map();
+  for (const name of targets) {
+    const path = `${CHANGES_DIR}${name}/proposal.md`;
+    const proposal = existsOr(() => readFile(path), "");
+    for (const [capability, description] of parseNewCapabilities(proposal)) {
+      capabilities.set(capability, description);
+    }
+  }
+
+  const restore = () => {
+    exec("git", ["reset", "--hard", "HEAD"]);
+    exec("git", ["clean", "-fd", "--", "openspec"]);
+  };
+
   for (const name of targets) {
     const result = exec("npx", ["openspec", "archive", name, "--yes"]);
     if (result.code !== 0) {
-      exec("git", ["reset", "--hard", "HEAD"]);
-      exec("git", ["clean", "-fd", "--", "openspec"]);
+      restore();
       comment(
         `change \`${name}\` のアーカイブに失敗したため、どの change もアーカイブしませんでした。\n\n${formatOutput(result)}`,
       );
       return done("failed");
     }
+  }
+
+  const missing = fillPurposes({
+    capabilities,
+    listSpecFiles,
+    readFile,
+    writeFile,
+  });
+  if (missing.length > 0) {
+    restore();
+    const lines = missing.map((name) => `- \`${name}\``);
+    comment(
+      `新しい spec の目的（Purpose）にする説明が proposal にないため、どの change もアーカイブしませんでした。proposal の「### New Capabilities」に \`- \`<capability>\`: <目的>\` の形で説明を書いてから \`archive\` ラベルを付け直してください。\n\n${lines.join("\n")}`,
+    );
+    return done("failed");
   }
 
   const message = `${targets.join("、")} をアーカイブ`;
@@ -165,6 +268,20 @@ export function run({ exec, changeExists, baseRef, headRef, prNumber }) {
   return done("archived", targets);
 }
 
+/**
+ * 読めなければ fallback を返す
+ * @template T
+ * @param {() => T} read
+ * @param {T} fallback
+ */
+function existsOr(read, fallback) {
+  try {
+    return read();
+  } catch {
+    return fallback;
+  }
+}
+
 /** @type {Exec} */
 function exec(command, args) {
   const result = spawnSync(command, args, { encoding: "utf8" });
@@ -184,6 +301,13 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
   const { status, archived } = run({
     exec,
     changeExists: (name) => existsSync(`${CHANGES_DIR}${name}`),
+    listSpecFiles: () =>
+      readdirSync(SPECS_DIR, { withFileTypes: true })
+        .filter((entry) => entry.isDirectory())
+        .map((entry) => `${SPECS_DIR}${entry.name}/spec.md`)
+        .filter((path) => existsSync(path)),
+    readFile: (path) => readFileSync(path, "utf8"),
+    writeFile: (path, content) => writeFileSync(path, content),
     baseRef: BASE_REF,
     headRef: HEAD_REF,
     prNumber: PR_NUMBER,
