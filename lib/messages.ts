@@ -20,6 +20,8 @@ export const messages = {
     taskNamePlaceholder: "タスク名（省略できます）",
     project: "プロジェクト",
     noProject: "プロジェクトなし",
+    /** 一覧のプロジェクトのボタンの読み上げ名 */
+    projectButton: (name: string) => `プロジェクト：${name}`,
     startedAt: "開始時刻",
     endedAt: "終了時刻",
     duration: "作業時間",
