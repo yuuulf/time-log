@@ -2,7 +2,7 @@
 
 ## 1. データと読み書き
 
-- [ ] 1.1 `lib/db/schema.ts` の `projects` に `archivedAt` を足し、`npm run db:generate -- --name add_project_archived_at` でマイグレーションを作る（design 決定 1）。`lib/db/client.test.ts` で、マイグレーション後に `archived_at` 列があり既定が null であることをテストする。既存の DB のコピーにマイグレーションを当て、プロジェクトと記録が残ることを確かめる（コミット: プロジェクトにアーカイブした日時を足す）
+- [x] 1.1 `lib/db/schema.ts` の `projects` に `archivedAt` を足し、`npm run db:generate -- --name add_project_archived_at` でマイグレーションを作る（design 決定 1）。`lib/db/client.test.ts` で、マイグレーション後に `archived_at` 列があり既定が null であることをテストする。既存の DB のコピーにマイグレーションを当て、プロジェクトと記録が残ることを確かめる（コミット: プロジェクトにアーカイブした日時を足す）
 - [ ] 1.2 `listProjects` にアーカイブの有無の引数を足し、`setProjectArchived` を作る。呼び出し（`ProjectsView`・`TimeTracker`・`EntryHistory`）を合わせる（design 決定 2・4）。`repository.test.ts` で、未アーカイブ・アーカイブ済みの一覧が登録順に分かれること、アーカイブと解除、見つからないとき、アーカイブ済みとも名前が重複できないことをテストする（コミット: プロジェクトをアーカイブ・解除して読み分ける）
 - [ ] 1.3 `archiveProjectAction`・`unarchiveProjectAction` を作る（design 決定 2）。`actions.test.ts` で、成功と `refresh()`、不正な id、見つからないときをテストする（コミット: プロジェクトのアーカイブと解除の処理を追加）
 

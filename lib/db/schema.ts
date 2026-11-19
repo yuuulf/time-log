@@ -18,6 +18,8 @@ export const projects = sqliteTable(
     description: text("description").notNull().default(""),
     createdAt: integer("created_at", { mode: "timestamp_ms" }).notNull(),
     updatedAt: integer("updated_at", { mode: "timestamp_ms" }).notNull(),
+    /** アーカイブした日時。null ならアーカイブしていない */
+    archivedAt: integer("archived_at", { mode: "timestamp_ms" }),
   },
   (table) => [uniqueIndex("projects_name_idx").on(table.name)],
 );
