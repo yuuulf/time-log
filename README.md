@@ -77,7 +77,9 @@ PR では GitHub Actions の CI が format:check・lint・typecheck・test・bui
 3. PR を作り、レビューで spec と実装が合っているかを確認する
 4. tasks.md がすべて完了していることを確かめ、PR に `archive` ラベルを付ける
 
-`archive` ラベルを付けると、GitHub Actions が PR に含まれる change をアーカイブし（`openspec/specs/` に反映し、`openspec/changes/archive/` に移す）、そのコミットを PR ブランチに追加します。tasks.md に未完了のタスクが残っているとき、またはアーカイブに失敗したときはコミットせず、理由を PR にコメントします。直したら、ラベルを外して付け直してください。
+`archive` ラベルを付けると、GitHub Actions が PR に含まれる change をアーカイブし（`openspec/specs/` に反映し、`openspec/changes/archive/` に移す）、そのコミットを PR ブランチに追加します。tasks.md に未完了のタスクが残っているとき、またはアーカイブに失敗したときはコミットせず、理由を PR にコメントします。
+
+新しい capability の spec ができるときは、proposal の「New Capabilities」に書いた説明が、その spec の目的（Purpose）として書き込まれます。アーカイブの後は CI と同じ OpenSpec の検証を行い、説明がない、または短すぎる（50 文字未満）などで通らないときはコミットせず、結果を PR にコメントします。直したら、ラベルを外して付け直してください。
 
 ### ブランチとコミット
 
