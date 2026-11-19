@@ -53,6 +53,7 @@ export const messages = {
     rangeHeading: "期間の指定",
     from: "開始日",
     to: "終了日",
+    rangeSeparator: "〜",
     show: "表示",
     empty: "この期間の記録はありません。",
     errors: {
