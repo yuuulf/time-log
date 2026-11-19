@@ -23,16 +23,17 @@ export function RunningTaskView({ running }: Props) {
       </h2>
       {running ? (
         <>
+          {/* 一覧と同じくプロジェクト → タスク名の順。プロジェクトはアイコンだけ（名前はポインタを合わせると出る） */}
           <p className="text-sm font-medium break-words text-foreground">
-            {running.taskName || t.untitled}
             {running.project && (
-              <span className="ml-2 inline-flex align-middle">
+              <span className="mr-2 inline-flex align-middle">
                 <ProjectIcon
                   name={running.project.name}
                   color={running.project.color}
                 />
               </span>
             )}
+            {running.taskName || t.untitled}
           </p>
           <p className="text-xs text-muted tabular-nums">
             {t.startedAt} {formatTime(running.startedAt)}

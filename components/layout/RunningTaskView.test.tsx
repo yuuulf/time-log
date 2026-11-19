@@ -41,7 +41,7 @@ test("記録中のタスクがなければ、ないことを伝える", () => {
   expect(screen.queryByText(new RegExp(t.startedAt))).toBeNull();
 });
 
-test("プロジェクトの紐づいた記録中のタスクは、タスク名の右側にアイコンを出す", () => {
+test("プロジェクトの紐づいた記録中のタスクは、タスク名の左側にアイコンを出す", () => {
   render(
     <RunningTaskView
       running={{
@@ -54,6 +54,11 @@ test("プロジェクトの紐づいた記録中のタスクは、タスク名�
 
   const icon = screen.getByRole("img", { name: "社内ツール" });
   expect(icon.getAttribute("title")).toBe("社内ツール");
+  // アイコンがタスク名より前にあり、読み上げはプロジェクト名 → タスク名の順
+  const row = icon.closest("p")!;
+  expect(row.firstElementChild?.contains(icon)).toBe(true);
+  expect(row.firstChild).toBe(row.firstElementChild);
+  expect(row.textContent).toBe("資料作成");
   // サイドバーでは名前を文字で出さない
   expect(screen.queryByText("社内ツール")).toBeNull();
 });
