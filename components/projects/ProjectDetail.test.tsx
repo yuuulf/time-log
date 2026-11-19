@@ -103,6 +103,30 @@ describe("その場の編集", () => {
     expect(lastSent().formData.get("clientName")).toBe("情報システム部");
   });
 
+  test("変換中の Enter では確定も保存もしない", () => {
+    render(<ProjectDetail project={project} />);
+    const name = input(t.name);
+    name.focus();
+
+    fireEvent.change(name, { target: { value: "社内ツール開発" } });
+    fireEvent.keyDown(name, { key: "Enter", isComposing: true });
+
+    expect(updateProjectAction).not.toHaveBeenCalled();
+    expect(document.activeElement).toBe(name);
+  });
+
+  test("変換中の Escape では元に戻さない", () => {
+    render(<ProjectDetail project={project} />);
+    const name = input(t.name);
+    name.focus();
+
+    fireEvent.change(name, { target: { value: "社内ツール開発" } });
+    fireEvent.keyDown(name, { key: "Escape", keyCode: 229 });
+
+    expect(name.value).toBe("社内ツール開発");
+    expect(document.activeElement).toBe(name);
+  });
+
   test("説明の Enter では送らない（改行のため）", () => {
     render(<ProjectDetail project={project} />);
     const description = input(t.description);

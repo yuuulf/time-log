@@ -14,6 +14,7 @@ import {
   updateProjectAction,
   type ProjectActionState,
 } from "@/lib/projects/actions";
+import { isComposing } from "@/lib/keyboard";
 import { messages } from "@/lib/messages";
 import { ProjectColorPicker } from "./ProjectColorPicker";
 import type { ProjectData } from "./types";
@@ -118,6 +119,8 @@ export function ProjectDetail({ project }: { project: ProjectData }) {
   };
 
   const handleKeyDown = (field: TextField, e: KeyboardEvent<TextElement>) => {
+    // 変換の確定の Enter などは入力の操作として扱わない（blur すると確定中の文字が二重に入る）
+    if (isComposing(e)) return;
     // 説明（複数行）の Enter は改行にする
     if (e.key === "Enter" && field !== "description") {
       e.preventDefault();

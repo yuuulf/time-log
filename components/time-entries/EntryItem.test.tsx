@@ -219,6 +219,18 @@ describe("直接編集", () => {
     expect(document.activeElement).not.toBe(taskName);
   });
 
+  test("変換中の Enter では確定も保存もしない", () => {
+    render(<EntryItem entry={finished} />);
+    const taskName = field(t.taskName);
+    taskName.focus();
+
+    fireEvent.change(taskName, { target: { value: "資料レビュー" } });
+    fireEvent.keyDown(taskName, { key: "Enter", isComposing: true });
+
+    expect(updateEntryAction).not.toHaveBeenCalled();
+    expect(document.activeElement).toBe(taskName);
+  });
+
   test("Escape キーで保存済みの値に戻し、送らない", () => {
     render(<EntryItem entry={finished} />);
     const taskName = field(t.taskName);
