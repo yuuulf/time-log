@@ -45,6 +45,9 @@ type Errors = NonNullable<ActionState["errors"]>;
 
 const FIELDS: Field[] = ["taskName", "startedAt", "endedAt"];
 
+/** 時刻の欄の追加のクラス。1 行に並べるとき（xl）は文字を小さくし、記録中の行の空きと幅をそろえる */
+const DATE_TIME_CLASS = "xl:w-52 xl:text-sm";
+
 /** 保存済みの記録から、入力欄の値を作る */
 function toValues(entry: EntryItemData): Values {
   return {
@@ -198,11 +201,14 @@ export function EntryItem({
 
   return (
     <div className="space-y-1 py-2">
-      {/* 本文が広いときは 1 行に、狭いときはタスク名・時刻・作業時間とボタンの段に分ける */}
-      <div className="flex flex-col gap-1 lg:flex-row lg:items-center lg:gap-3">
-        <div className="flex min-w-0 items-center gap-2 lg:flex-1">
+      {/*
+        本文が広いとき（xl）は 1 行に、狭いときはプロジェクトとタスク名の段と、時刻・作業時間・ボタンの段に分ける。
+        時刻の欄は日付と秒まで出すため幅をとるので、1 行のときは文字を小さくし幅をそろえる
+      */}
+      <div className="flex flex-col gap-1 xl:flex-row xl:items-center xl:gap-3">
+        <div className="flex min-w-0 items-center gap-2 xl:flex-1">
           {/* プロジェクトはタスク名の左側に、色のアイコンと名前で示す。選ぶと保存する */}
-          <div className="w-36 shrink-0 lg:w-40">
+          <div className="w-40 shrink-0">
             <ProjectPicker
               value={project}
               projects={projects}
@@ -215,60 +221,62 @@ export function EntryItem({
           </div>
           {input("taskName", t.taskName, "flex-1")}
         </div>
-        <div className="flex flex-wrap items-center gap-x-1">
-          {input("startedAt", t.startedAt, "")}
-          <span aria-hidden="true" className="text-muted">
-            –
-          </span>
-          {isRunning ? (
-            // 終了時刻の欄の代わりに空きを置き、他の行と列を揃える
-            <span aria-hidden="true" className="hidden w-[13.5rem] lg:block" />
-          ) : (
-            input("endedAt", t.endedAt, "")
-          )}
-        </div>
-        <div className="flex items-center gap-3">
-          <p className="mr-auto w-24 text-sm font-medium text-foreground tabular-nums lg:mr-0 lg:text-right">
-            {entry.endedAt
-              ? formatDuration(
-                  entry.endedAt.getTime() - entry.startedAt.getTime(),
-                )
-              : t.running}
-          </p>
-          <div className="flex gap-2">
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+          <div className="flex flex-wrap items-center gap-x-1">
+            {input("startedAt", t.startedAt, DATE_TIME_CLASS)}
+            <span aria-hidden="true" className="text-muted">
+              –
+            </span>
             {isRunning ? (
-              // 再開ボタンの代わりに同じ大きさの空きを置き、他の行と列を揃える
-              <span aria-hidden="true" className="size-10 shrink-0" />
+              // 終了時刻の欄の代わりに空きを置き、他の行と列を揃える
+              <span aria-hidden="true" className="hidden xl:block xl:w-52" />
             ) : (
-              <form action={resumeAction}>
-                <input type="hidden" name="taskName" value={entry.taskName} />
-                <input
-                  type="hidden"
-                  name="projectId"
-                  value={entry.project ? String(entry.project.id) : ""}
-                />
-                <IconButton
-                  type="submit"
-                  icon={Play}
-                  label={t.actions.resume}
-                  disabled={resuming}
-                />
-              </form>
+              input("endedAt", t.endedAt, DATE_TIME_CLASS)
             )}
-            {/* 記録の操作は「その他の操作」のメニューにまとめる。項目は今後増やせる */}
-            <DropdownMenu
-              icon={MoreVertical}
-              label={t.actions.more}
-              disabled={deleting}
-              items={[
-                {
-                  label: t.actions.delete,
-                  icon: Trash2,
-                  onSelect: handleDelete,
-                  variant: "danger",
-                },
-              ]}
-            />
+          </div>
+          <div className="ml-auto flex items-center gap-3">
+            <p className="w-20 text-right text-sm font-medium text-foreground tabular-nums">
+              {entry.endedAt
+                ? formatDuration(
+                    entry.endedAt.getTime() - entry.startedAt.getTime(),
+                  )
+                : t.running}
+            </p>
+            <div className="flex gap-2">
+              {isRunning ? (
+                // 再開ボタンの代わりに同じ大きさの空きを置き、他の行と列を揃える
+                <span aria-hidden="true" className="size-10 shrink-0" />
+              ) : (
+                <form action={resumeAction}>
+                  <input type="hidden" name="taskName" value={entry.taskName} />
+                  <input
+                    type="hidden"
+                    name="projectId"
+                    value={entry.project ? String(entry.project.id) : ""}
+                  />
+                  <IconButton
+                    type="submit"
+                    icon={Play}
+                    label={t.actions.resume}
+                    disabled={resuming}
+                  />
+                </form>
+              )}
+              {/* 記録の操作は「その他の操作」のメニューにまとめる。項目は今後増やせる */}
+              <DropdownMenu
+                icon={MoreVertical}
+                label={t.actions.more}
+                disabled={deleting}
+                items={[
+                  {
+                    label: t.actions.delete,
+                    icon: Trash2,
+                    onSelect: handleDelete,
+                    variant: "danger",
+                  },
+                ]}
+              />
+            </div>
           </div>
         </div>
       </div>
