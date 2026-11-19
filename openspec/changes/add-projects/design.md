@@ -30,7 +30,7 @@
 
 ### 2. 色
 
-- `lib/projects/colors.ts` に 10 色のキー（`red`・`orange`・`amber`・`green`・`teal`・`blue`・`violet`・`pink`・`brown`・`sky`）と、それぞれの名前（「赤」「橙」「黄」「緑」「青緑」「青」「紫」「ピンク」「茶」「水色」、`lib/messages.ts`）、Tailwind のクラス（`bg-project-red` など）の対応を置く。Tailwind がクラスを見つけられるよう、クラス名は文字列のまま書く
+- `lib/projects/colors.ts` に 10 色のキー（`red`・`orange`・`amber`・`green`・`teal`・`sky`・`blue`・`violet`・`pink`・`brown`）と、それぞれの名前（「赤」「橙」「黄」「緑」「青緑」「水色」「青」「紫」「ピンク」「茶」、`lib/messages.ts`）、Tailwind のクラス（色の選択に使う背景の `bg-project-red` と、アイコンに使う文字色の `text-project-red` など）の対応を置く。並びは色相の順（赤から紫・ピンク）で、無彩色に近い茶を最後に置く。Tailwind がクラスを見つけられるよう、クラス名は文字列のまま書く
 - `app/globals.css` に `--project-red` などのトークンをライト・ダークの両方で定義し、`@theme inline` で `--color-project-red` として使えるようにする
 - 色の選択は `fieldset`（凡例「色」）の中のラジオボタン 10 個。見た目は色の丸で、ラジオボタンのラベルに色の名前（読み上げ用）と `title` を付ける
 - 代替案: `<input type="color">` で自由に選ぶ → 色コードをデータに持つことになり、ダークモードでの見え方をそろえられないので不採用
@@ -50,12 +50,12 @@
 
 ### 5. 画面
 
-- `components/projects/ProjectIcon.tsx`: プロジェクトの色の丸（`role="img"`、`aria-label` と `title` にプロジェクト名。`decorative` のときは `aria-hidden` にして `title` だけ付ける）。記録の一覧、記録中の枠、サイドバー、プロジェクトの一覧で使う
+- `components/projects/ProjectIcon.tsx`: プロジェクトの色で塗りつぶしたフォルダのアイコン（lucide-react の `Folder` に `fill="currentColor"` と文字色のクラスを付ける。`role="img"`、`aria-label` と `title` にプロジェクト名。`decorative` のときは `aria-hidden` にして `title` だけ付ける）。記録の一覧、記録中の枠、サイドバー、プロジェクトの一覧で使う
 - `components/projects/ProjectSelect.tsx`: `<select name="projectId">`。先頭が「プロジェクトなし」（値は空）、続けて登録順のプロジェクト。記録の開始と修正で使う
 - 「プロジェクト」ページ（`app/projects/page.tsx`）: 見出しの下の `<Suspense>` の中で、async Server Component の `ProjectsView` が `connection()` の後に `listProjects` で読み、表示部品の `ProjectsContent` に渡す（`EntryHistory` / `HistoryContent` と同じ分け方で、表示部分をテストできるようにする）
   - `ProjectForm`（登録）: 名前・クライアント名・説明の入力欄、色の選択、「登録」ボタン（`Plus` アイコン）。登録できたら入力欄を空に戻す
   - `ProjectItem`（1 件）: 色のアイコン・名前・クライアント名・説明と、「編集」（`Pencil`）・「削除」（`Trash2`）ボタン。編集はその場でフォームを開き（`EntryItem` と同じ）、「保存」「キャンセル」。削除は確認してから行い、削除できなかったら理由を表示する
-- トップページと過去の記録: `TimeTracker` と `EntryHistory` が `listProjects` も読み、`StartStopForm`（選択肢）と `EntryList` → `EntryItem`（修正の選択肢）に渡す。`EntryItemData` に `project` を足し、タスク名の右側に `ProjectIcon` を置く。サイドバーの記録中のタスクも同じ。トップページの記録中の枠（`StartStopForm`）だけは、アイコンの横にプロジェクト名を文字で表示する。名前が文字で読めるので、ここではアイコンを読み上げの対象から外し（`ProjectIcon` に `decorative` を渡すと `aria-hidden` になる）、名前を二重に読まないようにする
+- トップページと過去の記録: `TimeTracker` と `EntryHistory` が `listProjects` も読み、`StartStopForm`（選択肢）と `EntryList` → `EntryItem`（修正の選択肢）に渡す。`EntryItemData` に `project` を足し、記録の一覧（`EntryItem`）ではタスク名の左側に `ProjectIcon` を置き、アイコンの位置で記録を見比べやすくする。サイドバーの記録中のタスクと記録中の枠では、タスク名の右側に置く。トップページの記録中の枠（`StartStopForm`）だけは、アイコンの横にプロジェクト名を文字で表示する。名前が文字で読めるので、ここではアイコンを読み上げの対象から外し（`ProjectIcon` に `decorative` を渡すと `aria-hidden` になる）、名前を二重に読まないようにする
 - サイドバー: `SidebarNav` のページのリンクに「プロジェクト」（`/projects`）を足す
 
 ### 6. 文言
