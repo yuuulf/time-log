@@ -69,8 +69,12 @@ export function SidebarShell({ children }: { children: ReactNode }) {
         onClick={(e) => {
           if ((e.target as Element).closest("a")) close();
         }}
-        className={`fixed inset-y-0 left-0 z-50 w-60 shrink-0 overflow-y-auto border-r border-border bg-background p-4 transition-[translate,visibility] md:visible md:sticky md:top-0 md:h-dvh md:translate-x-0 ${
-          open ? "visible translate-x-0" : "invisible -translate-x-full"
+        // 開くときは visibility をすぐ切り替えて閉じるボタンにフォーカスできるようにし、
+        // 閉じるときは visibility も遷移させて、隠れ終わるまで表示を残す
+        className={`fixed inset-y-0 left-0 z-50 w-60 shrink-0 overflow-y-auto border-r border-border bg-background p-4 md:visible md:sticky md:top-0 md:h-dvh md:translate-x-0 ${
+          open
+            ? "visible translate-x-0 transition-transform"
+            : "invisible -translate-x-full transition-[translate,visibility]"
         }`}
       >
         <div className="mb-2 flex justify-end md:hidden">
