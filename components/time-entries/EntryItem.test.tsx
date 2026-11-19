@@ -227,3 +227,95 @@ describe("再開", () => {
     );
   });
 });
+
+describe("プロジェクト", () => {
+  const projects = [
+    { id: 1, name: "社内ツール", color: "teal" },
+    { id: 2, name: "A 社サイト改修", color: "blue" },
+  ];
+  const withProject: EntryItemData = { ...finished, project: projects[0] };
+
+  test("タスク名の左側にプロジェクトの色のアイコンを出し、名前で読み上げる", () => {
+    render(<EntryItem entry={withProject} projects={projects} />);
+
+    const icon = screen.getByRole("img", { name: "社内ツール" });
+    expect(icon.getAttribute("title")).toBe("社内ツール");
+    expect(icon.className).toContain("text-project-teal");
+    // タスク名の行の先頭にアイコンがある
+    const row = icon.closest("p")!;
+    expect(row.textContent).toBe(withProject.taskName);
+    expect(row.firstElementChild?.contains(icon)).toBe(true);
+    expect(row.firstChild).toBe(row.firstElementChild);
+    // 名前は文字では出さない
+    expect(screen.queryByText("社内ツール")).toBeNull();
+  });
+
+  test("プロジェクトのない記録にはアイコンを出さない", () => {
+    render(
+      <EntryItem entry={{ ...finished, project: null }} projects={projects} />,
+    );
+
+    expect(screen.queryByRole("img")).toBeNull();
+  });
+
+  test("修正フォームは今のプロジェクトを選んだ状態で開き、選んだ値を送る", async () => {
+    render(<EntryItem entry={withProject} projects={projects} />);
+    fireEvent.click(screen.getByRole("button", { name: t.actions.edit }));
+    const select = screen.getByLabelText<HTMLSelectElement>(t.project);
+
+    expect(select.value).toBe("1");
+    expect([...select.options].map((o) => o.textContent)).toEqual([
+      t.noProject,
+      "社内ツール",
+      "A 社サイト改修",
+    ]);
+
+    fireEvent.change(select, { target: { value: "" } });
+    fireEvent.click(screen.getByRole("button", { name: t.actions.save }));
+
+    await vi.waitFor(() => expect(updateEntryAction).toHaveBeenCalledOnce());
+    expect(vi.mocked(updateEntryAction).mock.calls[0][2].get("projectId")).toBe(
+      "",
+    );
+  });
+
+  test("修正でプロジェクトが見つからなければ理由を表示し、選んだ値を残す", async () => {
+    vi.mocked(updateEntryAction).mockResolvedValue({
+      errors: { projectId: messages.projects.errors.notFound },
+    });
+    render(<EntryItem entry={withProject} projects={projects} />);
+    fireEvent.click(screen.getByRole("button", { name: t.actions.edit }));
+    const select = screen.getByLabelText<HTMLSelectElement>(t.project);
+
+    fireEvent.change(select, { target: { value: "2" } });
+    fireEvent.click(screen.getByRole("button", { name: t.actions.save }));
+
+    expect(
+      await screen.findByText(messages.projects.errors.notFound),
+    ).toBeDefined();
+    expect(select.value).toBe("2");
+    expect(select.getAttribute("aria-invalid")).toBe("true");
+  });
+
+  test("再開ボタンは元の記録のプロジェクトを送る", async () => {
+    render(<EntryItem entry={withProject} projects={projects} />);
+
+    fireEvent.click(screen.getByRole("button", { name: t.actions.resume }));
+
+    await vi.waitFor(() => expect(startEntryAction).toHaveBeenCalledOnce());
+    const formData = vi.mocked(startEntryAction).mock.calls[0][1];
+    expect(formData.get("taskName")).toBe("資料作成");
+    expect(formData.get("projectId")).toBe("1");
+  });
+
+  test("プロジェクトのない記録の再開は「プロジェクトなし」を送る", async () => {
+    render(<EntryItem entry={finished} projects={projects} />);
+
+    fireEvent.click(screen.getByRole("button", { name: t.actions.resume }));
+
+    await vi.waitFor(() => expect(startEntryAction).toHaveBeenCalledOnce());
+    expect(vi.mocked(startEntryAction).mock.calls[0][1].get("projectId")).toBe(
+      "",
+    );
+  });
+});

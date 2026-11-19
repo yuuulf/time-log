@@ -1,7 +1,16 @@
 "use client";
 
-import { useActionState, useId, useState, useTransition } from "react";
+import {
+  startTransition,
+  useActionState,
+  useId,
+  useState,
+  useTransition,
+} from "react";
 import { Check, Pencil, Play, Trash2, X } from "lucide-react";
+import { ProjectIcon } from "@/components/projects/ProjectIcon";
+import { ProjectSelect } from "@/components/projects/ProjectSelect";
+import type { EntryProject } from "@/components/projects/types";
 import { IconButton } from "@/components/ui/IconButton";
 import {
   deleteEntryAction,
@@ -20,13 +29,22 @@ export type EntryItemData = {
   startedAt: Date;
   /** null なら記録中 */
   endedAt: Date | null;
+  /** 紐づいたプロジェクト。なければ null */
+  project?: EntryProject | null;
 };
 
 /**
  * 記録 1 件の表示。修正ボタンでその場に修正フォームを開き、削除ボタンは確認してから削除する。
- * 終了した記録には再開ボタンを置き、同じタスク名で記録を始める
+ * 終了した記録には再開ボタンを置き、同じタスク名・プロジェクトで記録を始める
  */
-export function EntryItem({ entry }: { entry: EntryItemData }) {
+export function EntryItem({
+  entry,
+  projects = [],
+}: {
+  entry: EntryItemData;
+  /** 修正フォームのプロジェクトの選択肢（登録順） */
+  projects?: EntryProject[];
+}) {
   const [editing, setEditing] = useState(false);
   const [deleteError, setDeleteError] = useState<string>();
   const [deleting, startDeleting] = useTransition();
@@ -38,7 +56,13 @@ export function EntryItem({ entry }: { entry: EntryItemData }) {
   const isRunning = entry.endedAt === null;
 
   if (editing) {
-    return <EditForm entry={entry} onClose={() => setEditing(false)} />;
+    return (
+      <EditForm
+        entry={entry}
+        projects={projects}
+        onClose={() => setEditing(false)}
+      />
+    );
   }
 
   const handleDelete = () => {
@@ -54,6 +78,15 @@ export function EntryItem({ entry }: { entry: EntryItemData }) {
       {/* 狭い画面ではタスク名を 1 段目、時刻・作業時間・ボタンを 2 段目に置く */}
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-4">
         <p className="min-w-0 break-words text-foreground sm:flex-1">
+          {/* プロジェクトはタスク名の左側に色のアイコンで示す（名前はポインタを合わせると出る） */}
+          {entry.project && (
+            <span className="mr-2 inline-flex align-middle">
+              <ProjectIcon
+                name={entry.project.name}
+                color={entry.project.color}
+              />
+            </span>
+          )}
           {entry.taskName || t.untitled}
         </p>
         <div className="flex items-center gap-4">
@@ -76,6 +109,11 @@ export function EntryItem({ entry }: { entry: EntryItemData }) {
             ) : (
               <form action={resumeAction}>
                 <input type="hidden" name="taskName" value={entry.taskName} />
+                <input
+                  type="hidden"
+                  name="projectId"
+                  value={entry.project ? String(entry.project.id) : ""}
+                />
                 <IconButton
                   type="submit"
                   icon={Play}
@@ -110,9 +148,11 @@ export function EntryItem({ entry }: { entry: EntryItemData }) {
 
 function EditForm({
   entry,
+  projects,
   onClose,
 }: {
   entry: EntryItemData;
+  projects: EntryProject[];
   onClose: () => void;
 }) {
   const id = useId();
@@ -120,6 +160,7 @@ function EditForm({
   // 入力エラーのときに入力した値を残すため、値は state で持つ
   const [values, setValues] = useState({
     taskName: entry.taskName,
+    projectId: entry.project ? String(entry.project.id) : "",
     startedAt: toDateTimeLocalValue(entry.startedAt),
     endedAt: entry.endedAt ? toDateTimeLocalValue(entry.endedAt) : "",
   });
@@ -134,7 +175,7 @@ function EditForm({
   const errors = state.errors ?? {};
 
   const field = (
-    name: keyof typeof values,
+    name: "taskName" | "startedAt" | "endedAt",
     label: string,
     type: "text" | "datetime-local",
   ) => (
@@ -162,8 +203,45 @@ function EditForm({
   );
 
   return (
-    <form action={action} className="space-y-3 py-3">
-      {field("taskName", t.taskName, "text")}
+    // <form action> は送信後にフォームをリセットし、選んだプロジェクトが戻ってしまう。
+    // 入力エラーのときに値を残すため、送信は onSubmit で受けて action を呼ぶ
+    <form
+      onSubmit={(e) => {
+        e.preventDefault();
+        const formData = new FormData(e.currentTarget);
+        startTransition(() => action(formData));
+      }}
+      className="space-y-3 py-3"
+    >
+      <div className="grid gap-3 sm:grid-cols-2">
+        {field("taskName", t.taskName, "text")}
+        <div className="space-y-1">
+          <label
+            htmlFor={`${id}-projectId`}
+            className="block text-sm text-muted"
+          >
+            {t.project}
+          </label>
+          <ProjectSelect
+            id={`${id}-projectId`}
+            projects={projects}
+            value={values.projectId}
+            onChange={(e) =>
+              setValues({ ...values, projectId: e.target.value })
+            }
+            aria-invalid={errors.projectId ? true : undefined}
+            aria-describedby={
+              errors.projectId ? `${id}-projectId-error` : undefined
+            }
+            className="w-full"
+          />
+          {errors.projectId && (
+            <p id={`${id}-projectId-error`} className="text-sm text-danger">
+              {errors.projectId}
+            </p>
+          )}
+        </div>
+      </div>
       <div className="grid gap-3 sm:grid-cols-2">
         {field("startedAt", t.startedAt, "datetime-local")}
         {!isRunning && field("endedAt", t.endedAt, "datetime-local")}

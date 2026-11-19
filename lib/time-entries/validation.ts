@@ -7,7 +7,7 @@ export const TASK_NAME_MAX_LENGTH = 200;
 const errors = messages.timeEntries.errors;
 
 export type FieldErrors = Partial<
-  Record<"taskName" | "startedAt" | "endedAt" | "form", string>
+  Record<"taskName" | "projectId" | "startedAt" | "endedAt" | "form", string>
 >;
 
 export type ValidationResult<T> =

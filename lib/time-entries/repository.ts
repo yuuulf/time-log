@@ -1,6 +1,38 @@
 import { and, desc, eq, gte, isNull, lt, max, ne } from "drizzle-orm";
 import type { Db } from "@/lib/db/client";
-import { timeEntries, type TimeEntry } from "@/lib/db/schema";
+import {
+  projects,
+  timeEntries,
+  type Project,
+  type TimeEntry,
+} from "@/lib/db/schema";
+
+/** 記録に付けて返すプロジェクト */
+export type EntryProject = Pick<Project, "id" | "name" | "color">;
+
+/** プロジェクト（紐づいていなければ null）を付けた記録 */
+export type EntryWithProject = TimeEntry & { project: EntryProject | null };
+
+/** 記録とプロジェクトを left join して読むときの列 */
+const entryWithProjectColumns = {
+  entry: timeEntries,
+  project: { id: projects.id, name: projects.name, color: projects.color },
+};
+
+function toEntryWithProject(row: {
+  entry: TimeEntry;
+  project: EntryProject | null;
+}): EntryWithProject {
+  return { ...row.entry, project: row.project };
+}
+
+/** プロジェクトを付けて記録を読むクエリ */
+function selectEntriesWithProject(db: Db) {
+  return db
+    .select(entryWithProjectColumns)
+    .from(timeEntries)
+    .leftJoin(projects, eq(timeEntries.projectId, projects.id));
+}
 
 /** 一覧に表示する期間（現在時刻からさかのぼる日数） */
 export const RECENT_DAYS = 30;
@@ -8,18 +40,26 @@ export const RECENT_DAYS = 30;
 /** タスク名の候補の最大件数 */
 export const SUGGESTION_LIMIT = 20;
 
-/** 記録中の記録を返す。なければ undefined */
-export function getRunningEntry(db: Db): TimeEntry | undefined {
-  return db.select().from(timeEntries).where(isNull(timeEntries.endedAt)).get();
+/** 記録中の記録をプロジェクト付きで返す。なければ undefined */
+export function getRunningEntry(db: Db): EntryWithProject | undefined {
+  const row = selectEntriesWithProject(db)
+    .where(isNull(timeEntries.endedAt))
+    .get();
+  return row && toEntryWithProject(row);
 }
 
 /**
  * 記録を開始する。記録中の記録があれば、同じ時刻で終了してから開始する。
- * タスク名は入力チェック済み（前後の空白を除いたもの）を渡す。
+ * タスク名は入力チェック済み（前後の空白を除いたもの）、projectId は存在を確かめたものを渡す
+ * （省略時はプロジェクトなし）。
  */
 export function startEntry(
   db: Db,
-  { taskName, now }: { taskName: string; now: Date },
+  {
+    taskName,
+    projectId = null,
+    now,
+  }: { taskName: string; projectId?: number | null; now: Date },
 ): TimeEntry {
   return db.transaction((tx) => {
     tx.update(timeEntries)
@@ -28,7 +68,13 @@ export function startEntry(
       .run();
     return tx
       .insert(timeEntries)
-      .values({ taskName, startedAt: now, createdAt: now, updatedAt: now })
+      .values({
+        taskName,
+        projectId,
+        startedAt: now,
+        createdAt: now,
+        updatedAt: now,
+      })
       .returning()
       .get();
   });
@@ -49,25 +95,27 @@ export function getEntry(db: Db, id: number): TimeEntry | undefined {
   return db.select().from(timeEntries).where(eq(timeEntries.id, id)).get();
 }
 
-/** 直近 RECENT_DAYS 日（現在時刻から RECENT_DAYS×24 時間前以降）に開始した記録を新しい順に返す */
-export function listRecentEntries(db: Db, now: Date): TimeEntry[] {
+/** 直近 RECENT_DAYS 日（現在時刻から RECENT_DAYS×24 時間前以降）に開始した記録を、プロジェクト付きで新しい順に返す */
+export function listRecentEntries(db: Db, now: Date): EntryWithProject[] {
   const since = new Date(now.getTime() - RECENT_DAYS * 24 * 60 * 60 * 1000);
-  return db
-    .select()
-    .from(timeEntries)
+  return selectEntriesWithProject(db)
     .where(gte(timeEntries.startedAt, since))
     .orderBy(desc(timeEntries.startedAt), desc(timeEntries.id))
-    .all();
+    .all()
+    .map(toEntryWithProject);
 }
 
-/** from 以降、to より前（to は含まない）に開始した記録を新しい順に返す */
-export function listEntriesBetween(db: Db, from: Date, to: Date): TimeEntry[] {
-  return db
-    .select()
-    .from(timeEntries)
+/** from 以降、to より前（to は含まない）に開始した記録を、プロジェクト付きで新しい順に返す */
+export function listEntriesBetween(
+  db: Db,
+  from: Date,
+  to: Date,
+): EntryWithProject[] {
+  return selectEntriesWithProject(db)
     .where(and(gte(timeEntries.startedAt, from), lt(timeEntries.startedAt, to)))
     .orderBy(desc(timeEntries.startedAt), desc(timeEntries.id))
-    .all();
+    .all()
+    .map(toEntryWithProject);
 }
 
 /** 過去に使ったタスク名を、最近使った順に重複なく返す。空のタスク名は含めない */
@@ -85,14 +133,19 @@ export function listTaskNameSuggestions(db: Db): string[] {
 }
 
 /**
- * 記録を修正する。入力チェック済みの値を渡す。
+ * 記録を修正する。入力チェック済みの値を渡す。projectId を省略するとプロジェクトは変えない。
  * 記録中の記録では終了時刻を変えない（終了は stopRunningEntry で行う）。
  * 記録が存在しなければ undefined を返す。
  */
 export function updateEntry(
   db: Db,
   id: number,
-  input: { taskName: string; startedAt: Date; endedAt?: Date },
+  input: {
+    taskName: string;
+    projectId?: number | null;
+    startedAt: Date;
+    endedAt?: Date;
+  },
   now: Date,
 ): TimeEntry | undefined {
   const entry = getEntry(db, id);
@@ -102,6 +155,7 @@ export function updateEntry(
     .update(timeEntries)
     .set({
       taskName: input.taskName,
+      ...(input.projectId === undefined ? {} : { projectId: input.projectId }),
       startedAt: input.startedAt,
       ...(isRunning ? {} : { endedAt: input.endedAt ?? entry.endedAt }),
       updatedAt: now,

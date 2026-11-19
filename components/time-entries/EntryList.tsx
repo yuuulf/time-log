@@ -1,5 +1,6 @@
 import { messages } from "@/lib/messages";
 import { formatDateHeading, toDateKey } from "@/lib/time";
+import type { EntryProject } from "@/components/projects/types";
 import { EntryItem, type EntryItemData } from "./EntryItem";
 
 const t = messages.timeEntries;
@@ -31,6 +32,8 @@ type Props = {
   heading?: string;
   /** 記録がないときの文言。省略時は記録の始め方の案内 */
   emptyMessage?: string;
+  /** 修正フォームのプロジェクトの選択肢（登録順） */
+  projects?: EntryProject[];
 };
 
 /** 記録の一覧 */
@@ -38,6 +41,7 @@ export function EntryList({
   entries,
   heading = t.listHeading,
   emptyMessage = t.empty,
+  projects = [],
 }: Props) {
   return (
     <section aria-labelledby="entry-list-heading" className="space-y-4">
@@ -58,7 +62,7 @@ export function EntryList({
             <ul className="divide-y divide-border">
               {group.entries.map((entry) => (
                 <li key={entry.id}>
-                  <EntryItem entry={entry} />
+                  <EntryItem entry={entry} projects={projects} />
                 </li>
               ))}
             </ul>

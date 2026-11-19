@@ -13,6 +13,7 @@ import {
   stopRunningEntry,
   updateEntry,
 } from "./repository";
+import { createProject, updateProject } from "@/lib/projects/repository";
 
 const at = (time: string) => new Date(`2026-11-18T${time}+09:00`);
 
@@ -255,5 +256,105 @@ describe("記録の削除", () => {
 
   test("存在しない記録の削除は false を返す", () => {
     expect(deleteEntry(db, 999)).toBe(false);
+  });
+});
+
+describe("プロジェクトの紐づけ", () => {
+  const addProject = (name: string, color: "teal" | "blue" = "teal") =>
+    createProject(
+      db,
+      { name, color, clientName: "", description: "" },
+      at("08:00:00"),
+    );
+
+  test("プロジェクトを付けて開始でき、記録中の記録にプロジェクトが付く", () => {
+    const project = addProject("社内ツール");
+
+    const entry = startEntry(db, {
+      taskName: "資料作成",
+      projectId: project.id,
+      now: at("09:00:00"),
+    });
+
+    expect(entry.projectId).toBe(project.id);
+    expect(getRunningEntry(db)?.project).toEqual({
+      id: project.id,
+      name: "社内ツール",
+      color: "teal",
+    });
+  });
+
+  test("プロジェクトを省略して開始するとプロジェクトなし", () => {
+    startEntry(db, { taskName: "資料作成", now: at("09:00:00") });
+
+    expect(getRunningEntry(db)?.project).toBeNull();
+  });
+
+  test("一覧の記録にプロジェクトが付き、紐づかない記録は null", () => {
+    const project = addProject("社内ツール");
+    startEntry(db, {
+      taskName: "資料作成",
+      projectId: project.id,
+      now: at("09:00:00"),
+    });
+    startEntry(db, { taskName: "打ち合わせ", now: at("10:00:00") });
+
+    const entries = listRecentEntries(db, at("11:00:00"));
+    expect(entries.map((e) => [e.taskName, e.project?.name ?? null])).toEqual([
+      ["打ち合わせ", null],
+      ["資料作成", "社内ツール"],
+    ]);
+    expect(
+      listEntriesBetween(db, at("00:00:00"), at("23:59:59")).map(
+        (e) => e.project?.name ?? null,
+      ),
+    ).toEqual([null, "社内ツール"]);
+  });
+
+  test("修正でプロジェクトを変える・外す。省略すれば変えない", () => {
+    const a = addProject("社内ツール");
+    const b = addProject("A 社サイト改修");
+    const entry = startEntry(db, {
+      taskName: "資料作成",
+      projectId: a.id,
+      now: at("09:00:00"),
+    });
+    const base = { taskName: "資料作成", startedAt: at("09:00:00") };
+
+    updateEntry(db, entry.id, { ...base, projectId: b.id }, at("09:10:00"));
+    expect(getRunningEntry(db)?.project?.name).toBe("A 社サイト改修");
+
+    updateEntry(db, entry.id, base, at("09:20:00"));
+    expect(getRunningEntry(db)?.project?.name).toBe("A 社サイト改修");
+
+    updateEntry(db, entry.id, { ...base, projectId: null }, at("09:30:00"));
+    expect(getRunningEntry(db)?.project).toBeNull();
+  });
+
+  test("プロジェクトを編集すると、記録の読み込み結果にも反映される", () => {
+    const project = addProject("社内ツール");
+    startEntry(db, {
+      taskName: "資料作成",
+      projectId: project.id,
+      now: at("09:00:00"),
+    });
+
+    updateProject(
+      db,
+      project.id,
+      {
+        name: "社内ツール開発",
+        color: "blue",
+        clientName: "",
+        description: "",
+      },
+      at("09:30:00"),
+    );
+
+    expect(getRunningEntry(db)?.project).toEqual({
+      id: project.id,
+      name: "社内ツール開発",
+      color: "blue",
+    });
   });
 });

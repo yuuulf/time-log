@@ -40,3 +40,34 @@ test("記録中のタスクがなければ、ないことを伝える", () => {
   expect(screen.getByText(messages.nav.noRunning)).toBeDefined();
   expect(screen.queryByText(new RegExp(t.startedAt))).toBeNull();
 });
+
+test("プロジェクトの紐づいた記録中のタスクは、タスク名の右側にアイコンを出す", () => {
+  render(
+    <RunningTaskView
+      running={{
+        taskName: "資料作成",
+        startedAt: new Date("2026-11-19T09:00:00+09:00"),
+        project: { id: 1, name: "社内ツール", color: "teal" },
+      }}
+    />,
+  );
+
+  const icon = screen.getByRole("img", { name: "社内ツール" });
+  expect(icon.getAttribute("title")).toBe("社内ツール");
+  // サイドバーでは名前を文字で出さない
+  expect(screen.queryByText("社内ツール")).toBeNull();
+});
+
+test("プロジェクトのない記録中のタスクにはアイコンを出さない", () => {
+  render(
+    <RunningTaskView
+      running={{
+        taskName: "資料作成",
+        startedAt: new Date("2026-11-19T09:00:00+09:00"),
+        project: null,
+      }}
+    />,
+  );
+
+  expect(screen.queryByRole("img")).toBeNull();
+});

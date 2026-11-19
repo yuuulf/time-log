@@ -11,6 +11,17 @@
   --primary: #0f766e; /* teal-700 */
   --primary-foreground: #ffffff;
   --danger: #dc2626;
+  /* プロジェクトの色（lib/projects/colors.ts のキーと対応） */
+  --project-red: #dc2626;
+  --project-orange: #ea580c;
+  --project-amber: #ca8a04;
+  --project-green: #16a34a;
+  --project-teal: #0d9488;
+  --project-sky: #0ea5e9;
+  --project-blue: #2563eb;
+  --project-violet: #7c3aed;
+  --project-pink: #db2777;
+  --project-brown: #8b5a2b;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -22,6 +33,17 @@
     --primary: #14b8a6; /* teal-500 */
     --primary-foreground: #042f2e; /* teal-950 */
     --danger: #f87171;
+    /* プロジェクトの色 */
+    --project-red: #f87171;
+    --project-orange: #fb923c;
+    --project-amber: #facc15;
+    --project-green: #4ade80;
+    --project-teal: #2dd4bf;
+    --project-sky: #7dd3fc;
+    --project-blue: #3b82f6;
+    --project-violet: #a78bfa;
+    --project-pink: #f472b6;
+    --project-brown: #c08457;
   }
 }
 
@@ -33,6 +55,16 @@
   --color-primary: var(--primary);
   --color-primary-foreground: var(--primary-foreground);
   --color-danger: var(--danger);
+  --color-project-red: var(--project-red);
+  --color-project-orange: var(--project-orange);
+  --color-project-amber: var(--project-amber);
+  --color-project-green: var(--project-green);
+  --color-project-teal: var(--project-teal);
+  --color-project-sky: var(--project-sky);
+  --color-project-blue: var(--project-blue);
+  --color-project-violet: var(--project-violet);
+  --color-project-pink: var(--project-pink);
+  --color-project-brown: var(--project-brown);
   --font-sans:
     var(--font-geist-sans), "Hiragino Sans", "Hiragino Kaku Gothic ProN",
     "Noto Sans JP", "Yu Gothic", sans-serif;

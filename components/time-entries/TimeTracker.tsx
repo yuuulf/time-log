@@ -1,5 +1,6 @@
 import { connection } from "next/server";
 import { getDb } from "@/lib/db";
+import { listProjects } from "@/lib/projects/repository";
 import {
   getRunningEntry,
   listRecentEntries,
@@ -17,24 +18,38 @@ export async function TimeTracker() {
   const running = getRunningEntry(db);
   const entries = listRecentEntries(db, now);
   const suggestions = listTaskNameSuggestions(db);
+  const projects = listProjects(db).map(({ id, name, color }) => ({
+    id,
+    name,
+    color,
+  }));
 
   return (
     <div className="space-y-8">
       <StartStopForm
         running={
           running
-            ? { taskName: running.taskName, startedAt: running.startedAt }
+            ? {
+                taskName: running.taskName,
+                startedAt: running.startedAt,
+                project: running.project,
+              }
             : null
         }
         suggestions={suggestions}
+        projects={projects}
       />
       <EntryList
-        entries={entries.map(({ id, taskName, startedAt, endedAt }) => ({
-          id,
-          taskName,
-          startedAt,
-          endedAt,
-        }))}
+        entries={entries.map(
+          ({ id, taskName, startedAt, endedAt, project }) => ({
+            id,
+            taskName,
+            startedAt,
+            endedAt,
+            project,
+          }),
+        )}
+        projects={projects}
       />
     </div>
   );
