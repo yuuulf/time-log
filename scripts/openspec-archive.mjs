@@ -243,6 +243,16 @@ export function run({
     return done("failed");
   }
 
+  // CI と同じ検証。目的が短すぎるなど、アーカイブ後に CI が落ちる状態ならコミットしない
+  const validation = exec("npx", ["openspec", "validate", "--all", "--strict"]);
+  if (validation.code !== 0) {
+    restore();
+    comment(
+      `アーカイブ後の spec が OpenSpec の検証に通らないため、どの change もアーカイブしませんでした。新しい spec の目的（Purpose）は proposal の「### New Capabilities」の説明から書き込みます。50 文字以上で書いてから \`archive\` ラベルを付け直してください。\n\n${formatOutput(validation)}`,
+    );
+    return done("failed");
+  }
+
   const message = `${targets.join("、")} をアーカイブ`;
   for (const args of [
     ["add", "--all", "--", "openspec"],

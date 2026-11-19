@@ -330,6 +330,30 @@ describe("run", () => {
       spec("全画面に共通する外枠"),
     );
     expect(calls).toContain("git commit -m add-projects をアーカイブ");
+    // 置き換えた後、コミットの前に検証する
+    const validate = calls.indexOf("npx openspec validate --all --strict");
+    expect(validate).toBeGreaterThan(
+      calls.indexOf("npx openspec archive add-projects --yes"),
+    );
+    expect(validate).toBeLessThan(
+      calls.indexOf("git commit -m add-projects をアーカイブ"),
+    );
+  });
+
+  test("アーカイブ後の検証に失敗したときはコミットせず、作業ツリーを戻して結果をコメントする", () => {
+    const { result, calls, committed, comments } = setup({
+      diff: ["openspec/changes/add-projects/tasks.md"],
+      changes: [done("add-projects")],
+      fail: {
+        "npx openspec validate":
+          "Purpose section is too brief (less than 50 characters)",
+      },
+    });
+    expect(result.status).toBe("failed");
+    expect(committed).toBe(false);
+    expect(calls).toContain("git reset --hard HEAD");
+    expect(comments[0]).toContain("50 文字以上");
+    expect(comments[0]).toContain("Purpose section is too brief");
   });
 
   test("新しい spec の説明が proposal にないときはコミットせず、作業ツリーを戻してコメントする", () => {
