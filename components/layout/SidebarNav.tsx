@@ -10,10 +10,17 @@ const pages = [
   { href: "/projects", label: messages.projects.title },
 ] as const;
 
-/** サイドバーのページのリンク。今いるページのリンクに aria-current を付ける */
+/**
+ * サイドバーのページのリンク。今いるページのリンクに aria-current を付ける。
+ * usePathname は動的なパラメータのページでプリレンダー中に止まるため、使う側で <Suspense> で囲み、
+ * フォールバックには `<SidebarNavLinks pathname={null} />`（選ばれている表示なし）を出す
+ */
 export function SidebarNav() {
-  const pathname = usePathname();
+  return <SidebarNavLinks pathname={usePathname()} />;
+}
 
+/** ページのリンクの一覧。pathname が null なら、どのリンクも選ばれている表示にしない */
+export function SidebarNavLinks({ pathname }: { pathname: string | null }) {
   return (
     <nav aria-label={messages.nav.label}>
       <ul className="space-y-1">

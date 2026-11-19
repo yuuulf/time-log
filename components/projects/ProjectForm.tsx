@@ -8,12 +8,8 @@ import {
   createProjectAction,
   type ProjectActionState,
 } from "@/lib/projects/actions";
-import {
-  DEFAULT_PROJECT_COLOR,
-  PROJECT_COLORS,
-  projectColorClass,
-  projectColorName,
-} from "@/lib/projects/colors";
+import { DEFAULT_PROJECT_COLOR } from "@/lib/projects/colors";
+import { ProjectColorPicker } from "./ProjectColorPicker";
 
 const t = messages.projects;
 
@@ -117,30 +113,14 @@ export function ProjectForm() {
         />
         {errorText("description")}
       </div>
-      <fieldset className="space-y-1" aria-describedby={describedBy("color")}>
-        <legend className="text-sm text-muted">{t.color}</legend>
-        <div className="flex flex-wrap gap-2">
-          {PROJECT_COLORS.map((color) => (
-            <label key={color} title={projectColorName(color)}>
-              <input
-                type="radio"
-                name="color"
-                value={color}
-                checked={values.color === color}
-                onChange={() => setValues({ ...values, color })}
-                className="peer sr-only"
-              />
-              <span className="sr-only">{projectColorName(color)}</span>
-              {/* 選んだ色は外側の輪で示す */}
-              <span
-                aria-hidden="true"
-                className={`block size-8 cursor-pointer rounded-full border-2 border-background ring-1 ring-border peer-checked:ring-2 peer-checked:ring-foreground peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-foreground ${projectColorClass(color)}`}
-              />
-            </label>
-          ))}
-        </div>
+      <ProjectColorPicker
+        name="color"
+        value={values.color}
+        onChange={(color) => setValues({ ...values, color })}
+        aria-describedby={describedBy("color")}
+      >
         {errorText("color")}
-      </fieldset>
+      </ProjectColorPicker>
       {errors.form && (
         <p role="alert" className="text-sm text-danger">
           {errors.form}

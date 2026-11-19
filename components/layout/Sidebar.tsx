@@ -2,7 +2,7 @@ import Link from "next/link";
 import { Suspense } from "react";
 import { messages } from "@/lib/messages";
 import { RunningTask } from "./RunningTask";
-import { SidebarNav } from "./SidebarNav";
+import { SidebarNav, SidebarNavLinks } from "./SidebarNav";
 import { SidebarShell } from "./SidebarShell";
 
 /** 全ページ共通のサイドバー。上からアプリ名・記録中のタスク・ページのリンクを置く */
@@ -25,7 +25,10 @@ export function Sidebar() {
           <RunningTask />
         </Suspense>
       </div>
-      <SidebarNav />
+      {/* 今いるページはリクエストごとに決まる（動的なパラメータのページがある）ため、<Suspense> の中に置く */}
+      <Suspense fallback={<SidebarNavLinks pathname={null} />}>
+        <SidebarNav />
+      </Suspense>
     </SidebarShell>
   );
 }

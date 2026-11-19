@@ -1,7 +1,7 @@
 import { render, screen, within } from "@testing-library/react";
 import { beforeEach, expect, test, vi } from "vitest";
 import { messages } from "@/lib/messages";
-import { SidebarNav } from "./SidebarNav";
+import { SidebarNav, SidebarNavLinks } from "./SidebarNav";
 
 const navigation = vi.hoisted(() => ({ pathname: "/" }));
 vi.mock("next/navigation", () => ({
@@ -79,4 +79,16 @@ test("プロジェクトのページでは「プロジェクト」だけが今�
       .getByRole("link", { name: messages.history.title })
       .hasAttribute("aria-current"),
   ).toBe(false);
+});
+
+test("フォールバック（pathname が null）では、同じリンクを選ばれている表示なしで出す", () => {
+  render(<SidebarNavLinks pathname={null} />);
+
+  const links = within(nav()).getAllByRole("link");
+  expect(links.map((a) => a.textContent)).toEqual([
+    messages.nav.home,
+    messages.history.title,
+    messages.projects.title,
+  ]);
+  expect(links.some((a) => a.getAttribute("aria-current"))).toBe(false);
 });
