@@ -5,7 +5,7 @@
 - [x] 1.1 `scripts/openspec-archive.mjs` に `parseNewCapabilities` と、アーカイブ後に仮の目的を proposal の説明に置き換える処理を足す（design 決定 1・2）。`openspec-archive.test.ts` で、New Capabilities の読み取り（複数・「（なし）」・コメント・空の説明）、置き換えてからコミットすること、説明がないときにコミットせず作業ツリーを戻してコメントすること、既存の capability だけのときに spec を変えないことをテストする（コミット: アーカイブで新しい spec の目的を proposal から書き込む）
 - [x] 1.2 `openspec/config.yaml` の proposal のルールに、New Capabilities の説明が spec の目的になることを足す（design 決定 3）（コミット: proposal のルールに capability の説明の書き方を足す）
 - [x] 1.3 置き換えた後、コミットの前に `openspec validate --all --strict` を実行し、失敗したら作業ツリーを戻して検証の結果をコメントする（design 決定 2）。`openspec-archive.test.ts` で、検証に失敗したときにコミットせずコメントすること、成功したときにコミットすることをテストする（コミット: アーカイブ後の spec をコミット前に検証する）
-- [ ] 1.4 `openspec/config.yaml` の proposal のルールに、説明を 50 文字以上で書くことを足す（design 決定 3）（コミット: capability の説明の長さをルールに足す）
+- [x] 1.4 `openspec/config.yaml` の proposal のルールに、説明を 50 文字以上で書くことを足す（design 決定 3）（コミット: capability の説明の長さをルールに足す）
 
 ## 2. 確認とドキュメント
 

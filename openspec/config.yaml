@@ -14,7 +14,7 @@ rules:
   proposal:
     - スコープ外（やらないこと）を明記する
     - README.md の更新が必要かどうかを記載する
-    - New Capabilities の各 capability の説明は、アーカイブでその spec の目的（Purpose）になる。その capability が何のためのものかが分かる文で書く
+    - New Capabilities の各 capability の説明は、アーカイブでその spec の目的（Purpose）になる。その capability が何のためのものかが分かる 50 文字以上の文で書く（短いと OpenSpec の検証に通らず、アーカイブできない）
   specs:
     - シナリオはユーザーから観察できる振る舞いで書く
   design:
