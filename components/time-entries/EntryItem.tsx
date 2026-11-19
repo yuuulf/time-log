@@ -255,7 +255,7 @@ export function EntryItem({
       <div className="flex flex-col gap-1 lg:flex-row lg:items-center lg:gap-3">
         <div className="flex min-w-0 items-center gap-2 lg:flex-1">
           {/* プロジェクトはタスク名の左側に、色のアイコンと名前で示す。選ぶと保存する */}
-          <div className="w-40 shrink-0">
+          <div className="w-40 shrink-0 sm:w-60">
             <ProjectPicker
               value={project}
               projects={projects}
