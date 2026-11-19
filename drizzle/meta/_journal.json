@@ -8,6 +8,13 @@
       "when": 1794977142679,
       "tag": "0000_create_time_entries",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1795067354115,
+      "tag": "0001_add_projects",
+      "breakpoints": true
     }
   ]
 }

@@ -2,7 +2,7 @@
 
 ## 1. DB
 
-- [ ] 1.1 `lib/db/schema.ts` に `projects` テーブルと `time_entries.project_id`（外部キー、`ON DELETE RESTRICT`、インデックス）を足し、`npm run db:generate` でマイグレーションを作る（design 決定 1）。`client.test.ts` で、`projects` テーブルができること、記録が紐づいたプロジェクトを DB で消そうとするとエラーになることをテストする。既存の DB のコピーにマイグレーションを適用し、記録が残ることを確認する（コミット: プロジェクトのテーブルを追加）
+- [x] 1.1 `lib/db/schema.ts` に `projects` テーブルと `time_entries.project_id`（外部キー、`ON DELETE RESTRICT`、インデックス）を足し、`npm run db:generate` でマイグレーションを作る（design 決定 1）。`client.test.ts` で、`projects` テーブルができること、記録が紐づいたプロジェクトを DB で消そうとするとエラーになることをテストする。既存の DB のコピーにマイグレーションを適用し、記録が残ることを確認する（コミット: プロジェクトのテーブルを追加）
 
 ## 2. プロジェクトのロジック
 
