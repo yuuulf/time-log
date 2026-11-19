@@ -107,6 +107,35 @@ export function fillPurposes({
   return missing.sort();
 }
 
+/** アーカイブ後の検証に失敗したときの、出力に合わせた直し方の案内 */
+const VALIDATION_HINTS = [
+  {
+    pattern: /Purpose section/,
+    message:
+      "新しい spec の目的（Purpose）は、proposal の「### New Capabilities」の説明から書き込みます。説明を 50 文字以上で書いてください。",
+  },
+  {
+    pattern: /Requirement text is very long/,
+    message:
+      "要件の本文が長すぎます（500 文字超）。例や細かい場合はシナリオに移すか、要件を 1 つの振る舞いごとに分けてください。",
+  },
+];
+
+/**
+ * 検証の出力から、当てはまる直し方の案内を返す。どれにも当たらなければ一般の案内を返す。
+ *
+ * @param {string} output 検証の出力（stdout と stderr）
+ * @returns {string[]}
+ */
+export function validationHints(output) {
+  const hints = VALIDATION_HINTS.filter(({ pattern }) =>
+    pattern.test(output),
+  ).map(({ message }) => message);
+  return hints.length > 0
+    ? hints
+    : ["下の検証の結果を見て、spec を直してください。"];
+}
+
 /** PR コメントに載せるコマンド出力の最大文字数 */
 const MAX_OUTPUT_LENGTH = 3000;
 
@@ -247,8 +276,11 @@ export function run({
   const validation = exec("npx", ["openspec", "validate", "--all", "--strict"]);
   if (validation.code !== 0) {
     restore();
+    const hints = validationHints(`${validation.stdout}\n${validation.stderr}`)
+      .map((hint) => `- ${hint}`)
+      .join("\n");
     comment(
-      `アーカイブ後の spec が OpenSpec の検証に通らないため、どの change もアーカイブしませんでした。新しい spec の目的（Purpose）は proposal の「### New Capabilities」の説明から書き込みます。50 文字以上で書いてから \`archive\` ラベルを付け直してください。\n\n${formatOutput(validation)}`,
+      `アーカイブ後の spec が OpenSpec の検証に通らないため、どの change もアーカイブしませんでした。\n\n${hints}\n\n直したら \`archive\` ラベルを付け直してください。\n\n${formatOutput(validation)}`,
     );
     return done("failed");
   }
