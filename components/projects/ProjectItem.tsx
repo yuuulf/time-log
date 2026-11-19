@@ -1,29 +1,27 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { Pencil, Trash2 } from "lucide-react";
-import { IconButton } from "@/components/ui/IconButton";
+import Link from "next/link";
+import { MoreVertical, Trash2 } from "lucide-react";
+import { DropdownMenu } from "@/components/ui/DropdownMenu";
 import { messages } from "@/lib/messages";
 import { deleteProjectAction } from "@/lib/projects/actions";
-import { ProjectForm } from "./ProjectForm";
 import { ProjectIcon } from "./ProjectIcon";
 import type { ProjectData } from "./types";
 
 const t = messages.projects;
 
-/** プロジェクト 1 件の表示。編集ボタンでその場にフォームを開き、削除ボタンは確認してから削除する */
-export function ProjectItem({ project }: { project: ProjectData }) {
-  const [editing, setEditing] = useState(false);
+/**
+ * プロジェクト一覧の 1 行。色のアイコン・名前（詳細画面へのリンク）・クライアント名を出す。
+ * 編集は詳細画面で行い、削除は「その他の操作」のメニューから確認してから行う
+ */
+export function ProjectItem({
+  project,
+}: {
+  project: Pick<ProjectData, "id" | "name" | "color" | "clientName">;
+}) {
   const [deleteError, setDeleteError] = useState<string>();
   const [deleting, startDeleting] = useTransition();
-
-  if (editing) {
-    return (
-      <div className="py-3">
-        <ProjectForm project={project} onClose={() => setEditing(false)} />
-      </div>
-    );
-  }
 
   const handleDelete = () => {
     if (!window.confirm(t.confirmDelete)) return;
@@ -34,40 +32,36 @@ export function ProjectItem({ project }: { project: ProjectData }) {
   };
 
   return (
-    <div className="space-y-1 py-3">
-      <div className="flex items-start gap-3">
-        <div className="mt-1">
-          <ProjectIcon name={project.name} color={project.color} decorative />
-        </div>
-        <div className="min-w-0 flex-1 space-y-0.5">
-          <p className="font-medium break-words text-foreground">
+    <div className="space-y-1 py-2">
+      <div className="flex items-center gap-3">
+        {/* 名前を文字で出すので、アイコンは読み上げの対象から外す */}
+        <ProjectIcon name={project.name} color={project.color} decorative />
+        <div className="flex min-w-0 flex-1 flex-wrap items-baseline gap-x-3">
+          <Link
+            href={`/projects/${project.id}`}
+            className="min-w-0 font-medium break-words text-foreground underline-offset-4 hover:underline"
+          >
             {project.name}
-          </p>
+          </Link>
           {project.clientName && (
-            <p className="text-sm break-words text-muted">
+            <p className="min-w-0 text-sm break-words text-muted">
               {project.clientName}
             </p>
           )}
-          {project.description && (
-            <p className="text-sm break-words whitespace-pre-wrap text-muted">
-              {project.description}
-            </p>
-          )}
         </div>
-        <div className="flex gap-2">
-          <IconButton
-            icon={Pencil}
-            label={t.actions.edit}
-            onClick={() => setEditing(true)}
-          />
-          <IconButton
-            variant="danger"
-            icon={Trash2}
-            label={t.actions.delete}
-            onClick={handleDelete}
-            disabled={deleting}
-          />
-        </div>
+        <DropdownMenu
+          icon={MoreVertical}
+          label={t.actions.more}
+          disabled={deleting}
+          items={[
+            {
+              label: t.actions.delete,
+              icon: Trash2,
+              onSelect: handleDelete,
+              variant: "danger",
+            },
+          ]}
+        />
       </div>
       {deleteError && (
         <p role="alert" className="text-sm text-danger">

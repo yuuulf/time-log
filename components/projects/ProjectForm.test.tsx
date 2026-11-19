@@ -6,16 +6,13 @@ import { ProjectForm } from "./ProjectForm";
 
 vi.mock("@/lib/projects/actions", () => ({
   createProjectAction: vi.fn(),
-  updateProjectAction: vi.fn(),
 }));
 
-const { createProjectAction, updateProjectAction } =
-  await import("@/lib/projects/actions");
+const { createProjectAction } = await import("@/lib/projects/actions");
 const t = messages.projects;
 
 beforeEach(() => {
   vi.mocked(createProjectAction).mockReset().mockResolvedValue({ ok: true });
-  vi.mocked(updateProjectAction).mockReset().mockResolvedValue({ ok: true });
 });
 
 const input = (label: string) => screen.getByLabelText<HTMLInputElement>(label);
@@ -72,44 +69,5 @@ describe("登録", () => {
     expect(input(t.name).value).toBe("社内ツール");
     expect(input(t.name).getAttribute("aria-invalid")).toBe("true");
     expect(radio("green").checked).toBe(true);
-  });
-});
-
-describe("編集", () => {
-  const project = {
-    id: 3,
-    name: "社内ツール",
-    color: "violet",
-    clientName: "自社",
-    description: "説明",
-  };
-
-  test("今の値が入っていて、保存で送り、成功したら閉じる", async () => {
-    const onClose = vi.fn();
-    render(<ProjectForm project={project} onClose={onClose} />);
-
-    expect(input(t.name).value).toBe("社内ツール");
-    expect(input(t.clientName).value).toBe("自社");
-    expect(input(t.description).value).toBe("説明");
-    expect(radio("violet").checked).toBe(true);
-
-    fireEvent.change(input(t.name), { target: { value: "社内ツール開発" } });
-    fireEvent.click(screen.getByRole("button", { name: t.actions.save }));
-
-    await vi.waitFor(() => expect(updateProjectAction).toHaveBeenCalledOnce());
-    const [id, , formData] = vi.mocked(updateProjectAction).mock.calls[0];
-    expect(id).toBe(3);
-    expect(formData.get("name")).toBe("社内ツール開発");
-    await vi.waitFor(() => expect(onClose).toHaveBeenCalledOnce());
-  });
-
-  test("キャンセルで保存せずに閉じる", () => {
-    const onClose = vi.fn();
-    render(<ProjectForm project={project} onClose={onClose} />);
-
-    fireEvent.click(screen.getByRole("button", { name: t.actions.cancel }));
-
-    expect(onClose).toHaveBeenCalledOnce();
-    expect(updateProjectAction).not.toHaveBeenCalled();
   });
 });

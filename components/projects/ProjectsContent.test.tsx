@@ -31,7 +31,7 @@ test("登録欄と、渡した順の一覧を表示する", () => {
   expect(
     within(list)
       .getAllByRole("listitem")
-      .map((li) => li.querySelector("p")?.textContent),
+      .map((li) => li.querySelector("a")?.textContent),
   ).toEqual(["社内ツール", "A 社サイト改修"]);
   expect(screen.queryByText(t.empty)).toBeNull();
 });
