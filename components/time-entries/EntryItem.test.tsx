@@ -120,6 +120,9 @@ describe("時刻の編集", () => {
     expect(input.className).toContain(
       "[&::-webkit-calendar-picker-indicator]:hidden",
     );
+    // 時刻の表示の上に重ねるので、背景は透けさせない
+    expect(input.className).toContain("bg-background");
+    expect(input.className).not.toContain("bg-transparent");
   });
 
   test("Tab で時刻にフォーカスしても入力欄になる", () => {

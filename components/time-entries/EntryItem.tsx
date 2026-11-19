@@ -210,7 +210,7 @@ export function EntryItem({
         onKeyDown={(e) => handleKeyDown(field, e)}
         aria-invalid={errors[field] ? true : undefined}
         aria-describedby={errors[field] ? `${id}-${field}-error` : undefined}
-        className={`min-w-0 rounded-md border border-transparent bg-transparent px-2 py-1.5 text-foreground tabular-nums placeholder:text-muted hover:border-border focus:border-primary focus:outline-none aria-[invalid=true]:border-danger [&::-webkit-calendar-picker-indicator]:hidden ${className}`}
+        className={`min-w-0 rounded-md border border-transparent px-2 py-1.5 text-foreground tabular-nums placeholder:text-muted hover:border-border focus:border-primary focus:outline-none aria-[invalid=true]:border-danger [&::-webkit-calendar-picker-indicator]:hidden ${className}`}
       />
     </>
   );
@@ -242,7 +242,7 @@ export function EntryItem({
             field,
             label,
             hasError
-              ? "w-56"
+              ? "w-56 bg-transparent"
               : "absolute top-1/2 left-0 z-10 w-56 -translate-y-1/2 border-primary bg-background shadow-lg",
           )}
       </div>
@@ -266,7 +266,7 @@ export function EntryItem({
               }
             />
           </div>
-          {input("taskName", t.taskName, "flex-1")}
+          {input("taskName", t.taskName, "flex-1 bg-transparent")}
         </div>
         <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
           <div className="flex flex-wrap items-center gap-x-1">
