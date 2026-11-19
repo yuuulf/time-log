@@ -15,7 +15,7 @@
 
 - [x] 3.1 `components/projects/ProjectIcon.tsx` と、色の選択を含む `ProjectForm.tsx`（登録）を作る（design 決定 2・5）。`ProjectIcon.test.tsx` で名前の読み上げと `title`、`decorative` のときに読み上げの対象から外れること、`ProjectForm.test.tsx` で色の選択肢 10 個と最初の選択、入力エラーの表示と入力値の保持をテストする（コミット: プロジェクトの登録欄を追加）
 - [x] 3.2 `components/projects/ProjectItem.tsx`（表示・編集・削除）と `ProjectsContent.tsx`（登録欄と一覧、ないときの文言）を作る（design 決定 5）。`ProjectItem.test.tsx` で表示、編集フォームの開閉と初期値、削除の確認と取り消し、削除できないときの理由の表示を、`ProjectsContent.test.tsx` で一覧の順とないときの文言をテストする（コミット: プロジェクトの一覧を追加）
-- [ ] 3.3 `ProjectsView.tsx` と `app/projects/page.tsx` を作り、`SidebarNav` に「プロジェクト」を足す（design 決定 5）。`app/projects/page.test.tsx` でページ見出し、`SidebarNav.test.tsx` でリンク先と今いるページの表示、`app/layout.test.tsx` でサイドバーの並びをテストする。`npm run build` が `cacheComponents` のエラーなく通ることを確認する（コミット: プロジェクトのページを追加）
+- [x] 3.3 `ProjectsView.tsx` と `app/projects/page.tsx` を作り、`SidebarNav` に「プロジェクト」を足す（design 決定 5）。`app/projects/page.test.tsx` でページ見出し、`SidebarNav.test.tsx` でリンク先と今いるページの表示、`app/layout.test.tsx` でサイドバーの並びをテストする。`npm run build` が `cacheComponents` のエラーなく通ることを確認する（コミット: プロジェクトのページを追加）
 
 ## 4. 記録への紐づけ
 

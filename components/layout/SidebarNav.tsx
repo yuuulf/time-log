@@ -7,6 +7,7 @@ import { messages } from "@/lib/messages";
 const pages = [
   { href: "/", label: messages.nav.home },
   { href: "/history", label: messages.history.title },
+  { href: "/projects", label: messages.projects.title },
 ] as const;
 
 /** サイドバーのページのリンク。今いるページのリンクに aria-current を付ける */
