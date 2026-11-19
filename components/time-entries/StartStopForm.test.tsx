@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, within } from "@testing-library/react";
 import { beforeEach, describe, expect, test, vi } from "vitest";
 import { messages } from "@/lib/messages";
 import { StartStopForm } from "./StartStopForm";
@@ -192,7 +192,13 @@ describe("プロジェクト", () => {
     );
 
     const section = screen.getByRole("region", { name: t.runningHeading });
-    expect(section.textContent).toContain("社内ツール");
+    const project = within(section).getByText("社内ツール");
+    const task = within(section).getByText("資料作成");
+    // プロジェクトの行がタスク名の行より前（上）にある
+    expect(
+      project.compareDocumentPosition(task) & Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
+    expect(project.closest("p")).not.toBe(task.closest("p"));
     const icon = section.querySelector('[title="社内ツール"]');
     expect(icon?.getAttribute("aria-hidden")).toBe("true");
     expect(container.querySelector(".text-project-teal")).not.toBeNull();
@@ -210,5 +216,7 @@ describe("プロジェクト", () => {
     const section = screen.getByRole("region", { name: t.runningHeading });
     expect(section.querySelector('[title="社内ツール"]')).toBeNull();
     expect(section.querySelector('[class*="text-project-"]')).toBeNull();
+    // プロジェクトの行は出さず、見出し・タスク名・開始時刻の 3 つだけ
+    expect(section.querySelectorAll("h2, p")).toHaveLength(3);
   });
 });
