@@ -36,7 +36,7 @@ export function ProjectItem({ project }: { project: ProjectData }) {
   return (
     <div className="space-y-1 py-3">
       <div className="flex items-start gap-3">
-        <div className="mt-1.5">
+        <div className="mt-1">
           <ProjectIcon name={project.name} color={project.color} decorative />
         </div>
         <div className="min-w-0 flex-1 space-y-0.5">

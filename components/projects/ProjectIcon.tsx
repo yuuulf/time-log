@@ -1,4 +1,5 @@
-import { projectColorClass } from "@/lib/projects/colors";
+import { Folder } from "lucide-react";
+import { projectColorTextClass } from "@/lib/projects/colors";
 
 type Props = {
   name: string;
@@ -7,7 +8,7 @@ type Props = {
   decorative?: boolean;
 };
 
-/** プロジェクトの色の丸。ポインタを合わせるとプロジェクト名を表示し、読み上げでは名前を読む */
+/** プロジェクトの色で塗りつぶしたフォルダのアイコン。ポインタを合わせるとプロジェクト名を表示し、読み上げでは名前を読む */
 export function ProjectIcon({ name, color, decorative = false }: Props) {
   return (
     <span
@@ -15,7 +16,9 @@ export function ProjectIcon({ name, color, decorative = false }: Props) {
       aria-label={decorative ? undefined : name}
       aria-hidden={decorative ? true : undefined}
       title={name}
-      className={`inline-block size-3 shrink-0 rounded-full ${projectColorClass(color)}`}
-    />
+      className={`inline-flex shrink-0 ${projectColorTextClass(color)}`}
+    >
+      <Folder aria-hidden="true" className="size-4" fill="currentColor" />
+    </span>
   );
 }

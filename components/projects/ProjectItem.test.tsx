@@ -35,7 +35,7 @@ describe("表示", () => {
     expect(screen.getByText("A 社サイト改修")).toBeDefined();
     expect(screen.getByText("A 社")).toBeDefined();
     expect(screen.getByText("2026 年度の改修")).toBeDefined();
-    expect(container.querySelector(".bg-project-blue")).not.toBeNull();
+    expect(container.querySelector(".text-project-blue")).not.toBeNull();
   });
 
   test("クライアント名・説明が空なら何も表示しない", () => {

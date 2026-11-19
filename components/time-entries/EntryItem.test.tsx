@@ -235,12 +235,17 @@ describe("プロジェクト", () => {
   ];
   const withProject: EntryItemData = { ...finished, project: projects[0] };
 
-  test("タスク名の右側にプロジェクトの色のアイコンを出し、名前で読み上げる", () => {
+  test("タスク名の左側にプロジェクトの色のアイコンを出し、名前で読み上げる", () => {
     render(<EntryItem entry={withProject} projects={projects} />);
 
     const icon = screen.getByRole("img", { name: "社内ツール" });
     expect(icon.getAttribute("title")).toBe("社内ツール");
-    expect(icon.className).toContain("bg-project-teal");
+    expect(icon.className).toContain("text-project-teal");
+    // タスク名の行の先頭にアイコンがある
+    const row = icon.closest("p")!;
+    expect(row.textContent).toBe(withProject.taskName);
+    expect(row.firstElementChild?.contains(icon)).toBe(true);
+    expect(row.firstChild).toBe(row.firstElementChild);
     // 名前は文字では出さない
     expect(screen.queryByText("社内ツール")).toBeNull();
   });

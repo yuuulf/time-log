@@ -173,7 +173,7 @@ describe("プロジェクト", () => {
     expect(section.textContent).toContain("社内ツール");
     const icon = section.querySelector('[title="社内ツール"]');
     expect(icon?.getAttribute("aria-hidden")).toBe("true");
-    expect(container.querySelector(".bg-project-teal")).not.toBeNull();
+    expect(container.querySelector(".text-project-teal")).not.toBeNull();
   });
 
   test("プロジェクトのない記録中の枠にはアイコンを出さない", () => {
@@ -187,6 +187,6 @@ describe("プロジェクト", () => {
 
     const section = screen.getByRole("region", { name: t.runningHeading });
     expect(section.querySelector('[title="社内ツール"]')).toBeNull();
-    expect(section.querySelector('[class*="bg-project-"]')).toBeNull();
+    expect(section.querySelector('[class*="text-project-"]')).toBeNull();
   });
 });

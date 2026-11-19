@@ -78,16 +78,16 @@ export function EntryItem({
       {/* 狭い画面ではタスク名を 1 段目、時刻・作業時間・ボタンを 2 段目に置く */}
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-4">
         <p className="min-w-0 break-words text-foreground sm:flex-1">
-          {entry.taskName || t.untitled}
-          {/* プロジェクトはタスク名の右側に色のアイコンで示す（名前はポインタを合わせると出る） */}
+          {/* プロジェクトはタスク名の左側に色のアイコンで示す（名前はポインタを合わせると出る） */}
           {entry.project && (
-            <span className="ml-2 inline-flex align-middle">
+            <span className="mr-2 inline-flex align-middle">
               <ProjectIcon
                 name={entry.project.name}
                 color={entry.project.color}
               />
             </span>
           )}
+          {entry.taskName || t.untitled}
         </p>
         <div className="flex items-center gap-4">
           {/* 時刻の幅は記録中かどうかで変わるため、作業時間とボタンは右端に寄せて列を揃える */}
