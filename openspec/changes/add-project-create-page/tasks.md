@@ -19,4 +19,4 @@
 ## 4. レビューでの修正
 
 - [x] 4.1 言葉を「作成」でそろえる（一覧のボタン「新規作成」、登録画面の見出しとタブのタイトル「プロジェクトの作成」、ボタン「作成」、ないときの文言）。「作成」ボタンを各項目の下の右端に移す（design 決定 2・4・5）。`ProjectForm.test.tsx`・`ProjectsContent.test.tsx`・`app/projects/new/page.test.tsx` を合わせ、ボタンが右寄せの枠にあることをテストする。README の記述も合わせる（コミット: プロジェクトの作成の言葉をそろえ作成ボタンを右に置く）
-- [ ] 4.2 `npm run build` したアプリをブラウザで開き、言葉とボタンの位置を幅 375px・1024px で確認する。一時的な worktree でアーカイブと `openspec validate --all --strict` を確かめ、PR #13 に push して CI のチェックがすべて成功することを確認する
+- [x] 4.2 `npm run build` したアプリをブラウザで開き、言葉とボタンの位置を幅 375px・1024px で確認する。一時的な worktree でアーカイブと `openspec validate --all --strict` を確かめ、PR #13 に push して CI のチェックがすべて成功することを確認する
