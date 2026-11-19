@@ -9,7 +9,7 @@ import {
   type KeyboardEvent,
 } from "react";
 import { Play, Trash2 } from "lucide-react";
-import { ProjectIcon } from "@/components/projects/ProjectIcon";
+import { ProjectPicker } from "@/components/projects/ProjectPicker";
 import type { EntryProject } from "@/components/projects/types";
 import { IconButton } from "@/components/ui/IconButton";
 import {
@@ -76,7 +76,6 @@ export function EntryItem({
   /** プロジェクトの選択肢（登録順） */
   projects?: EntryProject[];
 }) {
-  void projects;
   const id = useId();
   const isRunning = entry.endedAt === null;
   const saved = toValues(entry);
@@ -96,6 +95,17 @@ export function EntryItem({
       return next;
     });
   }
+  // プロジェクトも同じく、エラーのときに選んだ値を残し、props が変わったら合わせる
+  const savedProjectId = entry.project?.id ?? null;
+  const [projectId, setProjectId] = useState(savedProjectId);
+  const [prevProjectId, setPrevProjectId] = useState(savedProjectId);
+  if (savedProjectId !== prevProjectId) {
+    setPrevProjectId(savedProjectId);
+    if (projectId === prevProjectId) setProjectId(savedProjectId);
+  }
+  const project =
+    projects.find((p) => p.id === projectId) ??
+    (entry.project?.id === projectId ? entry.project : null);
 
   const [errors, setErrors] = useState<Errors>({});
   const [, startSaving] = useTransition();
@@ -111,10 +121,13 @@ export function EntryItem({
   const resumeError = resumeState.errors?.taskName ?? resumeState.errors?.form;
 
   /** 今の入力値をすべて送って保存する（サーバーはまとめて入力チェックする） */
-  const save = (next: Values) => {
+  const save = (next: Values, nextProjectId: number | null = projectId) => {
     const formData = new FormData();
     formData.set("taskName", next.taskName);
-    formData.set("projectId", entry.project ? String(entry.project.id) : "");
+    formData.set(
+      "projectId",
+      nextProjectId === null ? "" : String(nextProjectId),
+    );
     formData.set("startedAt", next.startedAt);
     if (!isRunning) formData.set("endedAt", next.endedAt);
     startSaving(async () => {
@@ -151,11 +164,15 @@ export function EntryItem({
     });
   };
 
-  const fieldErrors = FIELDS.flatMap((f) =>
+  const handleProjectChange = (nextProjectId: number | null) => {
+    setProjectId(nextProjectId);
+    save(values, nextProjectId);
+  };
+
+  const fieldErrors = (["projectId", ...FIELDS] as const).flatMap((f) =>
     errors[f] ? [{ field: f, message: errors[f] }] : [],
   );
-  const rowError =
-    errors.projectId ?? errors.form ?? deleteError ?? resumeError;
+  const rowError = errors.form ?? deleteError ?? resumeError;
 
   const input = (field: Field, label: string, className: string) => (
     <>
@@ -183,12 +200,18 @@ export function EntryItem({
       {/* 本文が広いときは 1 行に、狭いときはタスク名・時刻・作業時間とボタンの段に分ける */}
       <div className="flex flex-col gap-1 lg:flex-row lg:items-center lg:gap-3">
         <div className="flex min-w-0 items-center gap-2 lg:flex-1">
-          {entry.project && (
-            <ProjectIcon
-              name={entry.project.name}
-              color={entry.project.color}
+          {/* プロジェクトはタスク名の左側に、色のアイコンと名前で示す。選ぶと保存する */}
+          <div className="w-36 shrink-0 lg:w-40">
+            <ProjectPicker
+              value={project}
+              projects={projects}
+              onChange={handleProjectChange}
+              aria-invalid={errors.projectId ? true : undefined}
+              aria-describedby={
+                errors.projectId ? `${id}-projectId-error` : undefined
+              }
             />
-          )}
+          </div>
           {input("taskName", t.taskName, "flex-1")}
         </div>
         <div className="flex flex-wrap items-center gap-x-1">

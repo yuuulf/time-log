@@ -322,27 +322,94 @@ describe("プロジェクト", () => {
   ];
   const withProject: EntryItemData = { ...finished, project: projects[0] };
 
-  test("タスク名の左側にプロジェクトの色のアイコンを出し、名前で読み上げる", () => {
+  const pickerButton = (name: string) =>
+    screen.getByRole("button", { name: t.projectButton(name) });
+
+  test("タスク名の左側にプロジェクトの色のアイコンと名前を出す", () => {
     render(<EntryItem entry={withProject} projects={projects} />);
 
-    const icon = screen.getByRole("img", { name: "社内ツール" });
-    expect(icon.getAttribute("title")).toBe("社内ツール");
-    expect(icon.className).toContain("text-project-teal");
-    // アイコンはタスク名の入力欄より前にある
+    const button = pickerButton("社内ツール");
+    expect(button.textContent).toBe("社内ツール");
+    expect(button.querySelector(".text-project-teal")).not.toBeNull();
+    // タスク名の入力欄より前にある
     expect(
-      icon.compareDocumentPosition(field(t.taskName)) &
+      button.compareDocumentPosition(field(t.taskName)) &
         Node.DOCUMENT_POSITION_FOLLOWING,
     ).toBeTruthy();
-    // 名前は文字では出さない
-    expect(screen.queryByText("社内ツール")).toBeNull();
   });
 
-  test("プロジェクトのない記録にはアイコンを出さない", () => {
+  test("プロジェクトのない記録は「プロジェクトなし」と出し、アイコンは出さない", () => {
     render(
       <EntryItem entry={{ ...finished, project: null }} projects={projects} />,
     );
 
-    expect(screen.queryByRole("img")).toBeNull();
+    const button = pickerButton(t.noProject);
+    expect(button.querySelector('[class*="text-project-"]')).toBeNull();
+  });
+
+  test("プルダウンで選ぶと、選んだプロジェクトと今の値を送る", async () => {
+    render(<EntryItem entry={withProject} projects={projects} />);
+    fireEvent.change(field(t.taskName), { target: { value: "資料レビュー" } });
+
+    fireEvent.click(pickerButton("社内ツール"));
+    fireEvent.click(screen.getByRole("option", { name: "A 社サイト改修" }));
+
+    await vi.waitFor(() => expect(updateEntryAction).toHaveBeenCalledOnce());
+    const { formData } = lastSent();
+    expect(formData.get("projectId")).toBe("2");
+    expect(formData.get("taskName")).toBe("資料レビュー");
+    expect(pickerButton("A 社サイト改修")).toBeDefined();
+  });
+
+  test("「プロジェクトなし」を選ぶと空の projectId を送る", async () => {
+    render(<EntryItem entry={withProject} projects={projects} />);
+
+    fireEvent.click(pickerButton("社内ツール"));
+    fireEvent.click(screen.getByRole("option", { name: t.noProject }));
+
+    await vi.waitFor(() => expect(updateEntryAction).toHaveBeenCalledOnce());
+    expect(lastSent().formData.get("projectId")).toBe("");
+  });
+
+  test("タスク名を保存するときは今のプロジェクトを送る", async () => {
+    render(<EntryItem entry={withProject} projects={projects} />);
+
+    fireEvent.change(field(t.taskName), { target: { value: "資料レビュー" } });
+    fireEvent.blur(field(t.taskName));
+
+    await vi.waitFor(() => expect(updateEntryAction).toHaveBeenCalledOnce());
+    expect(lastSent().formData.get("projectId")).toBe("1");
+  });
+
+  test("プロジェクトが見つからなければ理由を表示し、選んだ値を残す", async () => {
+    vi.mocked(updateEntryAction).mockResolvedValue({
+      errors: { projectId: messages.projects.errors.notFound },
+    });
+    render(<EntryItem entry={withProject} projects={projects} />);
+
+    fireEvent.click(pickerButton("社内ツール"));
+    fireEvent.click(screen.getByRole("option", { name: "A 社サイト改修" }));
+
+    expect((await screen.findByRole("alert")).textContent).toBe(
+      messages.projects.errors.notFound,
+    );
+    const button = pickerButton("A 社サイト改修");
+    expect(button.getAttribute("aria-invalid")).toBe("true");
+  });
+
+  test("保存の後に記録のプロジェクトが変わったら、表示も合わせる", () => {
+    const { rerender } = render(
+      <EntryItem entry={withProject} projects={projects} />,
+    );
+
+    rerender(
+      <EntryItem
+        entry={{ ...withProject, project: projects[1] }}
+        projects={projects}
+      />,
+    );
+
+    expect(pickerButton("A 社サイト改修")).toBeDefined();
   });
 
   test("再開ボタンは元の記録のプロジェクトを送る", async () => {

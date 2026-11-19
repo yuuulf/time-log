@@ -1,4 +1,4 @@
-import { render, screen, within } from "@testing-library/react";
+import { fireEvent, render, screen, within } from "@testing-library/react";
 import { expect, test, vi } from "vitest";
 import { messages } from "@/lib/messages";
 import { EntryList } from "./EntryList";
@@ -89,7 +89,7 @@ test("見出しと記録がないときの文言を差し替えられる", () =>
   expect(screen.queryByText(t.empty)).toBeNull();
 });
 
-test("プロジェクトのアイコンを出す", () => {
+test("プロジェクトの名前と選択肢を渡す", () => {
   const project = { id: 1, name: "社内ツール", color: "teal" };
   render(
     <EntryList
@@ -106,5 +106,11 @@ test("プロジェクトのアイコンを出す", () => {
     />,
   );
 
-  expect(screen.getByRole("img", { name: "社内ツール" })).toBeDefined();
+  fireEvent.click(
+    screen.getByRole("button", { name: t.projectButton("社内ツール") }),
+  );
+  expect(screen.getAllByRole("option").map((o) => o.textContent)).toEqual([
+    t.noProject,
+    "社内ツール",
+  ]);
 });
