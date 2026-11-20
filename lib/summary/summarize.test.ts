@@ -43,12 +43,28 @@ describe("合計時間", () => {
     expect(formatDuration(totalMs)).toBe("2時間15分");
   });
 
-  test("秒は足してから切り捨てる", () => {
+  test("秒は記録ごとに切り捨ててから足す", () => {
     const { totalMs } = summarize(
       [entry("2026-11-04T09:00", 10.5), entry("2026-11-04T10:00", 10.5)],
       november,
     );
-    expect(formatDuration(totalMs)).toBe("21分");
+    expect(formatDuration(totalMs)).toBe("20分");
+  });
+
+  test("週ごと・プロジェクトごとの時間を足すと、合計時間と一致する", () => {
+    const summary = summarize(
+      [
+        entry("2026-11-08T09:00", 10.5, dev),
+        entry("2026-11-09T09:00", 10.5, dev),
+        entry("2026-11-09T10:00", 0.75),
+      ],
+      november,
+    );
+    const sum = (totals: { totalMs: number }[]) =>
+      totals.reduce((s, x) => s + x.totalMs, 0);
+    expect(formatDuration(summary.totalMs)).toBe("20分");
+    expect(sum(summary.weeks)).toBe(summary.totalMs);
+    expect(sum(summary.projects)).toBe(summary.totalMs);
   });
 
   test("記録中の記録は含めない", () => {

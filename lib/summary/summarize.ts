@@ -29,7 +29,7 @@ export type ProjectTotal = {
 };
 
 export type Summary = {
-  /** 終了済みの記録の作業時間の合計（ミリ秒） */
+  /** 終了済みの記録の作業時間（記録ごとに分へ切り捨て）の合計（ミリ秒） */
   totalMs: number;
   /** 記録（記録中を含む）を開始した日の数 */
   workDays: number;
@@ -39,15 +39,16 @@ export type Summary = {
   projects: ProjectTotal[];
 };
 
+/** 記録の作業時間。記録の一覧の表示と同じく、分に切り捨てる。記録中なら 0 */
 function durationMs(entry: SummaryEntry): number {
-  return entry.endedAt
-    ? Math.max(0, entry.endedAt.getTime() - entry.startedAt.getTime())
-    : 0;
+  if (!entry.endedAt) return 0;
+  const ms = Math.max(0, entry.endedAt.getTime() - entry.startedAt.getTime());
+  return Math.floor(ms / MINUTE_MS) * MINUTE_MS;
 }
 
 /**
  * range（from は日本時間の 0 時、to はその日を含まない次の日の 0 時）に開始した記録を集計する。
- * 時間はミリ秒のまま足し、分への切り捨ては表示のときに行う
+ * 各記録の作業時間は分に切り捨ててから足す（記録の一覧に出る作業時間の合計と一致させる）
  */
 export function summarize(entries: SummaryEntry[], range: DateRange): Summary {
   const inRange = entries.filter(
@@ -82,12 +83,11 @@ export function summarize(entries: SummaryEntry[], range: DateRange): Summary {
     total.totalMs += durationMs(entry);
     byProject.set(key, total);
   }
-  // 表示する分の長い順。同じなら登録順（id の小さい順）、「プロジェクトなし」は最後
-  const minutes = (p: ProjectTotal) => Math.floor(p.totalMs / MINUTE_MS);
+  // 長い順。同じなら登録順（id の小さい順）、「プロジェクトなし」は最後
   const order = (p: ProjectTotal) => p.project?.id ?? Number.POSITIVE_INFINITY;
   const projects = [...byProject.values()]
-    .filter((p) => minutes(p) > 0)
-    .sort((a, b) => minutes(b) - minutes(a) || order(a) - order(b));
+    .filter((p) => p.totalMs > 0)
+    .sort((a, b) => b.totalMs - a.totalMs || order(a) - order(b));
 
   return { totalMs, workDays, weeks, projects };
 }
