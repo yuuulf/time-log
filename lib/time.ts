@@ -122,11 +122,37 @@ export function parseDateValue(value: string): Date | null {
   return parseDateTimeLocalValue(`${value}T00:00`);
 }
 
+// 日本時間には夏時間がないため、1 日はいつも 24 時間
+const DAY_MS = 24 * 60 * 60 * 1000;
+
 /** その日の範囲。日本時間のその日の 0 時（from）から翌日 0 時（to、含まない）まで */
 export function dayRange(date: Date): { from: Date; to: Date } {
   const from = parseDateValue(toDateKey(date))!;
-  // 日本時間には夏時間がないため、1 日はいつも 24 時間
-  return { from, to: new Date(from.getTime() + 24 * 60 * 60 * 1000) };
+  return { from, to: new Date(from.getTime() + DAY_MS) };
+}
+
+/** 開始時刻と終了時刻の区間 */
+export type TimeSpan = { startedAt: Date; endedAt: Date };
+
+/**
+ * 区間を日本時間の日ごとに分ける。前の日の区間は 23:59:59 で終わり、次の日の区間は 0:00:00 から始まる。
+ * 日をまたがない区間（終了がちょうど翌日 0 時のときも含む）は、そのまま 1 つで返す。
+ * 長さが 0 以下になる区間（開始が 23:59:59 以降の前の日の区間）は作らない。
+ */
+export function splitByJstDay(startedAt: Date, endedAt: Date): TimeSpan[] {
+  const spans: TimeSpan[] = [];
+  let start = startedAt;
+  let nextDay = dayRange(startedAt).to;
+  while (endedAt.getTime() > nextDay.getTime()) {
+    const dayEnd = new Date(nextDay.getTime() - 1000);
+    if (dayEnd.getTime() > start.getTime()) {
+      spans.push({ startedAt: start, endedAt: dayEnd });
+    }
+    start = nextDay;
+    nextDay = new Date(nextDay.getTime() + DAY_MS);
+  }
+  spans.push({ startedAt: start, endedAt });
+  return spans;
 }
 
 /** 月の値（「2026-10」）を解釈する。形式が正しくない、または 1〜12 月でなければ null を返す */
