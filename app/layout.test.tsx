@@ -21,6 +21,19 @@ test("ページのタイトルにアプリ名が含まれる", () => {
   });
 });
 
+test("ファビコンはライト・ダークで TimeLog のロゴを出し分ける", () => {
+  expect(metadata.icons).toEqual({
+    icon: [
+      { url: "/icon-light.png", type: "image/png" },
+      {
+        url: "/icon-dark.png",
+        type: "image/png",
+        media: "(prefers-color-scheme: dark)",
+      },
+    ],
+  });
+});
+
 test("日本語の文書として、サイドバー付きで表示される", () => {
   const html = renderToStaticMarkup(
     <RootLayout params={Promise.resolve({})}>

@@ -3,7 +3,7 @@
 ## 1. ファビコン
 
 - [x] 1.1 `~/Downloads/icon_light.png`・`icon_dark.png` の背景を `sharp` で透過してから 512×512px に縮小し、`public/icon-light.png`・`public/icon-dark.png` として置く（design「画像は背景を透過して縮小し、public/ に置く」）。512px でアルファがあること、四隅が透明なこと、時計の針が残っていることを確かめる（コミット: TimeLog のロゴの画像を追加）
-- [ ] 1.2 `app/layout.tsx` の `metadata.icons.icon` にライト用（`media` なし）とダーク用（`media: "(prefers-color-scheme: dark)"`）を指定し、`app/favicon.ico` を削除する（design「ファビコンはメタデータの icons で出し分ける」）。`app/layout.test.tsx` で `metadata.icons` の 2 つの URL と `media` をテストする。`npm run build` が通り、出力された HTML の `<head>` に 2 つの `<link rel="icon">` があり `favicon.ico` がないことを確かめる（コミット: ファビコンを TimeLog のロゴに変える）
+- [x] 1.2 `app/layout.tsx` の `metadata.icons.icon` にライト用（`media` なし）とダーク用（`media: "(prefers-color-scheme: dark)"`）を指定し、`app/favicon.ico` を削除する（design「ファビコンはメタデータの icons で出し分ける」）。`app/layout.test.tsx` で `metadata.icons` の 2 つの URL と `media` をテストする。`npm run build` が通り、出力された HTML の `<head>` に 2 つの `<link rel="icon">` があり `favicon.ico` がないことを確かめる（コミット: ファビコンを TimeLog のロゴに変える）
 
 ## 2. アプリ名のロゴ
 
