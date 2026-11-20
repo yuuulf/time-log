@@ -11,7 +11,7 @@
 
 - [x] 2.1 README.md に「普段使いの起動」の節を足す: 導入（`npm run local:install`）、開く URL、更新（`npm run local:update`）、バックアップ（毎日・3 日分・`npm run local:backup`・場所）、バックアップからの戻し方、ログの場所、やめ方（launchd の登録を外して設定を消す）、開発用の記録とは分かれること（コミット: README に普段使いの起動を追記）
 - [x] 2.2 PR のブランチを push してから、この Mac で実際に `npm run local:install -- --branch add-local-operation` を実行し、spec のシナリオを確かめる: `http://127.0.0.1:3100` に開発用と同じ記録が出る、もう一度実行しても記録が上書きされない、アプリのプロセスを止めると起動し直す、この Mac の LAN のアドレスの 3100 番では開けない、開発用で `npm run build` をしても普段使い用は変わらない、`backups/` にその日のバックアップができて開ける、`npm run local:update` で起動し直して記録が残る。ログイン時の起動は、`launchctl print` で `RunAtLoad` の登録を確かめる（実際のログアウトはユーザーに任せる）
-- [ ] 2.3 一時的な worktree で change をアーカイブし、`openspec validate --all --strict` が通ることを確認してから PR を作成し、CI のチェックがすべて成功することを確認する
+- [x] 2.3 一時的な worktree で change をアーカイブし、`openspec validate --all --strict` が通ることを確認してから PR を作成し、CI のチェックがすべて成功することを確認する
 
 ## Workflow follow-up
 
