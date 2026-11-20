@@ -2,7 +2,7 @@
 
 ## 1. 共通のフォーカスのスタイル
 
-- [ ] 1.1 `components/ui/fieldStyles.ts` を作り、`fieldFocusClassName`（`focus:border-primary focus:outline-none`）と `fieldFocusVisibleClassName`（`focus-visible:` 版）を export する。用途をコメントに書く（design「フォーカスのクラスを定数にする」）。`npm run typecheck` が通ることを確認する（コミット: 入力欄のフォーカスのスタイルを共通化する定数を追加）
+- [x] 1.1 `components/ui/fieldStyles.ts` を作り、`fieldFocusClassName`（`focus:border-primary focus:outline-none`）と `fieldFocusVisibleClassName`（`focus-visible:` 版）を export する。用途をコメントに書く（design「フォーカスのクラスを定数にする」）。`npm run typecheck` が通ることを確認する（コミット: 入力欄のフォーカスのスタイルを共通化する定数を追加）
 
 ## 2. 各入力欄に適用する
 
