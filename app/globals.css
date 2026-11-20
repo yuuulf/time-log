@@ -31,6 +31,11 @@
   }
 }
 
+/* 印刷の既定の余白。ブラウザの既定（約 10mm）では端に寄るので広げる（印刷ダイアログで変えられる） */
+@page {
+  margin: 20mm;
+}
+
 @media screen and (prefers-color-scheme: dark) {
   :root {
     --background: #0a0a0a;
