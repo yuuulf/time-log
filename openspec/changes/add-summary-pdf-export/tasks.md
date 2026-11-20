@@ -3,7 +3,7 @@
 ## 1. PDF 出力ボタン
 
 - [x] 1.1 `lib/messages.ts` の `summary` に、ボタンの名前「PDF 出力」（`pdf`）と保存の既定のファイル名「集計 {期間の見出し}」（`pdfTitle(heading)`）を追加し、`components/summary/SummaryPdfButton.tsx`（Client Component）を作る（design 決定 1）。`IconButton`（`FileDown`）で、押すと `document.title` を変えて `window.print()` を呼び、`afterprint` で元のタイトルに戻す。ボタン自身に `print:hidden` を付ける。`components/summary/SummaryPdfButton.test.tsx` で、「PDF 出力」の名前（`aria-label`・`title`）で見つかること、押すと `window.print` が呼ばれ、そのときのタイトルが「集計 2026年11月」であること、`afterprint` のあとにタイトルが元に戻ることをテストし、`npm test` が通ることを確認する（コミット: 集計の PDF 出力ボタンを追加）
-- [ ] 1.2 `components/summary/SummaryContent.tsx` で、期間の見出しの横に `SummaryPdfButton` を並べる（design 決定 1）。`components/summary/SummaryContent.test.tsx` に、月の集計・期間の集計で「PDF 出力」ボタンが表示されること、期間の入力に誤りがあるときは表示されないことを追加し、`npm test` が通ることを確認する（コミット: 集計の見出しの横に PDF 出力ボタンを置く）
+- [x] 1.2 `components/summary/SummaryContent.tsx` で、期間の見出しの横に `SummaryPdfButton` を並べる（design 決定 1）。`components/summary/SummaryContent.test.tsx` に、月の集計・期間の集計で「PDF 出力」ボタンが表示されること、期間の入力に誤りがあるときは表示されないことを追加し、`npm test` が通ることを確認する（コミット: 集計の見出しの横に PDF 出力ボタンを置く）
 
 ## 2. 印刷の見た目
 

@@ -1,4 +1,4 @@
-import { render, screen, within } from "@testing-library/react";
+import { cleanup, render, screen, within } from "@testing-library/react";
 import { expect, test } from "vitest";
 import { messages } from "@/lib/messages";
 import { summarize, type SummaryEntry } from "@/lib/summary/summarize";
@@ -154,4 +154,19 @@ test("入力に誤りがあれば、集計を表示せず理由を表示する",
   );
   expect(screen.queryByText(t.workDays)).toBeNull();
   expect(screen.queryByRole("region", { name: t.weekly })).toBeNull();
+});
+
+test("月の集計・期間の集計では、期間の見出しの横に「PDF 出力」ボタンを表示する", () => {
+  renderSummary({});
+  expect(screen.getByRole("button", { name: t.pdf })).toBeDefined();
+  cleanup();
+
+  renderSummary({ from: "2026-10-01", to: "2026-10-15" });
+  expect(screen.getByRole("button", { name: t.pdf })).toBeDefined();
+});
+
+test("入力に誤りがあれば、「PDF 出力」ボタンを表示しない", () => {
+  renderSummary({ from: "2026-10-15", to: "2026-10-01" });
+
+  expect(screen.queryByRole("button", { name: t.pdf })).toBeNull();
 });

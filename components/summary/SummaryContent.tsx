@@ -4,6 +4,7 @@ import { messages } from "@/lib/messages";
 import type { Summary } from "@/lib/summary/summarize";
 import { formatDuration, formatMonthDay } from "@/lib/time";
 import type { HistoryView } from "@/lib/time-entries/history";
+import { SummaryPdfButton } from "./SummaryPdfButton";
 
 const t = messages.summary;
 
@@ -24,12 +25,15 @@ export function SummaryContent({
       <PeriodControls view={view} basePath="/summary" />
       {view.mode !== "rangeError" && summary && (
         <section aria-labelledby="summary-heading" className="space-y-8">
-          <h2
-            id="summary-heading"
-            className="text-lg font-semibold text-foreground"
-          >
-            {view.heading}
-          </h2>
+          <div className="flex items-center justify-between gap-4">
+            <h2
+              id="summary-heading"
+              className="text-lg font-semibold text-foreground"
+            >
+              {view.heading}
+            </h2>
+            <SummaryPdfButton heading={view.heading} />
+          </div>
           <div className="space-y-2">
             <dl className="grid gap-4 sm:grid-cols-2">
               <Stat label={t.total} value={formatDuration(summary.totalMs)} />
