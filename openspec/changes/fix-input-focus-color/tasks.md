@@ -10,7 +10,7 @@
 - [x] 2.2 `PeriodControls` の開始日・終了日の入力欄に `fieldFocusClassName` を足す。`PeriodControls.test.tsx` で、両方の入力欄に `focus:border-primary` のクラスが付いていることをテストする（コミット: 期間の指定のフォーカスの枠を primary 色にする）
 - [x] 2.3 `ProjectFields` の名前・クライアント名・説明の入力欄に `fieldFocusClassName` を足す。`ProjectFields.test.tsx` で、3 つの欄に `focus:border-primary` のクラスが付き、エラーのある欄に `aria-invalid="true"` が付いたままであることをテストする（コミット: プロジェクトのフォームのフォーカスの枠を primary 色にする）
 - [x] 2.4 `ProjectPicker` の `field`・`inline` の両方に `fieldFocusVisibleClassName` を使う（`inline` の `focus-visible:border-border` を置き換える）。`ProjectPicker.test.tsx` で、両方の表示のボタンに `focus-visible:border-primary` のクラスが付いていることをテストする（コミット: プロジェクトのプルダウンのフォーカスの枠を primary 色にする）
-- [ ] 2.5 `EntryItem` の入力欄の `focus:border-primary focus:outline-none` を `fieldFocusClassName` に置き換える（見た目は変わらない）。`EntryItem.test.tsx` で、タスク名の入力欄に `focus:border-primary` のクラスが付いていることをテストし、既存のテストが通ることを確認する（コミット: 記録一覧の入力欄のフォーカスのスタイルを共通の定数にする）
+- [x] 2.5 `EntryItem` の入力欄の `focus:border-primary focus:outline-none` を `fieldFocusClassName` に置き換える（見た目は変わらない）。`EntryItem.test.tsx` で、タスク名の入力欄に `focus:border-primary` のクラスが付いていることをテストし、既存のテストが通ることを確認する（コミット: 記録一覧の入力欄のフォーカスのスタイルを共通の定数にする）
 - [ ] 2.6 `npm run build` で生成された CSS で、`aria-[invalid=true]:border-danger` が `focus:border-primary` より後に出てエラーの枠が優先されることを確認する。優先されない場合は design のとおり `focus:not-aria-[invalid=true]:border-primary` に切り替え、テストを合わせる（コミットは切り替えた場合のみ: 入力エラーの枠をフォーカスより優先する）
 - [ ] 2.7 `npm run format` を実行し、整形の差分があれば機能変更とは別にコミットする（コミット: フォーマットを適用）。`npm run lint`・`npm run typecheck`・`npm test` が通ることを確認する
 
