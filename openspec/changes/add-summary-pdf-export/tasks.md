@@ -8,7 +8,7 @@
 ## 2. 印刷の見た目
 
 - [x] 2.1 印刷に出さない部分に `print:hidden` を付ける: `SidebarShell.tsx` の上部のメニュー・背景の幕・`<aside>`、`app/summary/page.tsx` の見出し「集計」（あわせて印刷のときの余白を詰める）、`SummaryContent.tsx` の `PeriodControls` を包む要素。表の行と合計時間・稼働日数の枠に `print:break-inside-avoid` を付ける（design 決定 2・4）。画面の表示が変わらないことを既存のテスト（`npm test`）で確認する（コミット: 集計の印刷に期間の見出しから下だけを出す）
-- [ ] 2.2 `app/globals.css` のダークの配色を画面のときだけ（`@media screen and (prefers-color-scheme: dark)`）にし、印刷ではライトの配色と `color-scheme: light` を使う（design 決定 3）。`npm test` が通ることを確認する（コミット: 印刷ではライトの配色を使う）
+- [x] 2.2 `app/globals.css` のダークの配色を画面のときだけ（`@media screen and (prefers-color-scheme: dark)`）にし、印刷ではライトの配色と `color-scheme: light` を使う（design 決定 3）。`npm test` が通ることを確認する（コミット: 印刷ではライトの配色を使う）
 - [ ] 2.3 `npm run format`・`npm run lint`・`npm run typecheck`・`npm test` を実行し、すべて通ることを確認する（フォーマットで差分が出たら、機能のコミットとは別のコミットにする）
 
 ## 3. ドキュメントと確認
