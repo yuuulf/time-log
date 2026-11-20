@@ -12,7 +12,7 @@
 
 ## 3. 確認
 
-- [ ] 3.1 `npm run format` を実行し、整形の差分があれば別にコミットする（コミット: フォーマットを適用）。`npm run lint`・`npm run typecheck`・`npm test` が通ることを確認する
+- [x] 3.1 `npm run format` を実行し、整形の差分があれば別にコミットする（コミット: フォーマットを適用）。`npm run lint`・`npm run typecheck`・`npm test` が通ることを確認する
 - [ ] 3.2 `npm run build` したアプリをブラウザで開き、spec のシナリオを確認する: 集計の月の表示・期間の表示で週の日付に曜日が付くこと、幅 375px で横スクロールが出ず週の日付が読めること（折り返しが読みにくければ design のとおり調整する）、トップページのタスク名の候補に最近 30 日以内のタスク名だけが最大 10 件出ること
 - [ ] 3.3 一時的な worktree で change をアーカイブし、`openspec validate --all --strict` が通ることを確認してから PR を作成し、CI のチェックがすべて成功することを確認する
 
