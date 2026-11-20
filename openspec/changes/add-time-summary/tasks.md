@@ -2,7 +2,7 @@
 
 ## 1. 期間の切り替えの共通化
 
-- [ ] 1.1 `HistoryContent` の月の切り替え・「月ごとの表示」・期間の入力欄を `components/time-entries/PeriodControls.tsx` に移し、行き先のパスを引数にする。入力欄の `id` を `period-*` にする（design 決定 2）。`PeriodControls.test.tsx` で、渡したパスへのリンクとフォームの送り先、今月で「次の月」が選べないこと、誤りの表示をテストする。`HistoryContent.test.tsx` がそのまま通ることで「過去の記録」の動きが変わらないことを確かめる（コミット: 期間の切り替えを共通の部品にする）
+- [x] 1.1 `HistoryContent` の月の切り替え・「月ごとの表示」・期間の入力欄を `components/time-entries/PeriodControls.tsx` に移し、行き先のパスを引数にする。入力欄の `id` を `period-*` にする（design 決定 2）。`PeriodControls.test.tsx` で、渡したパスへのリンクとフォームの送り先、今月で「次の月」が選べないこと、誤りの表示をテストする。`HistoryContent.test.tsx` がそのまま通ることで「過去の記録」の動きが変わらないことを確かめる（コミット: 期間の切り替えを共通の部品にする）
 
 ## 2. 集計の計算
 
