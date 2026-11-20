@@ -30,10 +30,13 @@ export function SummaryContent({
           >
             {view.heading}
           </h2>
-          <dl className="grid gap-4 sm:grid-cols-2">
-            <Stat label={t.total} value={formatDuration(summary.totalMs)} />
-            <Stat label={t.workDays} value={t.days(summary.workDays)} />
-          </dl>
+          <div className="space-y-2">
+            <dl className="grid gap-4 sm:grid-cols-2">
+              <Stat label={t.total} value={formatDuration(summary.totalMs)} />
+              <Stat label={t.workDays} value={t.days(summary.workDays)} />
+            </dl>
+            <p className="text-xs text-muted">{t.roundingNote}</p>
+          </div>
           <WeeklyTable weeks={summary.weeks} />
           <ProjectTable projects={summary.projects} />
         </section>

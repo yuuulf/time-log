@@ -131,6 +131,7 @@ export const messages = {
     title: "集計",
     total: "合計時間",
     workDays: "稼働日数",
+    roundingNote: "作業時間は記録ごとに秒を切り捨てて集計しています。",
     /** 稼働日数の表示（例: 「12日」） */
     days: (count: number) => `${count}日`,
     weekly: "週ごとの合計時間",

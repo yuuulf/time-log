@@ -59,6 +59,16 @@ test("期間の見出し、合計時間と稼働日数を表示する", () => {
   expect(screen.getByText(t.workDays).nextSibling?.textContent).toBe("2日");
 });
 
+test("合計時間と稼働日数の下に、秒を記録ごとに切り捨てて集計している旨を添える", () => {
+  renderSummary({});
+
+  const note = screen.getByText(t.roundingNote);
+  expect(note.textContent).toBe(
+    "作業時間は記録ごとに秒を切り捨てて集計しています。",
+  );
+  expect(note.previousElementSibling?.tagName).toBe("DL");
+});
+
 test("週ごとの合計時間を、週の範囲と一緒に古い順に表示する", () => {
   renderSummary({}, [
     entry("2026-11-02T09:00", 60),
