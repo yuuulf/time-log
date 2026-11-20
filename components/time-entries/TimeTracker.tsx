@@ -18,7 +18,7 @@ export async function TimeTracker() {
   const now = new Date();
   const running = getRunningEntry(db);
   const entries = listEntriesOfDay(db, now);
-  const suggestions = listTaskNameSuggestions(db);
+  const suggestions = listTaskNameSuggestions(db, now);
   const projects = listProjects(db, { archived: false }).map(
     ({ id, name, color }) => ({
       id,

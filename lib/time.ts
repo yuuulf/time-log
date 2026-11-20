@@ -128,7 +128,7 @@ export function parseDateValue(value: string): Date | null {
 }
 
 // 日本時間には夏時間がないため、1 日はいつも 24 時間
-const DAY_MS = 24 * 60 * 60 * 1000;
+export const DAY_MS = 24 * 60 * 60 * 1000;
 
 /** その日の範囲。日本時間のその日の 0 時（from）から翌日 0 時（to、含まない）まで */
 export function dayRange(date: Date): { from: Date; to: Date } {
