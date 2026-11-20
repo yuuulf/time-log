@@ -58,6 +58,21 @@ export function toDateKey(date: Date): string {
   return `${year}-${month}-${day}`;
 }
 
+/** 日本時間の曜日。月曜日を 0、日曜日を 6 とする（週を月曜日で区切るため） */
+export function jstWeekdayFromMonday(date: Date): number {
+  const { year, month, day } = jstParts(date);
+  const sundayFirst = new Date(
+    Date.UTC(Number(year), Number(month) - 1, Number(day)),
+  ).getUTCDay();
+  return (sundayFirst + 6) % 7;
+}
+
+/** 日付を「11月16日」の形で表示する */
+export function formatMonthDay(date: Date): string {
+  const { month, day } = jstParts(date);
+  return `${Number(month)}月${Number(day)}日`;
+}
+
 /** 作業時間を分単位に切り捨てて「1時間5分」「5分」「0分」の形で表示する */
 export function formatDuration(milliseconds: number): string {
   const totalMinutes = Math.floor(Math.max(0, milliseconds) / 60_000);

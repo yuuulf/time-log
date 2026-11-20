@@ -14,7 +14,7 @@ beforeEach(() => {
 
 const nav = () => screen.getByRole("navigation", { name: messages.nav.label });
 
-test("「ホーム」はトップページ、「過去の記録」は /history、「プロジェクト」は /projects へのリンク", () => {
+test("「ホーム」はトップページ、「過去の記録」は /history、「集計」は /summary、「プロジェクト」は /projects へのリンク", () => {
   render(<SidebarNav />);
 
   const links = within(nav());
@@ -26,6 +26,11 @@ test("「ホーム」はトップページ、「過去の記録」は /history�
       .getByRole("link", { name: messages.history.title })
       .getAttribute("href"),
   ).toBe("/history");
+  expect(
+    links
+      .getByRole("link", { name: messages.summary.title })
+      .getAttribute("href"),
+  ).toBe("/summary");
   expect(
     links
       .getByRole("link", { name: messages.projects.title })
@@ -88,9 +93,21 @@ test("フォールバック（pathname が null）では、同じリンクを選
   expect(links.map((a) => a.textContent)).toEqual([
     messages.nav.home,
     messages.history.title,
+    messages.summary.title,
     messages.projects.title,
   ]);
   expect(links.some((a) => a.getAttribute("aria-current"))).toBe(false);
+});
+
+test("集計のページでは「集計」だけが今いるページになる", () => {
+  navigation.pathname = "/summary";
+  render(<SidebarNav />);
+
+  const current = within(nav())
+    .getAllByRole("link")
+    .filter((a) => a.getAttribute("aria-current") === "page")
+    .map((a) => a.textContent);
+  expect(current).toEqual([messages.summary.title]);
 });
 
 test("プロジェクトの詳細画面では「プロジェクト」が今いるページになる", () => {
