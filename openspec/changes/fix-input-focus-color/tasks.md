@@ -6,7 +6,7 @@
 
 ## 2. 各入力欄に適用する
 
-- [ ] 2.1 `StartStopForm` のタスク名の入力欄に `fieldFocusClassName` を足す。`StartStopForm.test.tsx` で、タスク名の入力欄に `focus:border-primary` のクラスが付いていることをテストする（コミット: 記録の開始フォームのフォーカスの枠を primary 色にする）
+- [x] 2.1 `StartStopForm` のタスク名の入力欄に `fieldFocusClassName` を足す。`StartStopForm.test.tsx` で、タスク名の入力欄に `focus:border-primary` のクラスが付いていることをテストする（コミット: 記録の開始フォームのフォーカスの枠を primary 色にする）
 - [ ] 2.2 `PeriodControls` の開始日・終了日の入力欄に `fieldFocusClassName` を足す。`PeriodControls.test.tsx` で、両方の入力欄に `focus:border-primary` のクラスが付いていることをテストする（コミット: 期間の指定のフォーカスの枠を primary 色にする）
 - [ ] 2.3 `ProjectFields` の名前・クライアント名・説明の入力欄に `fieldFocusClassName` を足す。`ProjectFields.test.tsx` で、3 つの欄に `focus:border-primary` のクラスが付き、エラーのある欄に `aria-invalid="true"` が付いたままであることをテストする（コミット: プロジェクトのフォームのフォーカスの枠を primary 色にする）
 - [ ] 2.4 `ProjectPicker` の `field`・`inline` の両方に `fieldFocusVisibleClassName` を使う（`inline` の `focus-visible:border-border` を置き換える）。`ProjectPicker.test.tsx` で、両方の表示のボタンに `focus-visible:border-primary` のクラスが付いていることをテストする（コミット: プロジェクトのプルダウンのフォーカスの枠を primary 色にする）
