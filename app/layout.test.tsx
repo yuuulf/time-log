@@ -15,11 +15,8 @@ vi.mock("@/components/layout/RunningTask", () => ({
 }));
 vi.mock("next/navigation", () => ({ usePathname: () => "/" }));
 
-test("ページのタイトルにアプリ名が含まれる", () => {
-  expect(metadata.title).toEqual({
-    default: messages.app.name,
-    template: `%s | ${messages.app.name}`,
-  });
+test("タブのタイトルはアプリ名「TimeLog」だけ", () => {
+  expect(metadata.title).toBe("TimeLog");
 });
 
 test("ファビコンはライト・ダークで TimeLog のロゴを出し分ける", () => {

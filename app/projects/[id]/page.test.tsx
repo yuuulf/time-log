@@ -1,7 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import { expect, test, vi } from "vitest";
-import { messages } from "@/lib/messages";
-import ProjectDetailPage, { metadata } from "./page";
+import * as page from "./page";
+import ProjectDetailPage from "./page";
 
 // ProjectDetailView は DB を読む async の Server Component で、Vitest では描画できないため差し替える
 vi.mock("@/components/projects/ProjectDetailView", () => ({
@@ -18,5 +18,8 @@ test("詳細の中身を置き、タイトルは「プロジェクト」にす�
 
   expect(screen.getByRole("main")).toBeDefined();
   expect(screen.getByTestId("project-detail-view")).toBeDefined();
-  expect(metadata.title).toBe(messages.projects.title);
+});
+
+test("タブのタイトルはページで設定せず、レイアウトの「TimeLog」だけにする", () => {
+  expect("metadata" in page).toBe(false);
 });

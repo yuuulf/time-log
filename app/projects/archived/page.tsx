@@ -1,14 +1,9 @@
-import type { Metadata } from "next";
 import { Suspense } from "react";
 import { ArchivedProjectsView } from "@/components/projects/ArchivedProjectsView";
 import { BackLink } from "@/components/projects/ProjectFields";
 import { messages } from "@/lib/messages";
 
 const t = messages.projects.archived;
-
-export const metadata: Metadata = {
-  title: t.title,
-};
 
 /** アーカイブ済みのプロジェクト。アーカイブの解除と削除ができる */
 export default function ArchivedProjectsPage() {

@@ -1,7 +1,8 @@
 import { render, screen } from "@testing-library/react";
 import { expect, test, vi } from "vitest";
 import { messages } from "@/lib/messages";
-import ArchivedProjectsPage, { metadata } from "./page";
+import * as page from "./page";
+import ArchivedProjectsPage from "./page";
 
 // ArchivedProjectsView は DB を読む async の Server Component で、Vitest では描画できないため差し替える
 vi.mock("@/components/projects/ArchivedProjectsView", () => ({
@@ -22,5 +23,8 @@ test("一覧へ戻るリンクと見出しの下に、アーカイブしたプ�
     screen.getByRole("heading", { level: 1, name: t.archived.title }),
   ).toBeDefined();
   expect(screen.getByTestId("archived-projects-view")).toBeDefined();
-  expect(metadata.title).toBe(t.archived.title);
+});
+
+test("タブのタイトルはページで設定せず、レイアウトの「TimeLog」だけにする", () => {
+  expect("metadata" in page).toBe(false);
 });

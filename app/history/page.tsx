@@ -1,11 +1,6 @@
-import type { Metadata } from "next";
 import { Suspense } from "react";
 import { EntryHistory } from "@/components/time-entries/EntryHistory";
 import { messages } from "@/lib/messages";
-
-export const metadata: Metadata = {
-  title: messages.history.title,
-};
 
 /** 過去の記録。月ごと、または指定した期間の記録を表示する */
 export default function HistoryPage({ searchParams }: PageProps<"/history">) {

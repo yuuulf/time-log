@@ -1,11 +1,6 @@
-import type { Metadata } from "next";
 import { Suspense } from "react";
 import { ProjectDetailView } from "@/components/projects/ProjectDetailView";
 import { messages } from "@/lib/messages";
-
-export const metadata: Metadata = {
-  title: messages.projects.title,
-};
 
 /** プロジェクトの詳細。全項目を表示し、その場で編集する */
 export default function ProjectDetailPage({
