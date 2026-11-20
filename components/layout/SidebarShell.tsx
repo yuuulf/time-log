@@ -43,7 +43,7 @@ export function SidebarShell({ children }: { children: ReactNode }) {
 
   return (
     <>
-      <div className="flex items-center gap-3 border-b border-border px-4 py-2 md:hidden">
+      <div className="flex items-center gap-3 border-b border-border px-4 py-2 md:hidden print:hidden">
         <IconButton
           ref={menuRef}
           icon={Menu}
@@ -65,7 +65,7 @@ export function SidebarShell({ children }: { children: ReactNode }) {
           aria-hidden="true"
           data-sidebar-backdrop=""
           onClick={close}
-          className="fixed inset-0 z-40 bg-foreground/30 md:hidden"
+          className="fixed inset-0 z-40 bg-foreground/30 md:hidden print:hidden"
         />
       )}
       {/* 中のリンクを選んだら閉じる（中身は Server Component なので、ここでまとめて受ける） */}
@@ -76,7 +76,7 @@ export function SidebarShell({ children }: { children: ReactNode }) {
         }}
         // 開くときは visibility をすぐ切り替えて閉じるボタンにフォーカスできるようにし、
         // 閉じるときは visibility も遷移させて、隠れ終わるまで表示を残す
-        className={`fixed inset-y-0 left-0 z-50 w-60 shrink-0 overflow-y-auto border-r border-border bg-background p-4 md:visible md:sticky md:top-0 md:h-dvh md:translate-x-0 ${
+        className={`fixed inset-y-0 left-0 z-50 w-60 shrink-0 overflow-y-auto border-r border-border bg-background p-4 md:visible md:sticky md:top-0 md:h-dvh md:translate-x-0 print:hidden ${
           open
             ? "visible translate-x-0 transition-transform"
             : "invisible -translate-x-full transition-[translate,visibility]"
