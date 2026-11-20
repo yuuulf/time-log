@@ -15,7 +15,8 @@
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
     "local:backup": "node scripts/local/backup.mjs",
-    "local:install": "node scripts/local/install.mjs"
+    "local:install": "node scripts/local/install.mjs",
+    "local:update": "node scripts/local/update.mjs"
   },
   "dependencies": {
     "better-sqlite3": "^13.2.0",
