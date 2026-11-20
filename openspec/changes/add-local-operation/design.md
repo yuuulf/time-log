@@ -51,7 +51,9 @@
   - 実行: `<mise> exec -- node scripts/local/backup.mjs`。作業ディレクトリは普段使い用のアプリ、環境変数は同じ
   - `RunAtLoad`（ログイン時）と `StartCalendarInterval`（毎日 12:00）。launchd は、スリープ中に過ぎた時刻の分を起きたときに 1 回実行する。電源が切れていた日は実行しない
 - mise のパスは、導入のときに `PATH` から探した絶対パスを書き込む（launchd ではシェルの設定が効かないため）
-- 登録は `launchctl bootout`（登録済みなら外す。失敗は無視）→ `launchctl bootstrap gui/<uid> <plist>` の順で行い、何度実行しても同じ状態にする
+- 登録は `launchctl bootout`（登録済みなら外す。失敗は無視）→ 外し終わるまで待つ → `launchctl bootstrap gui/<uid> <plist>` の順で行い、何度実行しても同じ状態にする
+  - `bootout` は裏で続くため、すぐに `bootstrap` すると失敗する（導入をやり直したときに実際に起きた）。`launchctl print` で見つからなくなるまで、0.5 秒おきに最大 10 秒待つ
+  - 失敗してよいコマンド（`bootout`・`print`）のエラー出力は表示しない
 - `-H 127.0.0.1` で、自分の Mac からの接続だけを受ける
 
 ### 3. バックアップ（`scripts/local/backup.mjs`）
