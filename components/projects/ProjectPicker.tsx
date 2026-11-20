@@ -2,6 +2,7 @@
 
 import { useEffect, useId, useRef } from "react";
 import { Check, ChevronDown } from "lucide-react";
+import { fieldFocusVisibleClassName } from "@/components/ui/fieldStyles";
 import { nextIndex, usePopover } from "@/components/ui/usePopover";
 import { messages } from "@/lib/messages";
 import { ProjectIcon } from "./ProjectIcon";
@@ -10,8 +11,7 @@ import type { EntryProject } from "./types";
 const t = messages.timeEntries;
 
 const VARIANTS = {
-  inline:
-    "border-transparent px-2 py-2 text-sm hover:border-border focus-visible:border-border",
+  inline: "border-transparent px-2 py-2 text-sm hover:border-border",
   field: "border-border bg-background px-3 py-2 text-base",
 } as const;
 
@@ -82,7 +82,7 @@ export function ProjectPicker({
             setOpen(true);
           }
         }}
-        className={`flex w-full min-w-0 items-center gap-2 rounded-md border text-left disabled:opacity-50 aria-[invalid=true]:border-danger ${VARIANTS[variant]}`}
+        className={`flex w-full min-w-0 items-center gap-2 rounded-md border text-left disabled:opacity-50 aria-[invalid=true]:border-danger ${fieldFocusVisibleClassName} ${VARIANTS[variant]}`}
         {...aria}
       >
         {value && (

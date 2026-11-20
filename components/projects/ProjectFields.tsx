@@ -3,6 +3,7 @@
 import type { FocusEventHandler, KeyboardEventHandler } from "react";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
+import { fieldFocusClassName } from "@/components/ui/fieldStyles";
 import { messages } from "@/lib/messages";
 import type { ProjectColor } from "@/lib/projects/colors";
 import { ProjectColorPicker } from "./ProjectColorPicker";
@@ -84,8 +85,7 @@ export function ProjectFields({
       onChange(field, e.target.value),
     "aria-invalid": errors[field] ? true : undefined,
     "aria-describedby": describedBy(field),
-    className:
-      "w-full rounded-md border border-border bg-background px-3 py-2 text-foreground placeholder:text-muted aria-[invalid=true]:border-danger",
+    className: `w-full rounded-md border border-border bg-background px-3 py-2 text-foreground placeholder:text-muted aria-[invalid=true]:border-danger ${fieldFocusClassName}`,
     ...fieldProps?.(field),
   });
   const label = (field: ProjectTextField, text: string) => (

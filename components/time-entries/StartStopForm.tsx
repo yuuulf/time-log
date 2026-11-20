@@ -6,6 +6,7 @@ import { ProjectIcon } from "@/components/projects/ProjectIcon";
 import { ProjectPicker } from "@/components/projects/ProjectPicker";
 import type { EntryProject } from "@/components/projects/types";
 import { IconButton } from "@/components/ui/IconButton";
+import { fieldFocusClassName } from "@/components/ui/fieldStyles";
 import {
   startEntryAction,
   stopEntryAction,
@@ -122,7 +123,7 @@ export function StartStopForm({ running, suggestions, projects = [] }: Props) {
             autoComplete="off"
             aria-invalid={taskNameError ? true : undefined}
             aria-describedby={taskNameError ? `${id}-error` : undefined}
-            className="min-w-0 flex-1 rounded-md border border-border bg-background px-3 py-2 text-foreground"
+            className={`min-w-0 flex-1 rounded-md border border-border bg-background px-3 py-2 text-foreground ${fieldFocusClassName}`}
           />
           {/* 一覧と同じ色のアイコン付きのプルダウン。選んだ id は hidden の欄で送る */}
           <div className="order-last w-full sm:order-none sm:w-72">

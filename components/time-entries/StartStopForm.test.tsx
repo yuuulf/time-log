@@ -27,6 +27,14 @@ describe("記録中のタスクがないとき", () => {
     expect(screen.queryByRole("button", { name: t.actions.stop })).toBeNull();
   });
 
+  test("タスク名の入力欄は、フォーカスしたとき枠をテーマ色にする", () => {
+    render(<StartStopForm running={null} suggestions={[]} />);
+
+    expect(screen.getByLabelText(t.taskName).className).toContain(
+      "focus:border-primary",
+    );
+  });
+
   test("開始ボタンで入力したタスク名を送り、成功したら入力欄を空にする", async () => {
     render(<StartStopForm running={null} suggestions={[]} />);
     const input = screen.getByLabelText<HTMLInputElement>(t.taskName);

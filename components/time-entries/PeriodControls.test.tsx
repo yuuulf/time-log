@@ -65,3 +65,13 @@ test("入力の誤りは理由を表示し、入力欄を誤りとして示す",
   expect(from.getAttribute("aria-invalid")).toBe("true");
   expect(from.getAttribute("aria-describedby")).toBe(alert.id);
 });
+
+test("開始日・終了日の入力欄は、フォーカスしたとき枠をテーマ色にする", () => {
+  renderControls({});
+
+  for (const label of [t.from, t.to]) {
+    expect(screen.getByLabelText(label).className).toContain(
+      "focus:border-primary",
+    );
+  }
+});

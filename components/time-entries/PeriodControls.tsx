@@ -2,6 +2,7 @@ import { CalendarDays, ChevronLeft, ChevronRight, Search } from "lucide-react";
 import Form from "next/form";
 import { IconButton } from "@/components/ui/IconButton";
 import { IconLink } from "@/components/ui/IconLink";
+import { fieldFocusClassName } from "@/components/ui/fieldStyles";
 import { messages } from "@/lib/messages";
 import type { HistoryView } from "@/lib/time-entries/history";
 
@@ -77,7 +78,7 @@ function RangeForm({
         defaultValue={values[name]}
         aria-invalid={error ? true : undefined}
         aria-describedby={error ? "period-range-error" : undefined}
-        className="h-10 w-full min-w-0 rounded-md border border-border bg-background px-2 text-foreground"
+        className={`h-10 w-full min-w-0 rounded-md border border-border bg-background px-2 text-foreground ${fieldFocusClassName}`}
       />
     </div>
   );

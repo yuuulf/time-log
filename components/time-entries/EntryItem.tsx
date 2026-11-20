@@ -13,6 +13,7 @@ import { ProjectPicker } from "@/components/projects/ProjectPicker";
 import type { EntryProject } from "@/components/projects/types";
 import { DropdownMenu } from "@/components/ui/DropdownMenu";
 import { IconButton } from "@/components/ui/IconButton";
+import { fieldFocusClassName } from "@/components/ui/fieldStyles";
 import {
   deleteEntryAction,
   startEntryAction,
@@ -213,7 +214,7 @@ export function EntryItem({
         onKeyDown={(e) => handleKeyDown(field, e)}
         aria-invalid={errors[field] ? true : undefined}
         aria-describedby={errors[field] ? `${id}-${field}-error` : undefined}
-        className={`min-w-0 rounded-md border border-transparent px-2 py-1.5 text-foreground tabular-nums placeholder:text-muted hover:border-border focus:border-primary focus:outline-none aria-[invalid=true]:border-danger [&::-webkit-calendar-picker-indicator]:hidden ${className}`}
+        className={`min-w-0 rounded-md border border-transparent px-2 py-1.5 text-foreground tabular-nums placeholder:text-muted hover:border-border ${fieldFocusClassName} aria-[invalid=true]:border-danger [&::-webkit-calendar-picker-indicator]:hidden ${className}`}
       />
     </>
   );

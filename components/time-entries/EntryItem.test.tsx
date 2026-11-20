@@ -101,6 +101,12 @@ describe("表示", () => {
     expect(field(t.taskName).placeholder).toBe(t.untitled);
   });
 
+  test("タスク名の入力欄は、フォーカスしたとき枠をテーマ色にする", () => {
+    render(<EntryItem entry={finished} />);
+
+    expect(field(t.taskName).className).toContain("focus:border-primary");
+  });
+
   test("修正ボタンはない", () => {
     render(<EntryItem entry={finished} />);
 

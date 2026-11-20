@@ -128,6 +128,26 @@ test("一覧用はふだん枠線を出さず、フォーム用は常に枠線�
   expect(button().className).not.toContain("border-transparent");
 });
 
+test("一覧用・フォーム用とも、キーボードでフォーカスしたとき枠をテーマ色にする", () => {
+  const { rerender } = render(
+    <ProjectPicker value={null} projects={projects} onChange={vi.fn()} />,
+  );
+  const button = () =>
+    screen.getByRole("button", { name: t.projectButton(t.noProject) });
+  expect(button().className).toContain("focus-visible:border-primary");
+  expect(button().className).not.toContain("focus-visible:border-border");
+
+  rerender(
+    <ProjectPicker
+      value={null}
+      projects={projects}
+      onChange={vi.fn()}
+      variant="field"
+    />,
+  );
+  expect(button().className).toContain("focus-visible:border-primary");
+});
+
 test("今の値が選択肢にない（アーカイブした）ときは、ボタンに今の値を出し、どの選択肢も選ばれている表示にしない", () => {
   const archived = { id: 9, name: "旧案件", color: "brown" };
   const onChange = vi.fn();
