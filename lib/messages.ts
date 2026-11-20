@@ -30,9 +30,9 @@ export const messages = {
     running: "記録中",
     untitled: "（タスク名なし）",
     runningHeading: "記録中のタスク",
-    listHeading: "記録",
-    empty:
-      "まだ記録がありません。タスク名を入力して開始ボタンを押すと記録が始まります。",
+    /** トップページの記録の一覧の見出し（今日に開始した記録だけを出す） */
+    listHeading: "今日の記録",
+    empty: "今日の記録はまだありません。",
     loading: "記録を読み込んでいます…",
     confirmDelete: "この記録を削除しますか？",
     actions: {

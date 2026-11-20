@@ -6,10 +6,11 @@ import {
   listEntriesOfDay,
   listTaskNameSuggestions,
 } from "@/lib/time-entries/repository";
+import { messages } from "@/lib/messages";
 import { EntryList } from "./EntryList";
 import { StartStopForm } from "./StartStopForm";
 
-/** 時間記録の画面。リクエストごとに最新の記録を読むため、<Suspense> の中に置く */
+/** 時間記録の画面。記録中の枠と今日の記録の一覧を並べる。リクエストごとに最新の記録を読むため、<Suspense> の中に置く */
 export async function TimeTracker() {
   // better-sqlite3 は同期 API のため、プリレンダーではなくリクエスト時に読むよう明示する
   await connection();
@@ -51,6 +52,8 @@ export async function TimeTracker() {
             project,
           }),
         )}
+        heading={messages.timeEntries.listHeading}
+        emptyMessage={messages.timeEntries.empty}
         projects={projects}
       />
     </div>

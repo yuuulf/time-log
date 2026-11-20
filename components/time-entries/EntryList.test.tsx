@@ -58,18 +58,18 @@ test("開始日ごとの見出しの下に、記録を渡された順（新し�
   ).toHaveProperty("value", "調査");
 });
 
-test("記録がなければ、まだ記録がないことを伝える", () => {
+test("記録がなければ、今日の記録がまだないことを伝える", () => {
   render(<EntryList entries={[]} />);
 
-  expect(screen.getByText(t.empty)).toBeDefined();
+  expect(screen.getByText("今日の記録はまだありません。")).toBeDefined();
   expect(screen.queryAllByRole("listitem")).toHaveLength(0);
 });
 
-test("見出しを省略すると「記録」と表示する", () => {
+test("見出しを省略すると「今日の記録」と表示する", () => {
   render(<EntryList entries={[]} />);
 
   expect(
-    screen.getByRole("heading", { level: 2, name: t.listHeading }),
+    screen.getByRole("heading", { level: 2, name: "今日の記録" }),
   ).toBeDefined();
 });
 
