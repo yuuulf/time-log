@@ -30,7 +30,7 @@
 
 ### 2. 一覧の見出しと空のときの文言
 
-`TimeTracker` から `EntryList` に `heading`（「今日の記録」）と `emptyMessage`（「今日の記録はまだありません。タスク名を入力して開始ボタンを押すと記録が始まります。」）を渡す。日付ごとの見出し（今日の日付）は `EntryList` のまま残す（何日の記録かが分かるため）。
+`TimeTracker` から `EntryList` に `heading`（「今日の記録」）と `emptyMessage`（「今日の記録はまだありません。」）を渡す。日付ごとの見出し（今日の日付）は `EntryList` のまま残す（何日の記録かが分かるため）。
 
 - 文言は `messages.timeEntries` の `listHeading`・`empty` を書き換える。「過去の記録」は独自の文言を渡しているので影響しない
 
