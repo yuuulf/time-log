@@ -83,6 +83,15 @@
   --font-mono: var(--font-geist-mono), ui-monospace, monospace;
 }
 
+@layer base {
+  /* キーボードで移ったときのフォーカスの枠をテーマ色にする（ブラウザ既定の青にしない）。
+     部品のクラス（入力欄の focus:outline-none など）はこれより優先される */
+  :focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
+  }
+}
+
 body {
   background: var(--background);
   color: var(--foreground);
