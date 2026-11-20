@@ -2,7 +2,7 @@ import { ProjectIcon } from "@/components/projects/ProjectIcon";
 import { PeriodControls } from "@/components/time-entries/PeriodControls";
 import { messages } from "@/lib/messages";
 import type { Summary } from "@/lib/summary/summarize";
-import { formatDuration, formatMonthDay } from "@/lib/time";
+import { formatDuration, formatMonthDayWithWeekday } from "@/lib/time";
 import type { HistoryView } from "@/lib/time-entries/history";
 import { SummaryPdfButton } from "./SummaryPdfButton";
 
@@ -100,8 +100,8 @@ function WeeklyTable({ weeks }: { weeks: Summary["weeks"] }) {
             <tr key={week.first.getTime()} className="print:break-inside-avoid">
               <th scope="row" className={`${tdClass} text-left font-normal`}>
                 {t.weekRange(
-                  formatMonthDay(week.first),
-                  formatMonthDay(week.last),
+                  formatMonthDayWithWeekday(week.first),
+                  formatMonthDayWithWeekday(week.last),
                 )}
               </th>
               <td className={numClass}>{formatDuration(week.totalMs)}</td>
