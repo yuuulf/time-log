@@ -30,7 +30,7 @@ function fake({ failOn = "", failTimes = 0, installed = true } = {}) {
           throw new Error(`失敗: ${line}`);
         }
         return {
-          status: 0,
+          status: args[0] === "print" ? 1 : 0,
           stdout: args.includes("rev-parse") ? "abc123\n" : "",
         };
       },
@@ -65,8 +65,10 @@ describe("更新する", () => {
       `${mise} exec -- npm ci @${app}`,
       `${mise} exec -- npm run build @${app}`,
       "launchctl bootout gui/501/local.timelog.app",
+      "launchctl print gui/501/local.timelog.app",
       `launchctl bootstrap gui/501 ${paths.launchAgentsDir}/local.timelog.app.plist`,
       "launchctl bootout gui/501/local.timelog.backup",
+      "launchctl print gui/501/local.timelog.backup",
       `launchctl bootstrap gui/501 ${paths.launchAgentsDir}/local.timelog.backup.plist`,
     ]);
   });

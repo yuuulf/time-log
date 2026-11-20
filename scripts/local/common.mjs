@@ -18,14 +18,15 @@ export const APP_URL = `http://${HOST}:${PORT}`;
  */
 
 /**
- * コマンドを実行し、出力をそのまま表示する。失敗したら例外を投げる（allowFailure なら投げない）。
+ * コマンドを実行し、出力をそのまま表示する。失敗したら例外を投げる。
+ * allowFailure なら失敗しても投げず、エラー出力も表示しない（失敗してよい確認のためのコマンド）。
  *
  * @type {Run}
  */
 export function runCommand(command, args, { cwd, allowFailure = false } = {}) {
   const result = spawnSync(command, args, {
     cwd,
-    stdio: ["ignore", "pipe", "inherit"],
+    stdio: ["ignore", "pipe", allowFailure ? "ignore" : "inherit"],
     encoding: "utf8",
   });
   if (result.stdout) process.stdout.write(result.stdout);
@@ -111,19 +112,40 @@ export function build({ run, mise, appDir }) {
   run(mise, ["exec", "--", "npm", "run", "build"], { cwd: appDir });
 }
 
+/** @param {number} ms */
+function sleepSync(ms) {
+  Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, ms);
+}
+
 /**
- * launchd の設定を書いて登録し直す（登録済みなら外してから登録する。アプリも起動し直す）
+ * launchd の設定を書いて登録し直す（登録済みなら外してから登録する。アプリも起動し直す）。
+ * 登録を外す処理（bootout）は裏で続くため、外し終わるまで待ってから登録する。
  *
- * @param {{ run: Run; fs: Fs; mise: string; paths: ReturnType<typeof import("./config.mjs").localPaths>; uid: number }} options
+ * @param {{ run: Run; fs: Fs; mise: string; paths: ReturnType<typeof import("./config.mjs").localPaths>; uid: number; sleep?: (ms: number) => void }} options
  */
-export function registerAgents({ run, fs, mise, paths, uid }) {
+export function registerAgents({
+  run,
+  fs,
+  mise,
+  paths,
+  uid,
+  sleep = sleepSync,
+}) {
   fs.mkdir(paths.launchAgentsDir);
   fs.mkdir(paths.logsDir);
   for (const agent of launchAgents({ mise, paths })) {
     fs.writeFile(agent.path, agent.content);
-    run("launchctl", ["bootout", `gui/${uid}/${agent.label}`], {
-      allowFailure: true,
-    });
+    const service = `gui/${uid}/${agent.label}`;
+    run("launchctl", ["bootout", service], { allowFailure: true });
+    // 外し終わる（print で見つからなくなる）まで、最大 10 秒待つ
+    for (let i = 0; i < 20; i += 1) {
+      if (
+        run("launchctl", ["print", service], { allowFailure: true }).status !==
+        0
+      )
+        break;
+      sleep(500);
+    }
     run("launchctl", ["bootstrap", `gui/${uid}`, agent.path]);
   }
 }

@@ -29,7 +29,7 @@ function fake(existing: string[] = []) {
             (options.cwd ? ` @${options.cwd}` : ""),
         );
         return {
-          status: 0,
+          status: args[0] === "print" ? 1 : 0,
           stdout: args.includes("get-url")
             ? "https://github.com/yuuulf/time-log.git\n"
             : "",
@@ -71,8 +71,10 @@ describe("初めての導入", () => {
       `${mise} exec -- npm ci @${app}`,
       `${mise} exec -- npm run build @${app}`,
       "launchctl bootout gui/501/local.timelog.app",
+      "launchctl print gui/501/local.timelog.app",
       `launchctl bootstrap gui/501 ${paths.launchAgentsDir}/local.timelog.app.plist`,
       "launchctl bootout gui/501/local.timelog.backup",
+      "launchctl print gui/501/local.timelog.backup",
       `launchctl bootstrap gui/501 ${paths.launchAgentsDir}/local.timelog.backup.plist`,
     ]);
     expect(f.copies).toEqual([`${devDatabase} → ${paths.database}`]);
@@ -127,5 +129,41 @@ describe("失敗するとき", () => {
     await expect(
       install({ ...f.options, waitForApp: async () => false }),
     ).rejects.toThrow(`${paths.logsDir}/app.log`);
+  });
+});
+
+describe("launchd への登録", () => {
+  test("登録を外したあと、外し終わるまで待ってから登録する", async () => {
+    const f = fake([]);
+    let prints = 0;
+    const sleeps: number[] = [];
+    const run = (command: string, args: string[], options = {}) => {
+      const result = f.options.run(command, args, options);
+      // 2 回目の print までは、まだ登録が残っているとする
+      if (args[0] === "print" && args[1].endsWith("app")) {
+        prints += 1;
+        return { ...result, status: prints <= 2 ? 0 : 1 };
+      }
+      return result;
+    };
+    const { registerAgents } = await import("./common.mjs");
+    registerAgents({
+      run,
+      fs: f.options.fs,
+      mise,
+      paths,
+      uid: 501,
+      sleep: (ms: number) => sleeps.push(ms),
+    });
+
+    const app = f.commands.filter((c) => c.includes("local.timelog.app"));
+    expect(app).toEqual([
+      "launchctl bootout gui/501/local.timelog.app",
+      "launchctl print gui/501/local.timelog.app",
+      "launchctl print gui/501/local.timelog.app",
+      "launchctl print gui/501/local.timelog.app",
+      `launchctl bootstrap gui/501 ${paths.launchAgentsDir}/local.timelog.app.plist`,
+    ]);
+    expect(sleeps).toEqual([500, 500]);
   });
 });
