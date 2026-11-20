@@ -17,7 +17,7 @@
 ## 3. ボタン・リンクのフォーカスリング
 
 - [x] 3.1 `app/globals.css` の `@layer base` に、`:focus-visible` の outline を primary 色（`2px solid var(--primary)`、オフセット 2px）にする規則を足す（design「ボタン・リンクのフォーカスリングは `globals.css` の base レイヤーで一括指定する」）。`app/globals.test.ts` で、base レイヤーにその規則があることをテストする。`npm run build` で生成された CSS で、入力欄・メニュー項目の `focus:outline-none` がこの規則より優先される（utilities レイヤーにある）ことを確認する（コミット: ボタンとリンクのフォーカスリングを primary 色にする）
-- [ ] 3.2 `npm run format`・`npm run lint`・`npm run typecheck`・`npm test` が通ることを確認する。整形の差分があれば別にコミットする
+- [x] 3.2 `npm run format`・`npm run lint`・`npm run typecheck`・`npm test` が通ることを確認する。整形の差分があれば別にコミットする
 
 ## 4. ドキュメントと確認
 
