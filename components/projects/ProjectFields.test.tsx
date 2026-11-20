@@ -80,6 +80,24 @@ test("入力・色の選択を知らせ、欄ごとのエラーを表示する",
   expect(screen.getByRole("alert").textContent).toBe(t.errors.nameTaken);
 });
 
+test("入力欄は、フォーカスしたとき枠をテーマ色にし、エラーの欄はエラーの印を残す", () => {
+  render(
+    <ProjectFields
+      idPrefix="p"
+      values={values}
+      errors={{ name: t.errors.nameTaken }}
+      onChange={vi.fn()}
+      onColorChange={vi.fn()}
+    />,
+  );
+
+  for (const label of [t.name, t.clientName, t.description]) {
+    expect(input(label).className).toContain("focus:border-primary");
+  }
+  expect(input(t.name).getAttribute("aria-invalid")).toBe("true");
+  expect(input(t.name).className).toContain("aria-[invalid=true]:border-danger");
+});
+
 test("一覧へ戻るリンク", () => {
   render(<BackLink />);
 
