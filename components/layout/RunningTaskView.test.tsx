@@ -1,9 +1,23 @@
 import { render, screen, within } from "@testing-library/react";
-import { expect, test } from "vitest";
+import { beforeEach, expect, test, vi } from "vitest";
 import { messages } from "@/lib/messages";
 import { RunningTaskView } from "./RunningTaskView";
 
 const t = messages.timeEntries;
+
+const navigation = vi.hoisted(() => ({ pathname: "/history" }));
+vi.mock("next/navigation", () => ({
+  usePathname: () => navigation.pathname,
+}));
+
+beforeEach(() => {
+  navigation.pathname = "/history";
+});
+
+const running = {
+  taskName: "資料作成",
+  startedAt: new Date("2026-11-19T09:00:00+09:00"),
+};
 
 test("記録中のタスク名と開始時刻を表示する", () => {
   render(
@@ -96,4 +110,35 @@ test("開始時刻は見出しの次にあり、プロジェクトとタスク�
   expect(follows(heading, time)).toBe(true);
   expect(follows(time, task)).toBe(true);
   expect(follows(time, within(section).getByTitle("社内ツール"))).toBe(true);
+});
+
+test("記録中のタスクがあるとき、枠全体がトップページへのリンクになる", () => {
+  render(<RunningTaskView running={running} />);
+
+  const section = screen.getByRole("region", { name: t.runningHeading });
+  const link = within(section).getByRole("link");
+  expect(link.getAttribute("href")).toBe("/");
+  // 見出し → 開始時刻 → タスク名の順で、すべてリンクの中にある
+  expect(link.textContent).toBe(
+    `${t.runningHeading}${t.startedAt} 09:00資料作成`,
+  );
+});
+
+test("記録中のタスクがないときも、枠全体がトップページへのリンクになる", () => {
+  render(<RunningTaskView running={null} />);
+
+  const link = screen.getByRole("link");
+  expect(link.getAttribute("href")).toBe("/");
+  expect(link.textContent).toBe(`${t.runningHeading}${messages.nav.noRunning}`);
+});
+
+test("トップページでは枠が選ばれている表示になり、ほかのページではならない", () => {
+  navigation.pathname = "/";
+  const { unmount } = render(<RunningTaskView running={running} />);
+  expect(screen.getByRole("link").getAttribute("aria-current")).toBe("page");
+  unmount();
+
+  navigation.pathname = "/summary";
+  render(<RunningTaskView running={running} />);
+  expect(screen.getByRole("link").hasAttribute("aria-current")).toBe(false);
 });

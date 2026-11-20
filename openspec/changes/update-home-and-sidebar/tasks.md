@@ -9,7 +9,7 @@
 ## 2. サイドバー
 
 - [x] 2.1 `SidebarNav` の `pages` から「ホーム」（`/`）を外す（design 決定 4）。`SidebarNav.test.tsx` と `app/layout.test.tsx` で、リンクが「過去の記録」「集計」「プロジェクト」の順の 3 つで、トップページではどのリンクも選ばれていない表示になることをテストする（コミット: サイドバーのリンクから「ホーム」をなくす）
-- [ ] 2.2 `components/layout/RunningTaskLink.tsx` を作り、`RunningTaskView` の中身全体をトップページへのリンクにする（design 決定 3）。`RunningTaskLink.test.tsx`・`RunningTaskView.test.tsx` で、記録中のタスクがあるときもないときも `/` へのリンクで、`/` では `aria-current="page"`、ほかのページでは付かないこと、表示の順（見出し → 開始時刻 → プロジェクトのアイコン → タスク名）が変わらないことをテストする。`SidebarShell.test.tsx` か結合のテストで、幅 768px 未満で枠を選ぶとサイドバーが閉じることを確かめる（コミット: 記録中のタスクの枠からトップページへ移れるようにする）
+- [x] 2.2 `components/layout/RunningTaskLink.tsx` を作り、`RunningTaskView` の中身全体をトップページへのリンクにする（design 決定 3）。`RunningTaskLink.test.tsx`・`RunningTaskView.test.tsx` で、記録中のタスクがあるときもないときも `/` へのリンクで、`/` では `aria-current="page"`、ほかのページでは付かないこと、表示の順（見出し → 開始時刻 → プロジェクトのアイコン → タスク名）が変わらないことをテストする。`SidebarShell.test.tsx` か結合のテストで、幅 768px 未満で枠を選ぶとサイドバーが閉じることを確かめる（コミット: 記録中のタスクの枠からトップページへ移れるようにする）
 
 ## 3. ドキュメントと確認
 

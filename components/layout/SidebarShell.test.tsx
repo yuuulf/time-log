@@ -1,6 +1,7 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import { expect, test } from "vitest";
 import { messages } from "@/lib/messages";
+import { RunningTaskLinkView } from "./RunningTaskLink";
 import { SidebarShell } from "./SidebarShell";
 
 const t = messages.nav;
@@ -68,6 +69,20 @@ test("Escape キーで閉じる", () => {
 test("サイドバーの中のリンクを選ぶと閉じる", () => {
   openSidebar();
   fireEvent.click(screen.getByRole("link", { name: "過去の記録" }));
+
+  expect(menuButton().getAttribute("aria-expanded")).toBe("false");
+});
+
+test("記録中のタスクの枠の中の文字を選んでも閉じる", () => {
+  render(
+    <SidebarShell>
+      <RunningTaskLinkView pathname="/history">
+        <p>資料作成</p>
+      </RunningTaskLinkView>
+    </SidebarShell>,
+  );
+  fireEvent.click(menuButton());
+  fireEvent.click(screen.getByText("資料作成"));
 
   expect(menuButton().getAttribute("aria-expanded")).toBe("false");
 });
