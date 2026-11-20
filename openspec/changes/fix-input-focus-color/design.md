@@ -32,8 +32,17 @@
 - 既存の `aria-[invalid=true]:border-danger` をそのまま残し、生成される CSS で `aria-[invalid=true]` がフォーカスの指定より後に出ることを確認する（Tailwind v4 では `aria-*` の variant は `focus` より後に並ぶ）。優先されない場合は `focus:not-aria-[invalid=true]:border-primary` に切り替える
 - `StartStopForm` のタスク名・`PeriodControls` の日付は今エラーの枠の指定がないが、今回はフォーカスの色だけを扱い、エラーの枠は追加しない
 
+### ボタン・リンクのフォーカスリングは `globals.css` の base レイヤーで一括指定する
+
+- `@layer base` に `:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }` を書く。ボタン・リンクは `IconButton`・`IconLink`・`TextButton`・`TextLink`・サイドバーのリンク・記録中のタスクの枠など種類が多く、どれもフォーカスの指定がない（ブラウザ既定の青い outline）ので、要素ごとにクラスを足すより一括指定のほうが漏れがない
+- outline の色だけを変える（`outline-color` のみ）案は、ブラウザ既定の `outline-style: auto` では Safari が色を無視するため採らない。太さ・オフセットを明示して見た目をブラウザ間でそろえる
+- base レイヤーなので、部品のクラス（utilities レイヤー）が優先される。入力欄の `focus:outline-none`、メニュー項目の `focus:outline-none`、色の選択の `peer-focus-visible:outline-foreground` はそのまま効く
+- `:focus-visible` を使うので、クリックでは出ず、キーボード操作のときだけ出る（ブラウザ既定と同じ）
+- 入力欄の方針（クラスの定数）と分けるのは、入力欄が「枠線（border）の色を変える」見た目で、要素ごとに枠の有無が違うため
+
 ### テストはクラスの付与で確認する
 
+- ボタン・リンクのフォーカスリングは `app/globals.css` の規則なので、`app/globals.test.ts` で CSS ファイルに `:focus-visible` の outline を `var(--primary)` にする規則が base レイヤーにあることを確認する
 - jsdom は CSS を計算しないので、フォーカス時の色そのものは自動テストで確かめられない。各入力欄に `fieldFocusClassName` のクラス（`focus:border-primary`）が付いていることを Testing Library で確認し、実際の色はブラウザで目視確認する
 
 ## Risks / Trade-offs
