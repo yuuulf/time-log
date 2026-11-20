@@ -95,7 +95,9 @@ test("入力欄は、フォーカスしたとき枠をテーマ色にし、エ�
     expect(input(label).className).toContain("focus:border-primary");
   }
   expect(input(t.name).getAttribute("aria-invalid")).toBe("true");
-  expect(input(t.name).className).toContain("aria-[invalid=true]:border-danger");
+  expect(input(t.name).className).toContain(
+    "aria-[invalid=true]:border-danger",
+  );
 });
 
 test("一覧へ戻るリンク", () => {

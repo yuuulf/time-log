@@ -11,8 +11,7 @@ import type { EntryProject } from "./types";
 const t = messages.timeEntries;
 
 const VARIANTS = {
-  inline:
-    "border-transparent px-2 py-2 text-sm hover:border-border",
+  inline: "border-transparent px-2 py-2 text-sm hover:border-border",
   field: "border-border bg-background px-3 py-2 text-base",
 } as const;
 
