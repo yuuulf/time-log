@@ -34,10 +34,12 @@ export async function EntryHistory({
             project,
           }),
         );
-  const projects = listProjects(db).map(({ id, name, color }) => ({
-    id,
-    name,
-    color,
-  }));
+  const projects = listProjects(db, { archived: false }).map(
+    ({ id, name, color }) => ({
+      id,
+      name,
+      color,
+    }),
+  );
   return <HistoryContent view={view} entries={entries} projects={projects} />;
 }

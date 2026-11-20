@@ -7,7 +7,7 @@ import { ProjectsContent } from "./ProjectsContent";
 export async function ProjectsView() {
   // better-sqlite3 は同期 API のため、プリレンダーではなくリクエスト時に読むよう明示する
   await connection();
-  const projects = listProjects(getDb()).map(
+  const projects = listProjects(getDb(), { archived: false }).map(
     ({ id, name, color, clientName, description }) => ({
       id,
       name,

@@ -45,14 +45,14 @@ export function ProjectPicker({
   const { open, setOpen, close, rootRef, triggerRef, rootProps } = usePopover();
   const optionRefs = useRef<(HTMLDivElement | null)[]>([]);
   const options: (EntryProject | null)[] = [null, ...projects];
-  const selectedIndex = Math.max(
-    0,
-    options.findIndex((o) => (o?.id ?? null) === (value?.id ?? null)),
+  // 今の値が選択肢にない（アーカイブしたプロジェクトが紐づいている）ときは -1 で、どれも選ばれている表示にしない
+  const selectedIndex = options.findIndex(
+    (o) => (o?.id ?? null) === (value?.id ?? null),
   );
   const name = value?.name ?? t.noProject;
 
   useEffect(() => {
-    if (open) optionRefs.current[selectedIndex]?.focus();
+    if (open) optionRefs.current[Math.max(0, selectedIndex)]?.focus();
     // 開いたときだけ今の項目にフォーカスする
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);

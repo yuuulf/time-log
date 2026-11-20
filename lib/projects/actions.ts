@@ -8,6 +8,7 @@ import {
   deleteProject,
   findProjectByName,
   getProject,
+  setProjectArchived,
   updateProject,
 } from "./repository";
 import { validateProjectInput, type ProjectFieldErrors } from "./validation";
@@ -101,4 +102,29 @@ export async function deleteProjectAction(
   if (result === "in-use") return { errors: { form: errors.inUse } };
   refresh();
   return { ok: true };
+}
+
+/** アーカイブ・解除の共通の処理。archive が true ならアーカイブ、false なら解除する */
+function setArchived(id: number, archive: boolean): ProjectActionState {
+  if (!isValidId(id)) return notFound;
+  const now = new Date();
+  if (!setProjectArchived(getDb(), id, archive ? now : null, now)) {
+    return notFound;
+  }
+  refresh();
+  return { ok: true };
+}
+
+/** プロジェクトをアーカイブする。一覧と記録の選択肢から外れる */
+export async function archiveProjectAction(
+  id: number,
+): Promise<ProjectActionState> {
+  return setArchived(id, true);
+}
+
+/** プロジェクトのアーカイブを解除する */
+export async function unarchiveProjectAction(
+  id: number,
+): Promise<ProjectActionState> {
+  return setArchived(id, false);
 }

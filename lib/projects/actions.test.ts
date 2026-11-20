@@ -4,8 +4,10 @@ import { createDb, type Db } from "@/lib/db/client";
 import { timeEntries } from "@/lib/db/schema";
 import { messages } from "@/lib/messages";
 import {
+  archiveProjectAction,
   createProjectAction,
   deleteProjectAction,
+  unarchiveProjectAction,
   updateProjectAction,
 } from "./actions";
 import { createProject, getProject, listProjects } from "./repository";
@@ -52,7 +54,7 @@ describe("createProjectAction", () => {
     );
 
     expect(result).toEqual({ ok: true });
-    expect(listProjects(db)).toMatchObject([
+    expect(listProjects(db, { archived: false })).toMatchObject([
       { name: "社内ツール", color: "teal", clientName: "A 社" },
     ]);
     expect(refresh).toHaveBeenCalledOnce();
@@ -62,7 +64,7 @@ describe("createProjectAction", () => {
     const result = await createProjectAction({}, form({ ...fields, name: "" }));
 
     expect(result).toEqual({ errors: { name: errors.nameRequired } });
-    expect(listProjects(db)).toEqual([]);
+    expect(listProjects(db, { archived: false })).toEqual([]);
     expect(refresh).not.toHaveBeenCalled();
   });
 
@@ -75,7 +77,7 @@ describe("createProjectAction", () => {
     );
 
     expect(result).toEqual({ errors: { name: errors.nameTaken } });
-    expect(listProjects(db)).toHaveLength(1);
+    expect(listProjects(db, { archived: false })).toHaveLength(1);
   });
 });
 
@@ -179,4 +181,33 @@ describe("deleteProjectAction", () => {
       errors: { form: errors.notFound },
     });
   });
+});
+
+describe("archiveProjectAction / unarchiveProjectAction", () => {
+  test("アーカイブすると一覧から外れ、解除すると戻る。どちらも画面を更新する", async () => {
+    const project = addProject("社内ツール");
+
+    expect(await archiveProjectAction(project.id)).toEqual({ ok: true });
+    expect(getProject(db, project.id)?.archivedAt).toBeInstanceOf(Date);
+    expect(listProjects(db, { archived: false })).toEqual([]);
+    expect(refresh).toHaveBeenCalledOnce();
+
+    expect(await unarchiveProjectAction(project.id)).toEqual({ ok: true });
+    expect(getProject(db, project.id)?.archivedAt).toBeNull();
+    expect(listProjects(db, { archived: false })).toHaveLength(1);
+    expect(refresh).toHaveBeenCalledTimes(2);
+  });
+
+  test.each([[999], [-1], [1.5]])(
+    "見つからない・不正な id（%j）は何もせず理由を返す",
+    async (id) => {
+      expect(await archiveProjectAction(id)).toEqual({
+        errors: { form: errors.notFound },
+      });
+      expect(await unarchiveProjectAction(id)).toEqual({
+        errors: { form: errors.notFound },
+      });
+      expect(refresh).not.toHaveBeenCalled();
+    },
+  );
 });

@@ -50,7 +50,14 @@ function toValues(project: ProjectData): Values {
  * 文字の項目は値を変えてフォーカスが外れたとき（名前・クライアント名は Enter でも）に保存し、Escape で元に戻す。
  * 色は選んだときに保存する。入力エラーのときは保存せず、入力した値を残す
  */
-export function ProjectDetail({ project }: { project: ProjectData }) {
+export function ProjectDetail({
+  project,
+  archived = false,
+}: {
+  project: ProjectData;
+  /** アーカイブしたプロジェクトなら true。見出しの下にその旨を出す */
+  archived?: boolean;
+}) {
   const id = useId();
   const saved = toValues(project);
 
@@ -137,6 +144,7 @@ export function ProjectDetail({ project }: { project: ProjectData }) {
         <h1 className="text-3xl font-bold break-words text-foreground">
           {project.name}
         </h1>
+        {archived && <p className="text-sm text-muted">{t.archived.notice}</p>}
       </div>
       <div className="space-y-4">
         <ProjectFields

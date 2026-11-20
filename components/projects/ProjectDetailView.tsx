@@ -20,6 +20,7 @@ export async function ProjectDetailView({
   return (
     <ProjectDetail
       project={{ id: project.id, name, color, clientName, description }}
+      archived={project.archivedAt !== null}
     />
   );
 }

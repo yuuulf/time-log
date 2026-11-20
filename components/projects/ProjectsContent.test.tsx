@@ -4,6 +4,8 @@ import { messages } from "@/lib/messages";
 import { ProjectsContent } from "./ProjectsContent";
 
 vi.mock("@/lib/projects/actions", () => ({
+  archiveProjectAction: vi.fn(),
+  unarchiveProjectAction: vi.fn(),
   deleteProjectAction: vi.fn(),
 }));
 
@@ -44,4 +46,13 @@ test("プロジェクトがなければ、ないことと「新規作成」か�
   expect(t.empty).toContain(`「${t.actions.add}」`);
   expect(screen.getByRole("link", { name: t.actions.add })).toBeDefined();
   expect(screen.queryByRole("list")).toBeNull();
+});
+
+test("「新規作成」の横に、アーカイブ済みの画面へのアイコンのリンクを置く", () => {
+  render(<ProjectsContent projects={[]} />);
+
+  const link = screen.getByRole("link", { name: t.actions.archived });
+  expect(link.getAttribute("href")).toBe("/projects/archived");
+  expect(link.getAttribute("title")).toBe(t.actions.archived);
+  expect(link.querySelector("svg.lucide-archive")).not.toBeNull();
 });

@@ -18,11 +18,13 @@ export async function TimeTracker() {
   const running = getRunningEntry(db);
   const entries = listRecentEntries(db, now);
   const suggestions = listTaskNameSuggestions(db);
-  const projects = listProjects(db).map(({ id, name, color }) => ({
-    id,
-    name,
-    color,
-  }));
+  const projects = listProjects(db, { archived: false }).map(
+    ({ id, name, color }) => ({
+      id,
+      name,
+      color,
+    }),
+  );
 
   return (
     <div className="space-y-8">

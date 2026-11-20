@@ -48,6 +48,28 @@ test("接続するとマイグレーションが適用され、projects テー�
   db.$client.close();
 });
 
+test("projects には archived_at 列があり、登録したばかりのプロジェクトは null", () => {
+  const db = createDb(":memory:");
+  const columns = db.all<{ name: string; notnull: number }>(
+    sql`pragma table_info(projects)`,
+  );
+  expect(columns.find((c) => c.name === "archived_at")?.notnull).toBe(0);
+
+  const now = new Date("2026-11-20T09:00:00+09:00");
+  const project = db
+    .insert(projects)
+    .values({
+      name: "社内ツール",
+      color: "teal",
+      createdAt: now,
+      updatedAt: now,
+    })
+    .returning()
+    .get();
+  expect(project.archivedAt).toBeNull();
+  db.$client.close();
+});
+
 test("記録が紐づいたプロジェクトは DB でも削除できない", () => {
   const db = createDb(":memory:");
   const now = new Date("2026-11-19T09:00:00+09:00");

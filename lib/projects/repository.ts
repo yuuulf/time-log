@@ -1,11 +1,43 @@
-import { asc, count, eq } from "drizzle-orm";
+import { asc, count, eq, isNotNull, isNull } from "drizzle-orm";
 import type { Db } from "@/lib/db/client";
 import { projects, timeEntries, type Project } from "@/lib/db/schema";
 import type { ProjectInput } from "./validation";
 
-/** プロジェクトを登録した順に返す */
-export function listProjects(db: Db): Project[] {
-  return db.select().from(projects).orderBy(asc(projects.id)).all();
+/**
+ * プロジェクトを登録した順に返す。archived が false ならアーカイブしていないもの、
+ * true ならアーカイブしたものだけを返す（呼ぶ側が意図して選ぶよう、引数は必須）
+ */
+export function listProjects(
+  db: Db,
+  { archived }: { archived: boolean },
+): Project[] {
+  return db
+    .select()
+    .from(projects)
+    .where(
+      archived ? isNotNull(projects.archivedAt) : isNull(projects.archivedAt),
+    )
+    .orderBy(asc(projects.id))
+    .all();
+}
+
+/**
+ * プロジェクトをアーカイブする（archivedAt に日時）、または解除する（null）。
+ * 存在しなければ false を返す
+ */
+export function setProjectArchived(
+  db: Db,
+  id: number,
+  archivedAt: Date | null,
+  now: Date,
+): boolean {
+  const updated = db
+    .update(projects)
+    .set({ archivedAt, updatedAt: now })
+    .where(eq(projects.id, id))
+    .returning({ id: projects.id })
+    .get();
+  return updated !== undefined;
 }
 
 /** プロジェクトを 1 件返す。なければ undefined */

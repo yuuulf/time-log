@@ -4,10 +4,13 @@ import { messages } from "@/lib/messages";
 import { ProjectItem } from "./ProjectItem";
 
 vi.mock("@/lib/projects/actions", () => ({
+  archiveProjectAction: vi.fn(),
+  unarchiveProjectAction: vi.fn(),
   deleteProjectAction: vi.fn(),
 }));
 
-const { deleteProjectAction } = await import("@/lib/projects/actions");
+const { archiveProjectAction, unarchiveProjectAction, deleteProjectAction } =
+  await import("@/lib/projects/actions");
 const t = messages.projects;
 
 const project = {
@@ -20,6 +23,8 @@ const project = {
 
 beforeEach(() => {
   vi.mocked(deleteProjectAction).mockReset().mockResolvedValue({ ok: true });
+  vi.mocked(archiveProjectAction).mockReset().mockResolvedValue({ ok: true });
+  vi.mocked(unarchiveProjectAction).mockReset().mockResolvedValue({ ok: true });
 });
 
 afterEach(() => {
@@ -100,5 +105,64 @@ describe("削除", () => {
     chooseDelete();
 
     expect((await screen.findByRole("alert")).textContent).toBe(t.errors.inUse);
+  });
+});
+
+describe("アーカイブ", () => {
+  const menuItems = () => {
+    fireEvent.click(screen.getByRole("button", { name: t.actions.more }));
+    return screen.getAllByRole("menuitem");
+  };
+
+  test("メニューは「アーカイブ」「削除」の順で、アーカイブにはアイコンが付く", () => {
+    render(<ProjectItem project={project} />);
+
+    const items = menuItems();
+    expect(items.map((i) => i.textContent)).toEqual([
+      t.actions.archive,
+      t.actions.delete,
+    ]);
+    expect(items[0].querySelector("svg.lucide-archive")).not.toBeNull();
+  });
+
+  test("「アーカイブ」を選ぶと確認せずにアーカイブする", async () => {
+    const confirm = vi.spyOn(window, "confirm");
+    render(<ProjectItem project={project} />);
+
+    fireEvent.click(menuItems()[0]);
+
+    await vi.waitFor(() =>
+      expect(archiveProjectAction).toHaveBeenCalledWith(3),
+    );
+    expect(confirm).not.toHaveBeenCalled();
+  });
+
+  test("アーカイブ済みの行のメニューは「アーカイブ解除」「削除」で、解除を呼ぶ", async () => {
+    render(<ProjectItem project={project} archived />);
+
+    const items = menuItems();
+    expect(items.map((i) => i.textContent)).toEqual([
+      t.actions.unarchive,
+      t.actions.delete,
+    ]);
+    fireEvent.click(items[0]);
+
+    await vi.waitFor(() =>
+      expect(unarchiveProjectAction).toHaveBeenCalledWith(3),
+    );
+    expect(archiveProjectAction).not.toHaveBeenCalled();
+  });
+
+  test("アーカイブに失敗したら理由を表示する", async () => {
+    vi.mocked(archiveProjectAction).mockResolvedValue({
+      errors: { form: t.errors.notFound },
+    });
+    render(<ProjectItem project={project} />);
+
+    fireEvent.click(menuItems()[0]);
+
+    expect((await screen.findByRole("alert")).textContent).toBe(
+      t.errors.notFound,
+    );
   });
 });

@@ -1,4 +1,5 @@
-import { Plus } from "lucide-react";
+import { Archive, Plus } from "lucide-react";
+import { IconLink } from "@/components/ui/IconLink";
 import { TextLink } from "@/components/ui/TextButton";
 import { messages } from "@/lib/messages";
 import { ProjectItem } from "./ProjectItem";
@@ -17,9 +18,16 @@ export function ProjectsContent({ projects }: { projects: ProjectData[] }) {
         >
           {t.listHeading}
         </h2>
-        <TextLink href="/projects/new" icon={Plus}>
-          {t.actions.add}
-        </TextLink>
+        <div className="flex gap-2">
+          <TextLink href="/projects/new" icon={Plus}>
+            {t.actions.add}
+          </TextLink>
+          <IconLink
+            href="/projects/archived"
+            icon={Archive}
+            label={t.actions.archived}
+          />
+        </div>
       </div>
       {projects.length === 0 ? (
         <p className="text-sm text-muted">{t.empty}</p>
