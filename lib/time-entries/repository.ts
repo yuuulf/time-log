@@ -6,7 +6,7 @@ import {
   type Project,
   type TimeEntry,
 } from "@/lib/db/schema";
-import { dayRange, splitByJstDay } from "@/lib/time";
+import { DAY_MS, dayRange, splitByJstDay } from "@/lib/time";
 
 /** 記録に付けて返すプロジェクト */
 export type EntryProject = Pick<Project, "id" | "name" | "color">;
@@ -36,7 +36,10 @@ function selectEntriesWithProject(db: Db) {
 }
 
 /** タスク名の候補の最大件数 */
-export const SUGGESTION_LIMIT = 20;
+export const SUGGESTION_LIMIT = 10;
+
+/** タスク名の候補にする期間の日数（今日を含む日本時間の日数） */
+export const SUGGESTION_DAYS = 30;
 
 /** 記録中の記録をプロジェクト付きで返す。なければ undefined */
 export function getRunningEntry(db: Db): EntryWithProject | undefined {
@@ -163,13 +166,19 @@ export function listEntriesBetween(
     .map(toEntryWithProject);
 }
 
-/** 過去に使ったタスク名を、最近使った順に重複なく返す。空のタスク名は含めない */
-export function listTaskNameSuggestions(db: Db): string[] {
+/**
+ * 最近（今日を含む日本時間の SUGGESTION_DAYS 日間）に開始した記録のタスク名を、最近使った順に重複なく
+ * SUGGESTION_LIMIT 件まで返す。空のタスク名は含めない
+ */
+export function listTaskNameSuggestions(db: Db, now: Date): string[] {
+  const from = new Date(
+    dayRange(now).from.getTime() - (SUGGESTION_DAYS - 1) * DAY_MS,
+  );
   const lastUsed = max(timeEntries.startedAt);
   return db
     .select({ taskName: timeEntries.taskName, lastUsed })
     .from(timeEntries)
-    .where(ne(timeEntries.taskName, ""))
+    .where(and(ne(timeEntries.taskName, ""), gte(timeEntries.startedAt, from)))
     .groupBy(timeEntries.taskName)
     .orderBy(desc(lastUsed))
     .limit(SUGGESTION_LIMIT)

@@ -290,25 +290,55 @@ describe("期間の一覧", () => {
 });
 
 describe("タスク名の候補", () => {
+  // 今日（日本時間）は 2026-11-18
+  const now = at("12:00:00");
+
   test("最近使った順に重複なく並び、空のタスク名は含まない", () => {
     insertEntry("資料作成", at("08:00:00"), at("09:00:00"));
     insertEntry("打ち合わせ", at("09:00:00"), at("10:00:00"));
     insertEntry("", at("10:00:00"), at("10:30:00"));
     insertEntry("資料作成", at("11:00:00"), null);
 
-    expect(listTaskNameSuggestions(db)).toEqual(["資料作成", "打ち合わせ"]);
+    expect(listTaskNameSuggestions(db, now)).toEqual([
+      "資料作成",
+      "打ち合わせ",
+    ]);
   });
 
-  test("最大 20 件まで", () => {
-    for (let i = 1; i <= 25; i++) {
+  test("今日を含む 30 日間（30 日目の 0 時から）に開始した記録だけを数える", () => {
+    // 30 日目は 10月20日、31 日目は 10月19日
+    insertEntry(
+      "旧資料",
+      jst("2026-10-19T23:59:59"),
+      jst("2026-10-20T00:30:00"),
+    );
+    insertEntry(
+      "月次報告",
+      jst("2026-10-20T00:00:00"),
+      jst("2026-10-20T01:00:00"),
+    );
+
+    expect(listTaskNameSuggestions(db, now)).toEqual(["月次報告"]);
+  });
+
+  test("30 日より前にも使ったタスク名は、期間内に使っていれば期間内の最新の使用順で並ぶ", () => {
+    insertEntry("定例", jst("2026-09-01T09:00:00"), jst("2026-09-01T10:00:00"));
+    insertEntry("設計", jst("2026-11-10T09:00:00"), jst("2026-11-10T10:00:00"));
+    insertEntry("定例", jst("2026-11-01T09:00:00"), jst("2026-11-01T10:00:00"));
+
+    expect(listTaskNameSuggestions(db, now)).toEqual(["設計", "定例"]);
+  });
+
+  test("最大 10 件まで", () => {
+    for (let i = 1; i <= 12; i++) {
       const start = new Date(at("00:00:00").getTime() + i * 60_000);
       insertEntry(`タスク${i}`, start, new Date(start.getTime() + 30_000));
     }
 
-    const suggestions = listTaskNameSuggestions(db);
-    expect(suggestions).toHaveLength(20);
-    expect(suggestions[0]).toBe("タスク25");
-    expect(suggestions[19]).toBe("タスク6");
+    const suggestions = listTaskNameSuggestions(db, now);
+    expect(suggestions).toHaveLength(10);
+    expect(suggestions[0]).toBe("タスク12");
+    expect(suggestions[9]).toBe("タスク3");
   });
 });
 

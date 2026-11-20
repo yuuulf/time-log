@@ -8,6 +8,7 @@ import {
   formatDateHeading,
   formatDuration,
   formatMonthDay,
+  formatMonthDayWithWeekday,
   formatMonthHeading,
   formatRangeHeading,
   formatTime,
@@ -58,6 +59,16 @@ describe("曜日と月日", () => {
       "11月16日",
     );
     expect(formatMonthDay(new Date("2026-01-01T15:00:00Z"))).toBe("1月2日");
+  });
+
+  test("日付を曜日付きで「11月16日（月）」の形で表示する", () => {
+    expect(
+      formatMonthDayWithWeekday(new Date("2026-11-16T00:00:00+09:00")),
+    ).toBe("11月16日（月）");
+    // UTC の 2026-11-22（日）15:00 は日本時間の 2026-11-23（月）0:00
+    expect(formatMonthDayWithWeekday(new Date("2026-11-22T15:00:00Z"))).toBe(
+      "11月23日（月）",
+    );
   });
 });
 
