@@ -15,10 +15,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: {
-    default: messages.app.name,
-    template: `%s | ${messages.app.name}`,
-  },
+  // タブのタイトルは、どのページでもアプリ名だけにする（ページ名は付けない）
+  title: messages.app.name,
   description: messages.app.description,
   // ファビコンはブラウザ・OS のライト・ダークに合わせて出し分ける。
   // media に対応していないブラウザでもロゴが出るよう、ライト用は media なしにする

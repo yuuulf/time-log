@@ -1,11 +1,6 @@
-import type { Metadata } from "next";
 import { Suspense } from "react";
 import { SummaryView } from "@/components/summary/SummaryView";
 import { messages } from "@/lib/messages";
-
-export const metadata: Metadata = {
-  title: messages.summary.title,
-};
 
 /** 集計。月ごと、または指定した期間の記録の合計時間・稼働日数などを表示する */
 export default function SummaryPage({ searchParams }: PageProps<"/summary">) {

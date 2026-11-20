@@ -1,11 +1,6 @@
-import type { Metadata } from "next";
 import { Suspense } from "react";
 import { ProjectsView } from "@/components/projects/ProjectsView";
 import { messages } from "@/lib/messages";
-
-export const metadata: Metadata = {
-  title: messages.projects.title,
-};
 
 /** プロジェクト。一覧と登録・編集・削除 */
 export default function ProjectsPage() {

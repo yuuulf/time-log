@@ -2,7 +2,7 @@
 
 ## 1. タイトル
 
-- [ ] 1.1 `app/layout.tsx` の `metadata.title` を「TimeLog」だけにし、`app/history`・`app/summary`・`app/projects`・`app/projects/new`・`app/projects/[id]`・`app/projects/archived` の `page.tsx` から `metadata` を削除する（design 決定 1）。`app/layout.test.tsx` でタイトルが「TimeLog」であること、各ページの `page.test.tsx` で `metadata` を export していないことをテストする（design 決定 2）。`npm run build` が通り、出力された各ページの HTML の `<title>` が `TimeLog` であることを確かめる（コミット: タブのタイトルをアプリ名だけにする）
+- [x] 1.1 `app/layout.tsx` の `metadata.title` を「TimeLog」だけにし、`app/history`・`app/summary`・`app/projects`・`app/projects/new`・`app/projects/[id]`・`app/projects/archived` の `page.tsx` から `metadata` を削除する（design 決定 1）。`app/layout.test.tsx` でタイトルが「TimeLog」であること、各ページの `page.test.tsx` で `metadata` を export していないことをテストする（design 決定 2）。`npm run build` が通り、出力された各ページの HTML の `<title>` が `TimeLog` であることを確かめる（コミット: タブのタイトルをアプリ名だけにする）
 
 ## 2. ドキュメントと確認
 

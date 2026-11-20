@@ -1,10 +1,4 @@
-import type { Metadata } from "next";
 import { ProjectForm } from "@/components/projects/ProjectForm";
-import { messages } from "@/lib/messages";
-
-export const metadata: Metadata = {
-  title: messages.projects.formHeading,
-};
 
 /** プロジェクトの登録画面。詳細画面と同じ並びで入力し、「作成」で作成する */
 export default function NewProjectPage() {
