@@ -6,9 +6,11 @@ import {
   currentMonth,
   formatDateHeading,
   formatDuration,
+  formatMonthDay,
   formatMonthHeading,
   formatRangeHeading,
   formatTime,
+  jstWeekdayFromMonday,
   monthRange,
   parseDateTimeLocalValue,
   parseDateValue,
@@ -32,6 +34,28 @@ describe("日本時間での表示", () => {
 
   test("日付のキーは日本時間の日付になる", () => {
     expect(toDateKey(date)).toBe("2026-11-18");
+  });
+});
+
+describe("曜日と月日", () => {
+  test("日本時間の曜日を、月曜日を 0 として返す", () => {
+    // 2026-11-16 は月曜日、2026-11-22 は日曜日
+    expect(jstWeekdayFromMonday(new Date("2026-11-16T00:00:00+09:00"))).toBe(0);
+    expect(jstWeekdayFromMonday(new Date("2026-11-21T23:59:59+09:00"))).toBe(5);
+    expect(jstWeekdayFromMonday(new Date("2026-11-22T12:00:00+09:00"))).toBe(6);
+  });
+
+  test("UTC では前日でも、日本時間の日付の曜日を返す", () => {
+    // UTC の 2026-11-15（日）15:00 は日本時間の 2026-11-16（月）0:00
+    expect(jstWeekdayFromMonday(new Date("2026-11-15T15:00:00Z"))).toBe(0);
+    expect(jstWeekdayFromMonday(new Date("2026-11-15T14:59:59Z"))).toBe(6);
+  });
+
+  test("日付を「11月16日」の形で表示する", () => {
+    expect(formatMonthDay(new Date("2026-11-16T00:00:00+09:00"))).toBe(
+      "11月16日",
+    );
+    expect(formatMonthDay(new Date("2026-01-01T15:00:00Z"))).toBe("1月2日");
   });
 });
 
