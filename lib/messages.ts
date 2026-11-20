@@ -134,11 +134,11 @@ export const messages = {
     roundingNote: "作業時間は記録ごとに秒を切り捨てて集計しています。",
     /** 稼働日数の表示（例: 「12日」） */
     days: (count: number) => `${count}日`,
-    weekly: "週ごとの合計時間",
+    weekly: "週ごとの集計",
     week: "週",
     /** 週の範囲（例: 「11月16日〜11月22日」） */
     weekRange: (first: string, last: string) => `${first}〜${last}`,
-    byProject: "プロジェクトごとの合計時間",
+    byProject: "プロジェクトごとの集計",
     project: "プロジェクト",
     noEntries: "この期間に集計する記録はありません。",
   },

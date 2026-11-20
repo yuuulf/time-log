@@ -123,7 +123,7 @@ describe("稼働日数", () => {
   });
 });
 
-describe("週ごとの合計時間", () => {
+describe("週ごとの集計", () => {
   test("月の集計では、月曜日で区切り、月をまたがない", () => {
     expect(weekLabels([])).toEqual([
       "11月1日〜11月1日",
@@ -182,7 +182,7 @@ test("週ごとの稼働日数は、その週に記録（記録中を含む）�
   expect(weeks.map((w) => w.workDays)).toEqual([0, 2, 0, 1, 0, 0]);
 });
 
-describe("プロジェクトごとの合計時間", () => {
+describe("プロジェクトごとの集計", () => {
   test("時間の長い順に並べ、プロジェクトのない記録は「プロジェクトなし」にまとめる", () => {
     const { projects } = summarize(
       [
