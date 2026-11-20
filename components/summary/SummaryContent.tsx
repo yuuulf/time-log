@@ -4,6 +4,7 @@ import { messages } from "@/lib/messages";
 import type { Summary } from "@/lib/summary/summarize";
 import { formatDuration, formatMonthDay } from "@/lib/time";
 import type { HistoryView } from "@/lib/time-entries/history";
+import { SummaryPdfButton } from "./SummaryPdfButton";
 
 const t = messages.summary;
 
@@ -21,15 +22,21 @@ export function SummaryContent({
 }) {
   return (
     <div className="space-y-6">
-      <PeriodControls view={view} basePath="/summary" />
+      {/* 印刷（PDF 出力）には、期間の見出しから下だけを出す */}
+      <div className="print:hidden">
+        <PeriodControls view={view} basePath="/summary" />
+      </div>
       {view.mode !== "rangeError" && summary && (
         <section aria-labelledby="summary-heading" className="space-y-8">
-          <h2
-            id="summary-heading"
-            className="text-lg font-semibold text-foreground"
-          >
-            {view.heading}
-          </h2>
+          <div className="flex items-center justify-between gap-4">
+            <h2
+              id="summary-heading"
+              className="text-lg font-semibold text-foreground"
+            >
+              {view.heading}
+            </h2>
+            <SummaryPdfButton heading={view.heading} />
+          </div>
           <div className="space-y-2">
             <dl className="grid gap-4 sm:grid-cols-2">
               <Stat label={t.total} value={formatDuration(summary.totalMs)} />
@@ -47,7 +54,7 @@ export function SummaryContent({
 
 function Stat({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-md border border-border px-4 py-3">
+    <div className="rounded-md border border-border px-4 py-3 print:break-inside-avoid">
       <dt className="text-sm text-muted">{label}</dt>
       <dd className="mt-1 text-2xl font-semibold text-foreground tabular-nums">
         {value}
@@ -90,7 +97,7 @@ function WeeklyTable({ weeks }: { weeks: Summary["weeks"] }) {
         </thead>
         <tbody>
           {weeks.map((week) => (
-            <tr key={week.first.getTime()}>
+            <tr key={week.first.getTime()} className="print:break-inside-avoid">
               <th scope="row" className={`${tdClass} text-left font-normal`}>
                 {t.weekRange(
                   formatMonthDay(week.first),
@@ -135,7 +142,10 @@ function ProjectTable({ projects }: { projects: Summary["projects"] }) {
           </thead>
           <tbody>
             {projects.map(({ project, totalMs, workDays }) => (
-              <tr key={project?.id ?? "none"}>
+              <tr
+                key={project?.id ?? "none"}
+                className="print:break-inside-avoid"
+              >
                 <th scope="row" className={`${tdClass} text-left font-normal`}>
                   <span className="flex min-w-0 items-center gap-2">
                     {project ? (
