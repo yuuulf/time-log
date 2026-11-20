@@ -169,6 +169,19 @@ describe("週ごとの合計時間", () => {
   });
 });
 
+test("週ごとの稼働日数は、その週に記録（記録中を含む）を開始した日の数で、記録のない週は 0", () => {
+  const { weeks } = summarize(
+    [
+      entry("2026-11-02T09:00", 30),
+      entry("2026-11-02T13:00", 30),
+      entry("2026-11-08T09:00", 30),
+      running("2026-11-20T09:00"),
+    ],
+    november,
+  );
+  expect(weeks.map((w) => w.workDays)).toEqual([0, 2, 0, 1, 0, 0]);
+});
+
 describe("プロジェクトごとの合計時間", () => {
   test("時間の長い順に並べ、プロジェクトのない記録は「プロジェクトなし」にまとめる", () => {
     const { projects } = summarize(
@@ -186,6 +199,23 @@ describe("プロジェクトごとの合計時間", () => {
       ["開発", "3時間0分"],
       [null, "2時間0分"],
       ["会議", "1時間0分"],
+    ]);
+  });
+
+  test("プロジェクトごとの稼働日数は、そのプロジェクトの記録を開始した日の数", () => {
+    const { projects } = summarize(
+      [
+        entry("2026-11-04T09:00", 30, dev),
+        entry("2026-11-04T13:00", 30, dev),
+        entry("2026-11-05T09:00", 30, dev),
+        { ...running("2026-11-06T09:00"), project: dev },
+        entry("2026-11-04T10:00", 30),
+      ],
+      november,
+    );
+    expect(projects.map((p) => [p.project?.name ?? null, p.workDays])).toEqual([
+      ["開発", 3],
+      [null, 1],
     ]);
   });
 
@@ -224,6 +254,8 @@ describe("プロジェクトごとの合計時間", () => {
       [entry("2026-11-04T09:00", 60, archived)],
       november,
     );
-    expect(projects).toEqual([{ project: archived, totalMs: 60 * 60_000 }]);
+    expect(projects).toEqual([
+      { project: archived, totalMs: 60 * 60_000, workDays: 1 },
+    ]);
   });
 });

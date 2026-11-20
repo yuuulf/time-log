@@ -56,7 +56,9 @@ test("期間の見出し、合計時間と稼働日数を表示する", () => {
   expect(
     screen.getByText(t.total, { selector: "dt" }).nextSibling?.textContent,
   ).toBe("2時間15分");
-  expect(screen.getByText(t.workDays).nextSibling?.textContent).toBe("2日");
+  expect(
+    screen.getByText(t.workDays, { selector: "dt" }).nextSibling?.textContent,
+  ).toBe("2日");
 });
 
 test("合計時間と稼働日数の下に、秒を記録ごとに切り捨てて集計している旨を添える", () => {
@@ -69,31 +71,31 @@ test("合計時間と稼働日数の下に、秒を記録ごとに切り捨て�
   expect(note.previousElementSibling?.tagName).toBe("DL");
 });
 
-test("週ごとの合計時間を、週の範囲と一緒に古い順に表示する", () => {
+test("週ごとの合計時間と稼働日数を、週の範囲と一緒に古い順に表示する", () => {
   renderSummary({}, [
     entry("2026-11-02T09:00", 60),
     entry("2026-11-08T09:00", 30),
   ]);
 
   expect(rows(t.weekly)).toEqual([
-    ["11月1日〜11月1日", "0分"],
-    ["11月2日〜11月8日", "1時間30分"],
-    ["11月9日〜11月15日", "0分"],
-    ["11月16日〜11月22日", "0分"],
-    ["11月23日〜11月29日", "0分"],
-    ["11月30日〜11月30日", "0分"],
+    ["11月1日〜11月1日", "0分", "0日"],
+    ["11月2日〜11月8日", "1時間30分", "2日"],
+    ["11月9日〜11月15日", "0分", "0日"],
+    ["11月16日〜11月22日", "0分", "0日"],
+    ["11月23日〜11月29日", "0分", "0日"],
+    ["11月30日〜11月30日", "0分", "0日"],
   ]);
 });
 
-test("プロジェクトごとの合計時間を、アイコンと名前で長い順に表示する", () => {
+test("プロジェクトごとの合計時間と稼働日数を、アイコンと名前で長い順に表示する", () => {
   renderSummary({}, [
     entry("2026-11-04T09:00", 60),
     entry("2026-11-04T10:00", 120, dev),
   ]);
 
   expect(rows(t.byProject)).toEqual([
-    ["開発", "2時間0分"],
-    [messages.timeEntries.noProject, "1時間0分"],
+    ["開発", "2時間0分", "1日"],
+    [messages.timeEntries.noProject, "1時間0分", "1日"],
   ]);
   const section = screen.getByRole("region", { name: t.byProject });
   expect(within(section).getByTitle("開発")).toBeDefined();
@@ -105,7 +107,9 @@ test("記録がなければ 0 を表示し、プロジェクトの欄に記録�
   expect(
     screen.getByText(t.total, { selector: "dt" }).nextSibling?.textContent,
   ).toBe("0分");
-  expect(screen.getByText(t.workDays).nextSibling?.textContent).toBe("0日");
+  expect(
+    screen.getByText(t.workDays, { selector: "dt" }).nextSibling?.textContent,
+  ).toBe("0日");
   expect(screen.getByText(t.noEntries)).toBeDefined();
 });
 

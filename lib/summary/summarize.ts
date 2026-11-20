@@ -20,12 +20,16 @@ export type WeekTotal = {
   /** 週の最後の日（日本時間 0 時） */
   last: Date;
   totalMs: number;
+  /** その週に記録（記録中を含む）を開始した日の数 */
+  workDays: number;
 };
 
 export type ProjectTotal = {
   /** null は「プロジェクトなし」 */
   project: EntryProject | null;
   totalMs: number;
+  /** そのプロジェクトの記録（記録中を含む）を開始した日の数 */
+  workDays: number;
 };
 
 export type Summary = {
@@ -46,6 +50,17 @@ function durationMs(entry: SummaryEntry): number {
   return Math.floor(ms / MINUTE_MS) * MINUTE_MS;
 }
 
+/** 記録の作業時間の合計と、記録（記録中を含む）を開始した日の数 */
+function totals(entries: SummaryEntry[]): {
+  totalMs: number;
+  workDays: number;
+} {
+  return {
+    totalMs: entries.reduce((sum, e) => sum + durationMs(e), 0),
+    workDays: new Set(entries.map((e) => toDateKey(e.startedAt))).size,
+  };
+}
+
 /**
  * range（from は日本時間の 0 時、to はその日を含まない次の日の 0 時）に開始した記録を集計する。
  * 各記録の作業時間は分に切り捨ててから足す（記録の一覧に出る作業時間の合計と一致させる）
@@ -55,8 +70,7 @@ export function summarize(entries: SummaryEntry[], range: DateRange): Summary {
     (e) => e.startedAt >= range.from && e.startedAt < range.to,
   );
 
-  const totalMs = inRange.reduce((sum, e) => sum + durationMs(e), 0);
-  const workDays = new Set(inRange.map((e) => toDateKey(e.startedAt))).size;
+  const { totalMs, workDays } = totals(inRange);
 
   // 範囲の初日から 1 日ずつ進め、月曜日だけで区切る（月の境目では区切らない）
   const weeks: WeekTotal[] = [];
@@ -71,21 +85,25 @@ export function summarize(entries: SummaryEntry[], range: DateRange): Summary {
     weeks.push({
       first: day,
       last: new Date(next.getTime() - DAY_MS),
-      totalMs: weekEntries.reduce((sum, e) => sum + durationMs(e), 0),
+      ...totals(weekEntries),
     });
     day = next;
   }
 
-  const byProject = new Map<number | null, ProjectTotal>();
+  const byProject = new Map<
+    number | null,
+    { project: EntryProject | null; entries: SummaryEntry[] }
+  >();
   for (const entry of inRange) {
     const key = entry.project?.id ?? null;
-    const total = byProject.get(key) ?? { project: entry.project, totalMs: 0 };
-    total.totalMs += durationMs(entry);
-    byProject.set(key, total);
+    const group = byProject.get(key) ?? { project: entry.project, entries: [] };
+    group.entries.push(entry);
+    byProject.set(key, group);
   }
   // 長い順。同じなら登録順（id の小さい順）、「プロジェクトなし」は最後
   const order = (p: ProjectTotal) => p.project?.id ?? Number.POSITIVE_INFINITY;
   const projects = [...byProject.values()]
+    .map(({ project, entries }) => ({ project, ...totals(entries) }))
     .filter((p) => p.totalMs > 0)
     .sort((a, b) => b.totalMs - a.totalMs || order(a) - order(b));
 

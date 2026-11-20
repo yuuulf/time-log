@@ -58,6 +58,12 @@ function Stat({ label, value }: { label: string; value: string }) {
 
 const thClass = "border-b border-border pb-1 text-sm font-medium text-muted";
 const tdClass = "border-b border-border py-2 text-foreground";
+/** 数字の列。右寄せで桁をそろえ、折り返さない */
+const numClass = `${tdClass} pl-4 text-right whitespace-nowrap tabular-nums`;
+const numThClass = `${thClass} pl-4 text-right whitespace-nowrap`;
+/** 週ごととプロジェクトごとの表で数字の列の位置をそろえるため、幅を決めておく（狭い画面では名前の列を広く取るため決めない） */
+const totalColClass = `${numThClass} sm:w-32`;
+const daysColClass = `${numThClass} sm:w-24`;
 
 function WeeklyTable({ weeks }: { weeks: Summary["weeks"] }) {
   return (
@@ -74,8 +80,11 @@ function WeeklyTable({ weeks }: { weeks: Summary["weeks"] }) {
             <th scope="col" className={`${thClass} text-left`}>
               {t.week}
             </th>
-            <th scope="col" className={`${thClass} text-right`}>
+            <th scope="col" className={totalColClass}>
               {t.total}
+            </th>
+            <th scope="col" className={daysColClass}>
+              {t.workDays}
             </th>
           </tr>
         </thead>
@@ -88,9 +97,8 @@ function WeeklyTable({ weeks }: { weeks: Summary["weeks"] }) {
                   formatMonthDay(week.last),
                 )}
               </th>
-              <td className={`${tdClass} text-right tabular-nums`}>
-                {formatDuration(week.totalMs)}
-              </td>
+              <td className={numClass}>{formatDuration(week.totalMs)}</td>
+              <td className={numClass}>{t.days(week.workDays)}</td>
             </tr>
           ))}
         </tbody>
@@ -117,13 +125,16 @@ function ProjectTable({ projects }: { projects: Summary["projects"] }) {
               <th scope="col" className={`${thClass} text-left`}>
                 {t.project}
               </th>
-              <th scope="col" className={`${thClass} text-right`}>
+              <th scope="col" className={totalColClass}>
                 {t.total}
+              </th>
+              <th scope="col" className={daysColClass}>
+                {t.workDays}
               </th>
             </tr>
           </thead>
           <tbody>
-            {projects.map(({ project, totalMs }) => (
+            {projects.map(({ project, totalMs, workDays }) => (
               <tr key={project?.id ?? "none"}>
                 <th scope="row" className={`${tdClass} text-left font-normal`}>
                   <span className="flex min-w-0 items-center gap-2">
@@ -144,11 +155,8 @@ function ProjectTable({ projects }: { projects: Summary["projects"] }) {
                     </span>
                   </span>
                 </th>
-                <td
-                  className={`${tdClass} text-right whitespace-nowrap tabular-nums`}
-                >
-                  {formatDuration(totalMs)}
-                </td>
+                <td className={numClass}>{formatDuration(totalMs)}</td>
+                <td className={numClass}>{t.days(workDays)}</td>
               </tr>
             ))}
           </tbody>
