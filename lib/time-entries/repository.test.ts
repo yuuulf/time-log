@@ -359,6 +359,132 @@ describe("記録の修正", () => {
     expect(getRunningEntry(db)?.id).toBe(entry.id);
   });
 
+  test("終了時刻を翌日に直すと、元の記録は 23:59:59 で終わり翌日の記録が増える", () => {
+    const entry = insertEntry(
+      "資料作成",
+      jst("2026-11-18T22:00:00"),
+      jst("2026-11-18T23:00:00"),
+    );
+
+    const updated = updateEntry(
+      db,
+      entry.id,
+      {
+        taskName: "資料作成",
+        startedAt: jst("2026-11-18T22:00:00"),
+        endedAt: jst("2026-11-19T01:00:00"),
+      },
+      jst("2026-11-19T12:00:00"),
+    );
+
+    expect(updated).toMatchObject({
+      id: entry.id,
+      endedAt: jst("2026-11-18T23:59:59"),
+    });
+    expect(allEntries()).toEqual([
+      {
+        taskName: "資料作成",
+        projectId: null,
+        startedAt: jst("2026-11-18T22:00:00"),
+        endedAt: jst("2026-11-18T23:59:59"),
+      },
+      {
+        taskName: "資料作成",
+        projectId: null,
+        startedAt: jst("2026-11-19T00:00:00"),
+        endedAt: jst("2026-11-19T01:00:00"),
+      },
+    ]);
+  });
+
+  test("開始時刻を前の日に直すと、元の記録は前の日の区間になり当日に 0:00:00 からの記録が増える", () => {
+    const project = createProject(
+      db,
+      { name: "社内ツール", color: "teal", clientName: "", description: "" },
+      jst("2026-11-18T09:00:00"),
+    );
+    const entry = db
+      .insert(timeEntries)
+      .values({
+        taskName: "資料作成",
+        projectId: project.id,
+        startedAt: jst("2026-11-19T00:30:00"),
+        endedAt: jst("2026-11-19T01:00:00"),
+        createdAt: jst("2026-11-19T00:30:00"),
+        updatedAt: jst("2026-11-19T00:30:00"),
+      })
+      .returning()
+      .get();
+
+    updateEntry(
+      db,
+      entry.id,
+      {
+        taskName: "資料作成",
+        startedAt: jst("2026-11-18T23:30:00"),
+        endedAt: jst("2026-11-19T01:00:00"),
+      },
+      jst("2026-11-19T12:00:00"),
+    );
+
+    expect(getEntry(db, entry.id)).toMatchObject({
+      startedAt: jst("2026-11-18T23:30:00"),
+      endedAt: jst("2026-11-18T23:59:59"),
+    });
+    expect(
+      listEntriesOfDay(db, jst("2026-11-19T12:00:00")).map((e) => ({
+        taskName: e.taskName,
+        projectId: e.projectId,
+        startedAt: e.startedAt,
+        endedAt: e.endedAt,
+      })),
+    ).toEqual([
+      {
+        taskName: "資料作成",
+        projectId: project.id,
+        startedAt: jst("2026-11-19T00:00:00"),
+        endedAt: jst("2026-11-19T01:00:00"),
+      },
+    ]);
+  });
+
+  test("記録中の記録の開始時刻を前の日に直しても分かれない", () => {
+    const entry = insertEntry("資料作成", jst("2026-11-19T00:30:00"), null);
+
+    updateEntry(
+      db,
+      entry.id,
+      { taskName: "資料作成", startedAt: jst("2026-11-18T23:30:00") },
+      jst("2026-11-19T12:00:00"),
+    );
+
+    expect(allEntries()).toEqual([
+      {
+        taskName: "資料作成",
+        projectId: null,
+        startedAt: jst("2026-11-18T23:30:00"),
+        endedAt: null,
+      },
+    ]);
+  });
+
+  test("日をまたがない修正では件数が変わらない", () => {
+    const entry = insertEntry("資料作成", at("09:00:00"), at("10:00:00"));
+
+    updateEntry(
+      db,
+      entry.id,
+      {
+        taskName: "資料作成",
+        startedAt: at("08:00:00"),
+        endedAt: at("11:00:00"),
+      },
+      now,
+    );
+
+    expect(allEntries()).toHaveLength(1);
+  });
+
   test("存在しない記録の修正は undefined を返す", () => {
     expect(
       updateEntry(db, 999, { taskName: "x", startedAt: at("09:00:00") }, now),

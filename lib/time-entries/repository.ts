@@ -179,7 +179,8 @@ export function listTaskNameSuggestions(db: Db): string[] {
 
 /**
  * 記録を修正する。入力チェック済みの値を渡す。projectId を省略するとプロジェクトは変えない。
- * 記録中の記録では終了時刻を変えない（終了は stopRunningEntry で行う）。
+ * 記録中の記録では終了時刻を変えず、分けもしない（終了は stopRunningEntry で行う）。
+ * 終了した記録が日本時間の日をまたぐときは、日ごとに分けて開始日の記録を返す。
  * 記録が存在しなければ undefined を返す。
  */
 export function updateEntry(
@@ -193,21 +194,30 @@ export function updateEntry(
   },
   now: Date,
 ): TimeEntry | undefined {
-  const entry = getEntry(db, id);
-  if (!entry) return undefined;
-  const isRunning = entry.endedAt === null;
-  return db
-    .update(timeEntries)
-    .set({
+  return db.transaction((tx) => {
+    const entry = tx
+      .select()
+      .from(timeEntries)
+      .where(eq(timeEntries.id, id))
+      .get();
+    if (!entry) return undefined;
+    const values = {
       taskName: input.taskName,
-      ...(input.projectId === undefined ? {} : { projectId: input.projectId }),
+      projectId:
+        input.projectId === undefined ? entry.projectId : input.projectId,
       startedAt: input.startedAt,
-      ...(isRunning ? {} : { endedAt: input.endedAt ?? entry.endedAt }),
-      updatedAt: now,
-    })
-    .where(eq(timeEntries.id, id))
-    .returning()
-    .get();
+    };
+    if (entry.endedAt === null) {
+      return tx
+        .update(timeEntries)
+        .set({ ...values, updatedAt: now })
+        .where(eq(timeEntries.id, id))
+        .returning()
+        .get();
+    }
+    const endedAt = input.endedAt ?? entry.endedAt;
+    return saveSplitByDay(tx, entry, values, endedAt, now);
+  });
 }
 
 /** 記録を削除する。削除できたら true、存在しなければ false を返す */
