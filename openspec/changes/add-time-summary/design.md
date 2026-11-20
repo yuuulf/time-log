@@ -56,7 +56,7 @@
 - `app/summary/page.tsx`: 見出し「集計」と `<Suspense>`。中に `SummaryView` を置く（「過去の記録」と同じく、`searchParams` の `await` と DB の読み込みは `<Suspense>` の中で行う）
 - `components/summary/SummaryView.tsx`（サーバー部品）: `resolveHistoryQuery` → `listEntriesBetween` → `summarize` を行い、`SummaryContent` に渡す
 - `components/summary/SummaryContent.tsx`: `PeriodControls`、期間の見出し、合計時間と稼働日数の 2 つの数字、週ごとの表、プロジェクトごとの表を上から並べる
-  - 合計時間と稼働日数は見出し付きの大きな数字で並べる（幅 375px では縦に並べる）
+  - 合計時間と稼働日数は見出し付きの大きな数字で並べる（幅 375px では縦に並べる）。その下に、秒を記録ごとに切り捨てて集計していることを小さな文字（`text-xs text-muted`）で添える
   - 週ごと・プロジェクトごとは `<table>` にして、行と列の関係を読み上げで分かるようにする。時間は右寄せにする
   - プロジェクトは `ProjectIcon`（`decorative`）と名前を並べる。「プロジェクトなし」は記録の一覧と同じ文言を使う
 - サイドバーの `SidebarNav` の `pages` に「集計」（`/summary`）を「過去の記録」と「プロジェクト」の間に足す

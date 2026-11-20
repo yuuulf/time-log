@@ -11,7 +11,7 @@
 
 ## 3. 画面
 
-- [x] 3.1 `messages.summary` を足し、`components/summary/SummaryContent.tsx` を作る（design 決定 4）。`SummaryContent.test.tsx` で、期間の見出し、合計時間と稼働日数の表示、週ごとの表の行と時間、プロジェクトごとの表（アイコンと名前、「プロジェクトなし」）、記録がないときの文言、入力の誤りのときに集計を出さず理由を出すことをテストする（コミット: 集計の表示の部品を追加）
+- [x] 3.1 `messages.summary` を足し、`components/summary/SummaryContent.tsx` を作る（design 決定 4）。`SummaryContent.test.tsx` で、期間の見出し、合計時間と稼働日数の表示、数え方の注記、週ごとの表の行と時間、プロジェクトごとの表（アイコンと名前、「プロジェクトなし」）、記録がないときの文言、入力の誤りのときに集計を出さず理由を出すことをテストする（コミット: 集計の表示の部品を追加）
 - [x] 3.2 `app/summary/page.tsx` と `components/summary/SummaryView.tsx` を作る（design 決定 4）。`app/summary/page.test.tsx` でタイトルとページの構成をテストする。`npm run build` が通ることを確認する（コミット: 集計ページを追加）
 - [x] 3.3 `SidebarNav` に「集計」（`/summary`）を「過去の記録」と「プロジェクト」の間に足す。`SidebarNav.test.tsx` と `app/layout.test.tsx` で、リンクの並びと `/summary` で選ばれている表示になることをテストする（コミット: サイドバーに集計のリンクを追加）
 
