@@ -79,3 +79,11 @@ test("アプリ名はトップページへのリンク", () => {
     screen.getByRole("link", { name: messages.app.name }).getAttribute("href"),
   ).toBe("/");
 });
+
+test("画面上部のアプリ名はロゴ付きで、名前は「TimeLog」のままトップページを指す", () => {
+  renderShell();
+
+  const link = screen.getByRole("link", { name: messages.app.name });
+  expect(link.getAttribute("href")).toBe("/");
+  expect(link.querySelectorAll('img[alt=""]')).toHaveLength(2);
+});

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Suspense } from "react";
 import { messages } from "@/lib/messages";
+import { AppLogo } from "./AppLogo";
 import { RunningTask } from "./RunningTask";
 import { SidebarNav, SidebarNavLinks } from "./SidebarNav";
 import { SidebarShell } from "./SidebarShell";
@@ -11,8 +12,9 @@ export function Sidebar() {
     <SidebarShell>
       <Link
         href="/"
-        className="block px-3 text-lg font-semibold text-foreground"
+        className="flex items-center gap-2 px-3 text-lg font-semibold text-foreground"
       >
+        <AppLogo />
         {messages.app.name}
       </Link>
       {/* 記録中のタスクはリクエストごとに読むため、<Suspense> の中に置く */}

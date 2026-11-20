@@ -7,7 +7,7 @@
 
 ## 2. アプリ名のロゴ
 
-- [ ] 2.1 `components/layout/AppLogo.tsx` を作り、`Sidebar.tsx` と `SidebarShell.tsx` のアプリ名のリンクの中で、アプリ名の左にロゴを並べる（design「ロゴは components/layout/AppLogo.tsx にまとめる」）。`AppLogo.test.tsx` で、ライト用（`dark:hidden`）とダーク用（`hidden dark:block`）の 2 枚が `alt=""` で出ることをテストする。`app/layout.test.tsx` と `SidebarShell.test.tsx` で、アプリ名のリンクの名前が「TimeLog」のままでリンク先が `/` であることを確かめる（コミット: サイドバーのアプリ名にロゴを追加）
+- [x] 2.1 `components/layout/AppLogo.tsx` を作り、`Sidebar.tsx` と `SidebarShell.tsx` のアプリ名のリンクの中で、アプリ名の左にロゴを並べる（design「ロゴは components/layout/AppLogo.tsx にまとめる」）。`AppLogo.test.tsx` で、ライト用（`dark:hidden`）とダーク用（`hidden dark:block`）の 2 枚が `alt=""` で出ることをテストする。`app/layout.test.tsx` と `SidebarShell.test.tsx` で、アプリ名のリンクの名前が「TimeLog」のままでリンク先が `/` であることを確かめる（コミット: サイドバーのアプリ名にロゴを追加）
 
 ## 3. ドキュメントと確認
 
