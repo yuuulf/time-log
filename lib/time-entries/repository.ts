@@ -6,7 +6,7 @@ import {
   type Project,
   type TimeEntry,
 } from "@/lib/db/schema";
-import { dayRange } from "@/lib/time";
+import { dayRange, splitByJstDay } from "@/lib/time";
 
 /** 記録に付けて返すプロジェクト */
 export type EntryProject = Pick<Project, "id" | "name" | "color">;
@@ -60,10 +60,7 @@ export function startEntry(
   }: { taskName: string; projectId?: number | null; now: Date },
 ): TimeEntry {
   return db.transaction((tx) => {
-    tx.update(timeEntries)
-      .set({ endedAt: now, updatedAt: now })
-      .where(isNull(timeEntries.endedAt))
-      .run();
+    finishRunningEntry(tx, now);
     return tx
       .insert(timeEntries)
       .values({
@@ -78,14 +75,68 @@ export function startEntry(
   });
 }
 
-/** 記録中の記録を現在時刻で終了する。記録中の記録がなければ何もせず undefined を返す */
-export function stopRunningEntry(db: Db, now: Date): TimeEntry | undefined {
-  return db
+/** db.transaction のコールバックが受け取るトランザクション */
+type Tx = Parameters<Parameters<Db["transaction"]>[0]>[0];
+
+/**
+ * 記録を startedAt〜endedAt で保存する。日本時間の日をまたぐときは日ごとに分け、
+ * 元の記録を開始日の区間にし、2 日目以降は同じタスク名・同じプロジェクトの記録として足す。
+ * 元の記録（開始日の区間）を返す。トランザクションの中で呼ぶ
+ */
+function saveSplitByDay(
+  tx: Tx,
+  entry: TimeEntry,
+  values: { taskName: string; projectId: number | null; startedAt: Date },
+  endedAt: Date,
+  now: Date,
+): TimeEntry {
+  const [first, ...rest] = splitByJstDay(values.startedAt, endedAt);
+  const updated = tx
     .update(timeEntries)
-    .set({ endedAt: now, updatedAt: now })
-    .where(isNull(timeEntries.endedAt))
+    .set({
+      taskName: values.taskName,
+      projectId: values.projectId,
+      startedAt: first.startedAt,
+      endedAt: first.endedAt,
+      updatedAt: now,
+    })
+    .where(eq(timeEntries.id, entry.id))
     .returning()
     .get();
+  if (rest.length > 0) {
+    tx.insert(timeEntries)
+      .values(
+        rest.map((span) => ({
+          taskName: values.taskName,
+          projectId: values.projectId,
+          startedAt: span.startedAt,
+          endedAt: span.endedAt,
+          createdAt: now,
+          updatedAt: now,
+        })),
+      )
+      .run();
+  }
+  return updated;
+}
+
+/** 記録中の記録を now で終了する（日をまたぐときは日ごとに分ける）。なければ undefined */
+function finishRunningEntry(tx: Tx, now: Date): TimeEntry | undefined {
+  const running = tx
+    .select()
+    .from(timeEntries)
+    .where(isNull(timeEntries.endedAt))
+    .get();
+  if (!running) return undefined;
+  return saveSplitByDay(tx, running, running, now, now);
+}
+
+/**
+ * 記録中の記録を現在時刻で終了する。日をまたぐときは日ごとに分け、開始日の記録を返す。
+ * 記録中の記録がなければ何もせず undefined を返す
+ */
+export function stopRunningEntry(db: Db, now: Date): TimeEntry | undefined {
+  return db.transaction((tx) => finishRunningEntry(tx, now));
 }
 
 /** 記録を 1 件返す。なければ undefined */
