@@ -7,6 +7,7 @@ import { messages } from "@/lib/messages";
 const pages = [
   { href: "/", label: messages.nav.home },
   { href: "/history", label: messages.history.title },
+  { href: "/summary", label: messages.summary.title },
   { href: "/projects", label: messages.projects.title },
 ] as const;
 
