@@ -73,6 +73,11 @@ export function formatMonthDay(date: Date): string {
   return `${Number(month)}月${Number(day)}日`;
 }
 
+/** 日付を「11月16日（月）」の形で表示する（曜日は日付の見出しと同じ表記） */
+export function formatMonthDayWithWeekday(date: Date): string {
+  return `${formatMonthDay(date)}（${weekdayFormatter.format(date)}）`;
+}
+
 /** 作業時間を分単位に切り捨てて「1時間5分」「5分」「0分」の形で表示する */
 export function formatDuration(milliseconds: number): string {
   const totalMinutes = Math.floor(Math.max(0, milliseconds) / 60_000);

@@ -2,7 +2,7 @@
 
 ## 1. 週ごとの集計の日付に曜日を付ける
 
-- [ ] 1.1 `lib/time.ts` に `formatMonthDayWithWeekday(date)`（「11月16日（月）」）を足す（design「曜日付きの月日は `formatMonthDayWithWeekday` を新しく作る」）。`lib/time.test.ts` で、日本時間の日付と曜日を返すこと（UTC では前日になる時刻を含む）をテストする（コミット: 曜日付きの月日を表示する関数を追加）
+- [x] 1.1 `lib/time.ts` に `formatMonthDayWithWeekday(date)`（「11月16日（月）」）を足す（design「曜日付きの月日は `formatMonthDayWithWeekday` を新しく作る」）。`lib/time.test.ts` で、日本時間の日付と曜日を返すこと（UTC では前日になる時刻を含む）をテストする（コミット: 曜日付きの月日を表示する関数を追加）
 - [ ] 1.2 `SummaryContent` の週の範囲を `formatMonthDayWithWeekday` で組み立てる。`SummaryContent.test.tsx` で、2026年11月の週が「11月1日（日）〜11月1日（日）」「11月2日（月）〜11月8日（日）」…「11月30日（月）〜11月30日（月）」の形で表示されることをテストし、既存の週の表示のテストを新しい形に合わせる（コミット: 週ごとの集計の日付に曜日を付ける）
 
 ## 2. タスク名の入力候補を絞る
