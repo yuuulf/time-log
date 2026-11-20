@@ -141,5 +141,8 @@ export const messages = {
     byProject: "プロジェクトごとの集計",
     project: "プロジェクト",
     noEntries: "この期間に集計する記録はありません。",
+    pdf: "PDF 出力",
+    /** 印刷ダイアログで PDF に保存するときの既定のファイル名（例: 「集計 2026年11月」） */
+    pdfTitle: (heading: string) => `集計 ${heading}`,
   },
 } as const;
