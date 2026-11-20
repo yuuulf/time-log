@@ -27,6 +27,59 @@ http://localhost:3000 を開くとトップページが表示されます。デ�
 
 mise が有効になっていないシェルでは、`mise exec -- npm run dev` のように `mise exec --` を付けて実行してください。
 
+## 普段使いの起動（macOS）
+
+開発用の `npm run dev` とは別に、自分の Mac で普段使いするための仕組みがあります。普段使い用のアプリと記録は開発用のリポジトリとは別の場所に置くので、開発の作業で普段使いの記録が変わることはありません。
+
+### 導入
+
+開発用のリポジトリで一度だけ実行します。
+
+```bash
+npm run local:install
+```
+
+- 普段使い用のアプリを `~/Library/Application Support/TimeLog/app` に main ブランチから用意してビルドし、ログインしたときに自動で起動するよう登録します（止まったときも起動し直します）
+- 記録は `~/Library/Application Support/TimeLog/timelog.db` に置きます。初めて導入するときは、開発用の `data/timelog.db` の記録を移します（すでに普段使い用の記録があるときは上書きしません）
+- 導入したら http://127.0.0.1:3100 を開きます。自分の Mac からだけ開けます
+- 導入した後に開発用の `npm run dev` で記録をつけても、普段使い用の記録には入りません。普段の記録は http://127.0.0.1:3100 でつけてください
+
+### 更新
+
+main に変更をマージしたら、開発用のリポジトリで実行します。
+
+```bash
+npm run local:update
+```
+
+バックアップをとってから、普段使い用のアプリを main の最新にしてビルドし、起動し直します。ビルドに失敗したときは、更新前の版に戻して動かし続けます。導入と更新は `-- --branch <ブランチ名>` で main 以外のブランチも使えます。
+
+### バックアップ
+
+- Mac が起動しているとき、ログインしたときと毎日 12:00 に、記録のバックアップを `~/Library/Application Support/TimeLog/backups/timelog-YYYY-MM-DD.db` にとります（12:00 にスリープしていたら、起きたときにとります）
+- 日付ごとに 1 つで、新しい 3 日分だけを残します。手でとるときは `npm run local:backup` を実行します
+- バックアップから戻すときは、アプリを止めてから記録を置き換え、起動し直します
+
+```bash
+launchctl bootout gui/$(id -u)/local.timelog.app
+cd ~/Library/Application\ Support/TimeLog
+rm -f timelog.db-wal timelog.db-shm
+cp backups/timelog-2026-11-20.db timelog.db   # 戻したい日付のファイル
+launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/local.timelog.app.plist
+```
+
+### ログとやめ方
+
+- ログは `~/Library/Logs/TimeLog/`（`app.log`・`backup.log`）にあります
+- mise を入れ直したときなど、アプリが起動しなくなったときは `npm run local:install` をもう一度実行します（記録はそのままです）
+- 普段使いをやめるときは、launchd の登録を外して設定を消します。記録とバックアップは `~/Library/Application Support/TimeLog/` に残るので、不要なら消してください
+
+```bash
+launchctl bootout gui/$(id -u)/local.timelog.app
+launchctl bootout gui/$(id -u)/local.timelog.backup
+rm ~/Library/LaunchAgents/local.timelog.app.plist ~/Library/LaunchAgents/local.timelog.backup.plist
+```
+
 ## 使い方
 
 - 画面の左のサイドバーから「過去の記録」「集計」「プロジェクト」に移動できます。サイドバーには記録中のタスク（タスク名と開始時刻）も表示され、その枠を押すとトップページ（記録の開始・終了の画面）に移ります（アプリ名を押しても移ります）。幅の狭い画面では、左上のメニューボタン（≡）でサイドバーを開きます
@@ -50,18 +103,21 @@ mise が有効になっていないシェルでは、`mise exec -- npm run dev` 
 
 ## 開発コマンド
 
-| コマンド               | 内容                                           |
-| ---------------------- | ---------------------------------------------- |
-| `npm run dev`          | 開発サーバーを起動する                         |
-| `npm run build`        | 本番ビルドを作る                               |
-| `npm test`             | 自動テスト（Vitest）を実行する                 |
-| `npm run test:watch`   | 変更を監視してテストを実行する                 |
-| `npm run lint`         | ESLint でチェックする                          |
-| `npm run typecheck`    | TypeScript の型チェックをする                  |
-| `npm run format`       | Prettier で整形する                            |
-| `npm run format:check` | 整形されていないファイルがないか確認する       |
-| `npm run db:generate`  | `lib/db/schema.ts` からマイグレーションを作る  |
-| `npm run db:migrate`   | マイグレーションを手動で適用する（通常は不要） |
+| コマンド                | 内容                                           |
+| ----------------------- | ---------------------------------------------- |
+| `npm run dev`           | 開発サーバーを起動する                         |
+| `npm run build`         | 本番ビルドを作る                               |
+| `npm test`              | 自動テスト（Vitest）を実行する                 |
+| `npm run test:watch`    | 変更を監視してテストを実行する                 |
+| `npm run lint`          | ESLint でチェックする                          |
+| `npm run typecheck`     | TypeScript の型チェックをする                  |
+| `npm run format`        | Prettier で整形する                            |
+| `npm run format:check`  | 整形されていないファイルがないか確認する       |
+| `npm run db:generate`   | `lib/db/schema.ts` からマイグレーションを作る  |
+| `npm run db:migrate`    | マイグレーションを手動で適用する（通常は不要） |
+| `npm run local:install` | 普段使いの TimeLog を導入する（macOS）         |
+| `npm run local:update`  | 普段使いの TimeLog を更新する                  |
+| `npm run local:backup`  | 普段使いの記録のバックアップをとる             |
 
 PR では GitHub Actions の CI が format:check・lint・typecheck・test・build と OpenSpec の検証を実行します。
 
