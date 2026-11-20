@@ -1,3 +1,4 @@
+import { render, within } from "@testing-library/react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { expect, test, vi } from "vitest";
 import { messages } from "@/lib/messages";
@@ -18,6 +19,19 @@ test("ページのタイトルにアプリ名が含まれる", () => {
   expect(metadata.title).toEqual({
     default: messages.app.name,
     template: `%s | ${messages.app.name}`,
+  });
+});
+
+test("ファビコンはライト・ダークで TimeLog のロゴを出し分ける", () => {
+  expect(metadata.icons).toEqual({
+    icon: [
+      { url: "/icon-light.png", type: "image/png" },
+      {
+        url: "/icon-dark.png",
+        type: "image/png",
+        media: "(prefers-color-scheme: dark)",
+      },
+    ],
   });
 });
 
@@ -42,4 +56,19 @@ test("日本語の文書として、サイドバー付きで表示される", ()
   expect(order.every((i) => i >= 0)).toBe(true);
   expect(order).toEqual([...order].sort((a, b) => a - b));
   expect(html).toContain("<p>本文</p>");
+});
+
+test("サイドバーのアプリ名はロゴ付きで、名前は「TimeLog」のままトップページを指す", () => {
+  render(
+    <RootLayout params={Promise.resolve({})}>
+      <p>本文</p>
+    </RootLayout>,
+    { container: document },
+  );
+  const aside = document.querySelector("aside");
+  const link = within(aside as HTMLElement).getByRole("link", {
+    name: messages.app.name,
+  });
+  expect(link.getAttribute("href")).toBe("/");
+  expect(link.querySelectorAll('img[alt=""]')).toHaveLength(2);
 });

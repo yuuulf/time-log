@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { IconButton } from "@/components/ui/IconButton";
 import { messages } from "@/lib/messages";
+import { AppLogo } from "./AppLogo";
 
 const SIDEBAR_ID = "sidebar";
 
@@ -51,7 +52,11 @@ export function SidebarShell({ children }: { children: ReactNode }) {
           aria-controls={SIDEBAR_ID}
           onClick={() => setOpen(true)}
         />
-        <Link href="/" className="text-lg font-semibold text-foreground">
+        <Link
+          href="/"
+          className="flex items-center gap-2 text-lg font-semibold text-foreground"
+        >
+          <AppLogo />
           {messages.app.name}
         </Link>
       </div>

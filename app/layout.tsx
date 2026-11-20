@@ -20,6 +20,18 @@ export const metadata: Metadata = {
     template: `%s | ${messages.app.name}`,
   },
   description: messages.app.description,
+  // ファビコンはブラウザ・OS のライト・ダークに合わせて出し分ける。
+  // media に対応していないブラウザでもロゴが出るよう、ライト用は media なしにする
+  icons: {
+    icon: [
+      { url: "/icon-light.png", type: "image/png" },
+      {
+        url: "/icon-dark.png",
+        type: "image/png",
+        media: "(prefers-color-scheme: dark)",
+      },
+    ],
+  },
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
