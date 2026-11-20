@@ -3,7 +3,7 @@
 ## 1. トップページを今日の記録だけにする
 
 - [x] 1.1 `lib/time.ts` に `dayRange(date)` を足す（design 決定 1）。`lib/time.test.ts` で、日本時間の 0 時の境目（UTC では前日の 15 時）と翌日 0 時までの範囲をテストする（コミット: その日の範囲を返す関数を追加）
-- [ ] 1.2 `lib/time-entries/repository.ts` の `listRecentEntries`・`RECENT_DAYS` を `listEntriesOfDay(db, now)` に置き換え、`TimeTracker` で使う。`repository.test.ts` で、今日に開始した記録だけを新しい順に返すこと（日本時間の 0:30 と前日の 23:30、昨日から記録中の記録）をテストし、`actions.test.ts` の記録の読み直しも合わせる（design 決定 1）（コミット: トップページで今日の記録だけを読む）
+- [x] 1.2 `lib/time-entries/repository.ts` の `listRecentEntries`・`RECENT_DAYS` を `listEntriesOfDay(db, now)` に置き換え、`TimeTracker` で使う。`repository.test.ts` で、今日に開始した記録だけを新しい順に返すこと（日本時間の 0:30 と前日の 23:30、昨日から記録中の記録）をテストし、`actions.test.ts` の記録の読み直しも合わせる（design 決定 1）（コミット: トップページで今日の記録だけを読む）
 - [ ] 1.3 `messages.timeEntries` の `listHeading` を「今日の記録」、`empty` を「今日の記録はまだありません。」に変え、`TimeTracker` から渡す（design 決定 2）。`EntryList.test.tsx` で、既定の見出しと空のときの文言をテストする。「過去の記録」の見出しと文言が変わらないことを `HistoryContent.test.tsx` で確かめる（コミット: トップページの一覧の見出しを「今日の記録」にする）
 
 ## 2. サイドバー

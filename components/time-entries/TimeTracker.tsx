@@ -3,7 +3,7 @@ import { getDb } from "@/lib/db";
 import { listProjects } from "@/lib/projects/repository";
 import {
   getRunningEntry,
-  listRecentEntries,
+  listEntriesOfDay,
   listTaskNameSuggestions,
 } from "@/lib/time-entries/repository";
 import { EntryList } from "./EntryList";
@@ -16,7 +16,7 @@ export async function TimeTracker() {
   const db = getDb();
   const now = new Date();
   const running = getRunningEntry(db);
-  const entries = listRecentEntries(db, now);
+  const entries = listEntriesOfDay(db, now);
   const suggestions = listTaskNameSuggestions(db);
   const projects = listProjects(db, { archived: false }).map(
     ({ id, name, color }) => ({
