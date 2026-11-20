@@ -122,6 +122,13 @@ export function parseDateValue(value: string): Date | null {
   return parseDateTimeLocalValue(`${value}T00:00`);
 }
 
+/** その日の範囲。日本時間のその日の 0 時（from）から翌日 0 時（to、含まない）まで */
+export function dayRange(date: Date): { from: Date; to: Date } {
+  const from = parseDateValue(toDateKey(date))!;
+  // 日本時間には夏時間がないため、1 日はいつも 24 時間
+  return { from, to: new Date(from.getTime() + 24 * 60 * 60 * 1000) };
+}
+
 /** 月の値（「2026-10」）を解釈する。形式が正しくない、または 1〜12 月でなければ null を返す */
 export function parseMonthValue(value: string): YearMonth | null {
   const match = MONTH_VALUE.exec(value);

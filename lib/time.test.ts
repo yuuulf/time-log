@@ -4,6 +4,7 @@ import {
   addMonths,
   compareMonths,
   currentMonth,
+  dayRange,
   formatDateHeading,
   formatDuration,
   formatMonthDay,
@@ -118,6 +119,26 @@ describe("日付の値", () => {
       expect(parseDateValue(value)).toBeNull();
     },
   );
+});
+
+describe("その日の範囲", () => {
+  test("日本時間のその日の 0 時から翌日 0 時までを返す", () => {
+    expect(dayRange(new Date("2026-11-20T12:00:00+09:00"))).toEqual({
+      from: new Date("2026-11-20T00:00:00+09:00"),
+      to: new Date("2026-11-21T00:00:00+09:00"),
+    });
+  });
+
+  test("UTC では前日でも、日本時間の日付で決める", () => {
+    // UTC の 2026-11-19 15:00 は日本時間の 2026-11-20 0:00
+    expect(dayRange(new Date("2026-11-19T15:00:00Z")).from).toEqual(
+      new Date("2026-11-20T00:00:00+09:00"),
+    );
+    // UTC の 2026-11-19 14:59:59 は日本時間の 2026-11-19 23:59:59
+    expect(dayRange(new Date("2026-11-19T14:59:59Z")).from).toEqual(
+      new Date("2026-11-19T00:00:00+09:00"),
+    );
+  });
 });
 
 describe("月", () => {
