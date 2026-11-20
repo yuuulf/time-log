@@ -8,7 +8,7 @@
 
 - [x] 2.1 README.md の更新が必要か確認する（proposal の見込みでは不要）。必要なら同じ PR で更新する
 - [x] 2.2 `npm run build` したアプリをブラウザで開き、トップページ・「過去の記録」・「集計」・「プロジェクト」・プロジェクトの詳細画面・登録画面・アーカイブ済みの画面で、タブのタイトルが「TimeLog」だけであることを確認する
-- [ ] 2.3 一時的な worktree で change をアーカイブし、`openspec validate --all --strict` が通ることを確認してから PR を作成し、CI のチェックがすべて成功することを確認する
+- [x] 2.3 一時的な worktree で change をアーカイブし、`openspec validate --all --strict` が通ることを確認してから PR を作成し、CI のチェックがすべて成功することを確認する
 
 ## Workflow follow-up
 
