@@ -17,11 +17,13 @@ export function Sidebar() {
         <AppLogo />
         {messages.app.name}
       </Link>
-      {/* 記録中のタスクはリクエストごとに読むため、<Suspense> の中に置く */}
-      <div className="px-3">
+      {/* 記録中のタスクはリクエストごとに読むため、<Suspense> の中に置く。枠はトップページへのリンク */}
+      <div>
         <Suspense
           fallback={
-            <p className="text-sm text-muted">{messages.timeEntries.loading}</p>
+            <p className="px-3 py-2 text-sm text-muted">
+              {messages.timeEntries.loading}
+            </p>
           }
         >
           <RunningTask />

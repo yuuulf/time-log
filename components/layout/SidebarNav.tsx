@@ -5,7 +5,6 @@ import { usePathname } from "next/navigation";
 import { messages } from "@/lib/messages";
 
 const pages = [
-  { href: "/", label: messages.nav.home },
   { href: "/history", label: messages.history.title },
   { href: "/summary", label: messages.summary.title },
   { href: "/projects", label: messages.projects.title },
@@ -26,11 +25,10 @@ export function SidebarNavLinks({ pathname }: { pathname: string | null }) {
     <nav aria-label={messages.nav.label}>
       <ul className="space-y-1">
         {pages.map(({ href, label }) => {
-          // ホームは完全一致、それ以外はその下のページ（プロジェクトの詳細など）でも選ばれている表示にする
+          // その下のページ（プロジェクトの詳細など）でも選ばれている表示にする
           const current =
             pathname !== null &&
-            (pathname === href ||
-              (href !== "/" && pathname.startsWith(`${href}/`)));
+            (pathname === href || pathname.startsWith(`${href}/`));
           return (
             <li key={href}>
               <Link

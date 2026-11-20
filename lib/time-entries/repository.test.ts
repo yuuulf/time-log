@@ -7,7 +7,7 @@ import {
   getEntry,
   getRunningEntry,
   listEntriesBetween,
-  listRecentEntries,
+  listEntriesOfDay,
   listTaskNameSuggestions,
   startEntry,
   stopRunningEntry,
@@ -100,35 +100,40 @@ function insertEntry(taskName: string, startedAt: Date, endedAt: Date | null) {
     .get();
 }
 
-describe("直近 30 日の一覧", () => {
+describe("今日の一覧", () => {
   const now = at("12:00:00");
-  const daysAgo = (days: number, plusMs = 0) =>
-    new Date(now.getTime() - days * 24 * 60 * 60 * 1000 + plusMs);
 
-  test("開始時刻の新しい順に並ぶ", () => {
+  test("今日に開始した記録を、開始時刻の新しい順に返す", () => {
     insertEntry("朝", at("08:00:00"), at("09:00:00"));
     insertEntry("昼", at("11:00:00"), null);
-    insertEntry("昨日", daysAgo(1), daysAgo(1, 60_000));
 
-    expect(listRecentEntries(db, now).map((e) => e.taskName)).toEqual([
+    expect(listEntriesOfDay(db, now).map((e) => e.taskName)).toEqual([
       "昼",
       "朝",
-      "昨日",
     ]);
   });
 
-  test("ちょうど 30 日前に開始した記録は含み、それより前は含まない", () => {
-    insertEntry("30日前", daysAgo(30), daysAgo(30, 60_000));
-    insertEntry("30日前より1ミリ秒前", daysAgo(30, -1), daysAgo(30, 60_000));
-    insertEntry("31日前", daysAgo(31), daysAgo(31, 60_000));
+  test("日本時間の 0 時で分け、昨日に開始した記録は含まない", () => {
+    insertEntry("今日の0時30分", at("00:30:00"), at("01:00:00"));
+    insertEntry(
+      "昨日の23時30分",
+      new Date("2026-11-17T23:30:00+09:00"),
+      at("00:10:00"),
+    );
 
-    expect(listRecentEntries(db, now).map((e) => e.taskName)).toEqual([
-      "30日前",
+    expect(listEntriesOfDay(db, now).map((e) => e.taskName)).toEqual([
+      "今日の0時30分",
     ]);
+  });
+
+  test("昨日から記録中の記録は含まない", () => {
+    insertEntry("昨日から記録中", new Date("2026-11-17T23:00:00+09:00"), null);
+
+    expect(listEntriesOfDay(db, now)).toEqual([]);
   });
 
   test("記録がなければ空", () => {
-    expect(listRecentEntries(db, now)).toEqual([]);
+    expect(listEntriesOfDay(db, now)).toEqual([]);
   });
 });
 
@@ -299,7 +304,7 @@ describe("プロジェクトの紐づけ", () => {
     });
     startEntry(db, { taskName: "打ち合わせ", now: at("10:00:00") });
 
-    const entries = listRecentEntries(db, at("11:00:00"));
+    const entries = listEntriesOfDay(db, at("11:00:00"));
     expect(entries.map((e) => [e.taskName, e.project?.name ?? null])).toEqual([
       ["打ち合わせ", null],
       ["資料作成", "社内ツール"],

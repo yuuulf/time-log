@@ -9,7 +9,7 @@ import {
   updateEntryAction,
 } from "./actions";
 import { createProject } from "@/lib/projects/repository";
-import { getEntry, getRunningEntry, listRecentEntries } from "./repository";
+import { getEntry, getRunningEntry, listEntriesOfDay } from "./repository";
 
 const mocks = vi.hoisted(() => ({ db: undefined as Db | undefined }));
 
@@ -60,7 +60,7 @@ describe("開始", () => {
     );
 
     expect(state).toEqual({ errors: { taskName: errors.taskNameTooLong } });
-    expect(listRecentEntries(db, now)).toEqual([]);
+    expect(listEntriesOfDay(db, now)).toEqual([]);
     expect(refresh).not.toHaveBeenCalled();
   });
 });
@@ -73,7 +73,7 @@ describe("終了", () => {
     await stopEntryAction();
 
     expect(getRunningEntry(db)).toBeUndefined();
-    expect(listRecentEntries(db, now)[0].endedAt).toEqual(
+    expect(listEntriesOfDay(db, now)[0].endedAt).toEqual(
       new Date("2026-11-18T12:30:00+09:00"),
     );
     expect(refresh).toHaveBeenCalledTimes(2);
@@ -88,7 +88,7 @@ describe("修正", () => {
     await stopEntryAction();
     vi.setSystemTime(now);
     vi.mocked(refresh).mockClear();
-    return listRecentEntries(db, now)[0];
+    return listEntriesOfDay(db, now)[0];
   }
 
   test("保存して refresh する", async () => {
@@ -144,7 +144,7 @@ describe("修正", () => {
 describe("削除", () => {
   test("削除して refresh する", async () => {
     await startEntryAction({}, form({ taskName: "資料作成" }));
-    const entry = listRecentEntries(db, now)[0];
+    const entry = listEntriesOfDay(db, now)[0];
     vi.mocked(refresh).mockClear();
 
     expect(await deleteEntryAction(entry.id)).toEqual({ ok: true });
