@@ -16,6 +16,7 @@ import {
   parseDateTimeLocalValue,
   parseDateValue,
   parseMonthValue,
+  splitByJstDay,
   toDateKey,
   toDateTimeLocalValue,
   toMonthValue,
@@ -138,6 +139,66 @@ describe("その日の範囲", () => {
     expect(dayRange(new Date("2026-11-19T14:59:59Z")).from).toEqual(
       new Date("2026-11-19T00:00:00+09:00"),
     );
+  });
+});
+
+describe("日ごとの区間に分ける", () => {
+  const jst = (value: string) => new Date(`${value}+09:00`);
+  const span = (startedAt: string, endedAt: string) => ({
+    startedAt: jst(startedAt),
+    endedAt: jst(endedAt),
+  });
+
+  test("同じ日の区間は分けない", () => {
+    expect(
+      splitByJstDay(jst("2026-11-18T09:00:00"), jst("2026-11-18T17:00:00")),
+    ).toEqual([span("2026-11-18T09:00:00", "2026-11-18T17:00:00")]);
+  });
+
+  test("日をまたぐ区間は、前の日を 23:59:59 で終え、次の日を 0:00:00 から始める", () => {
+    expect(
+      splitByJstDay(jst("2026-11-18T23:30:00"), jst("2026-11-19T00:30:00")),
+    ).toEqual([
+      span("2026-11-18T23:30:00", "2026-11-18T23:59:59"),
+      span("2026-11-19T00:00:00", "2026-11-19T00:30:00"),
+    ]);
+  });
+
+  test("3 日にまたがると、間の日は 0:00:00〜23:59:59 になる", () => {
+    expect(
+      splitByJstDay(jst("2026-11-17T22:00:00"), jst("2026-11-19T02:00:00")),
+    ).toEqual([
+      span("2026-11-17T22:00:00", "2026-11-17T23:59:59"),
+      span("2026-11-18T00:00:00", "2026-11-18T23:59:59"),
+      span("2026-11-19T00:00:00", "2026-11-19T02:00:00"),
+    ]);
+  });
+
+  test("終了がちょうど翌日 0:00:00 なら分けない", () => {
+    expect(
+      splitByJstDay(jst("2026-11-18T23:00:00"), jst("2026-11-19T00:00:00")),
+    ).toEqual([span("2026-11-18T23:00:00", "2026-11-19T00:00:00")]);
+  });
+
+  test("開始が 23:59:59 より後なら、前の日の区間を作らない", () => {
+    expect(
+      splitByJstDay(jst("2026-11-18T23:59:59.500"), jst("2026-11-19T00:10:00")),
+    ).toEqual([span("2026-11-19T00:00:00", "2026-11-19T00:10:00")]);
+  });
+
+  test("月・年の境目でも分ける", () => {
+    expect(
+      splitByJstDay(jst("2026-10-31T23:00:00"), jst("2026-11-01T01:00:00")),
+    ).toEqual([
+      span("2026-10-31T23:00:00", "2026-10-31T23:59:59"),
+      span("2026-11-01T00:00:00", "2026-11-01T01:00:00"),
+    ]);
+    expect(
+      splitByJstDay(jst("2026-12-31T23:00:00"), jst("2027-01-01T01:00:00")),
+    ).toEqual([
+      span("2026-12-31T23:00:00", "2026-12-31T23:59:59"),
+      span("2027-01-01T00:00:00", "2027-01-01T01:00:00"),
+    ]);
   });
 });
 
