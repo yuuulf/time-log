@@ -1,23 +1,37 @@
 import { messages } from "@/lib/messages";
-import { formatDateHeading, toDateKey } from "@/lib/time";
+import {
+  entryDurationMs,
+  formatDateHeading,
+  formatDuration,
+  toDateKey,
+} from "@/lib/time";
 import type { EntryProject } from "@/components/projects/types";
 import { EntryItem, type EntryItemData } from "./EntryItem";
 
 const t = messages.timeEntries;
 
-/** 新しい順に並んだ記録を、開始日（日本時間）ごとにまとめる */
+/**
+ * 新しい順に並んだ記録を、開始日（日本時間）ごとにまとめる。
+ * totalMs はその日の終了済みの記録の作業時間（記録ごとに分へ切り捨て）の合計で、記録中の記録は含めない
+ */
 function groupByDate(entries: EntryItemData[]) {
-  const groups: { key: string; heading: string; entries: EntryItemData[] }[] =
-    [];
+  const groups: {
+    key: string;
+    heading: string;
+    totalMs: number;
+    entries: EntryItemData[];
+  }[] = [];
   for (const entry of entries) {
     const key = toDateKey(entry.startedAt);
     const last = groups.at(-1);
     if (last?.key === key) {
       last.entries.push(entry);
+      last.totalMs += entryDurationMs(entry);
     } else {
       groups.push({
         key,
         heading: formatDateHeading(entry.startedAt),
+        totalMs: entryDurationMs(entry),
         entries: [entry],
       });
     }
@@ -56,9 +70,13 @@ export function EntryList({
       ) : (
         groupByDate(entries).map((group) => (
           <section key={group.key} aria-label={group.heading}>
-            <h3 className="border-b border-border pb-1 text-sm font-medium text-muted">
-              {group.heading}
-            </h3>
+            <div className="flex items-baseline justify-between gap-4 border-b border-border pb-1 text-sm font-medium text-muted">
+              <h3>{group.heading}</h3>
+              <p className="tabular-nums">
+                <span className="sr-only">{t.dayTotal} </span>
+                {formatDuration(group.totalMs)}
+              </p>
+            </div>
             <ul className="divide-y divide-border">
               {group.entries.map((entry) => (
                 <li key={entry.id}>
