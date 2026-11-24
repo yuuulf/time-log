@@ -249,3 +249,11 @@ test("記録中の記録だけの日は「0分」と表示する", () => {
     `${t.dayTotal} 0分`,
   );
 });
+
+test("headingAction を渡さなければ、見出しの横には何も置かない", () => {
+  render(<EntryList entries={[]} />);
+
+  const heading = screen.getByRole("heading", { level: 2 });
+  expect(heading.parentElement?.children).toHaveLength(1);
+  expect(screen.queryByRole("link")).toBeNull();
+});

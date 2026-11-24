@@ -7,7 +7,7 @@
 
 ## 2. CSV 出力のボタン
 
-- [ ] 2.1 `HistoryView` の `month` モードに表示中の月の値（`month`）を加え、`history.test.ts` で値を確かめる。`components/ui/IconDownloadLink.tsx`（`iconControlClassName` の見た目の `<a download>`。`aria-label` と `title` を付ける）を作り、`IconDownloadLink.test.tsx` でテストする。`EntryList` に `headingAction` を加え、`HistoryContent` から「CSV 出力」（`FileSpreadsheet`）のリンクを期間の見出しの横に渡す。リンク先は月なら `/history/export?month=…`、期間なら `/history/export?from=…&to=…` にする（design「ボタンは `<a download>` のアイコンリンクにし、期間の見出しの横に置く」）。`HistoryContent.test.tsx` で、月・期間それぞれのリンク先、名前が「CSV 出力」であること、範囲の誤りではボタンが出ないことをテストし、`EntryList.test.tsx` でトップページの使い方（`headingAction` なし）では何も出ないことを確かめる。`npm test` が通ることを確かめる（コミット: 過去の記録に CSV 出力のボタンを追加）
+- [x] 2.1 `HistoryView` の `month` モードに表示中の月の値（`month`）を加え、`history.test.ts` で値を確かめる。`components/ui/IconDownloadLink.tsx`（`iconControlClassName` の見た目の `<a download>`。`aria-label` と `title` を付ける）を作り、`IconDownloadLink.test.tsx` でテストする。`EntryList` に `headingAction` を加え、`HistoryContent` から「CSV 出力」（`FileSpreadsheet`）のリンクを期間の見出しの横に渡す。リンク先は月なら `/history/export?month=…`、期間なら `/history/export?from=…&to=…` にする（design「ボタンは `<a download>` のアイコンリンクにし、期間の見出しの横に置く」）。`HistoryContent.test.tsx` で、月・期間それぞれのリンク先、名前が「CSV 出力」であること、範囲の誤りではボタンが出ないことをテストし、`EntryList.test.tsx` でトップページの使い方（`headingAction` なし）では何も出ないことを確かめる。`npm test` が通ることを確かめる（コミット: 過去の記録に CSV 出力のボタンを追加）
 - [ ] 2.2 README.md の「使い方」の「過去の記録」の説明に、CSV 出力ボタンで表示中の月・期間の記録を CSV に保存できること、列、古い順であること、記録中の記録の扱いを追記する（コミット: README に CSV 出力を追記）
 
 ## 3. 確認
