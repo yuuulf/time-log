@@ -95,3 +95,15 @@ export function validateUpdateInput(
     value: { taskName: taskName.taskName, startedAt: started.date, endedAt },
   };
 }
+
+/** 終了済みの記録の追加の入力をチェックする。確かめ方は終了した記録の修正と同じ */
+export function validateCreateInput(
+  input: { taskName: RawValue; startedAt: RawValue; endedAt: RawValue },
+  now: Date,
+): ValidationResult<{ taskName: string; startedAt: Date; endedAt: Date }> {
+  const result = validateUpdateInput(input, { isRunning: false, now });
+  if (!result.ok) return result;
+  const { taskName, startedAt, endedAt } = result.value;
+  // 終了した記録として確かめたので、endedAt は必ずある
+  return { ok: true, value: { taskName, startedAt, endedAt: endedAt! } };
+}

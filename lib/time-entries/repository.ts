@@ -229,6 +229,33 @@ export function updateEntry(
   });
 }
 
+/**
+ * 終了済みの記録を追加する。日本時間の日をまたぐときは日ごとに分けて足し、開始日の記録を返す。
+ * 記録中の記録には触れない
+ */
+export function createEntry(
+  db: Db,
+  input: {
+    taskName: string;
+    projectId: number | null;
+    startedAt: Date;
+    endedAt: Date;
+  },
+  now: Date,
+): TimeEntry {
+  return db.transaction((tx) => {
+    const rows = splitByJstDay(input.startedAt, input.endedAt).map((span) => ({
+      taskName: input.taskName,
+      projectId: input.projectId,
+      startedAt: span.startedAt,
+      endedAt: span.endedAt,
+      createdAt: now,
+      updatedAt: now,
+    }));
+    return tx.insert(timeEntries).values(rows).returning().all()[0];
+  });
+}
+
 /** 記録を削除する。削除できたら true、存在しなければ false を返す */
 export function deleteEntry(db: Db, id: number): boolean {
   const deleted = db

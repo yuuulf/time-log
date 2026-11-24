@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, test } from "vitest";
 import { createDb, type Db } from "@/lib/db/client";
 import { timeEntries } from "@/lib/db/schema";
 import {
+  createEntry,
   deleteEntry,
   getEntry,
   getRunningEntry,
@@ -633,6 +634,86 @@ describe("プロジェクトの紐づけ", () => {
       id: project.id,
       name: "社内ツール開発",
       color: "blue",
+    });
+  });
+});
+
+describe("終了済みの記録の追加", () => {
+  const now = at("15:00:00");
+
+  test("同じ日の記録が 1 件足される", () => {
+    const entry = createEntry(
+      db,
+      {
+        taskName: "打ち合わせ",
+        projectId: null,
+        startedAt: at("10:30:00"),
+        endedAt: at("11:00:00"),
+      },
+      now,
+    );
+
+    expect(entry).toMatchObject({
+      taskName: "打ち合わせ",
+      projectId: null,
+      startedAt: at("10:30:00"),
+      endedAt: at("11:00:00"),
+    });
+    expect(db.select().from(timeEntries).all()).toHaveLength(1);
+  });
+
+  test("日をまたぐと日ごとに分かれ、開始日の記録を返す", () => {
+    const project = createProject(
+      db,
+      { name: "社内ツール", color: "red", clientName: "", description: "" },
+      now,
+    );
+    const entry = createEntry(
+      db,
+      {
+        taskName: "検証",
+        projectId: project.id,
+        startedAt: new Date("2026-11-17T23:30:00+09:00"),
+        endedAt: at("00:30:00"),
+      },
+      now,
+    );
+
+    expect(entry).toMatchObject({
+      startedAt: new Date("2026-11-17T23:30:00+09:00"),
+      endedAt: new Date("2026-11-17T23:59:59+09:00"),
+    });
+    expect(listEntriesOfDay(db, now)).toMatchObject([
+      {
+        taskName: "検証",
+        projectId: project.id,
+        startedAt: at("00:00:00"),
+        endedAt: at("00:30:00"),
+      },
+    ]);
+  });
+
+  test("記録中の記録は変わらない", () => {
+    const running = startEntry(db, {
+      taskName: "資料作成",
+      now: at("13:00:00"),
+    });
+
+    createEntry(
+      db,
+      {
+        taskName: "打ち合わせ",
+        projectId: null,
+        startedAt: at("10:30:00"),
+        endedAt: at("11:00:00"),
+      },
+      now,
+    );
+
+    expect(getRunningEntry(db)).toMatchObject({
+      id: running.id,
+      endedAt: null,
+      startedAt: at("13:00:00"),
     });
   });
 });
