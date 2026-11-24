@@ -10,6 +10,17 @@ export const RUNNING_BLOCK_MINUTES = 30;
  */
 export const MIN_BLOCK_MINUTES = 25;
 
+/** 帯の文字の 1 行の高さ（px）。帯の text-xs の行の高さ（1rem）と同じ */
+const BLOCK_LINE_PX = 16;
+
+/** 帯の上下の余白の合計（px）。帯の py-0.5 と同じ */
+const BLOCK_PADDING_PX = 4;
+
+/** 帯の高さ（px）に入る文字の行数。1 行も入らない高さでも 1 行とする */
+export function blockLineCount(heightPx: number): number {
+  return Math.max(1, Math.floor((heightPx - BLOCK_PADDING_PX) / BLOCK_LINE_PX));
+}
+
 /** 空いている場所を選んだときの開始時刻の切り捨ての単位（分） */
 const SNAP_MINUTES = 15;
 

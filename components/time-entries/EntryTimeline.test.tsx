@@ -1,4 +1,11 @@
-import { act, fireEvent, render, screen, within } from "@testing-library/react";
+import {
+  act,
+  cleanup,
+  fireEvent,
+  render,
+  screen,
+  within,
+} from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 import {
   createEntryAction,
@@ -37,6 +44,42 @@ function blockStyle(name: RegExp) {
   return screen.getByRole("button", { name }).style;
 }
 
+/**
+ * 帯の文字の行（上から）。1 行の帯はその 1 行を、2 行以上の帯は行ごとの文字を返す。
+ * どの行も幅に入らない部分を省略するクラスを持つことも確かめる
+ */
+function lines(block: HTMLElement): string[] {
+  const content = block.firstElementChild as HTMLElement;
+  const rows = content.className.includes("truncate")
+    ? [content]
+    : (Array.from(content.children) as HTMLElement[]);
+  for (const row of rows) expect(row.className).toContain("truncate");
+  return rows.map((row) => row.textContent ?? "");
+}
+
+/** 9:00 から minutes 分の「社内ツール」（project を省けば）の「資料作成」の帯を描いて返す */
+function renderBlock(
+  minutes: number,
+  entryProject: typeof project | null = project,
+) {
+  const endedAt = new Date(at("09:00:00").getTime() + minutes * 60 * 1000);
+  render(
+    <EntryTimeline
+      now={now}
+      entries={[
+        {
+          id: 1,
+          taskName: "資料作成",
+          startedAt: at("09:00:00"),
+          endedAt,
+          project: entryProject,
+        },
+      ]}
+    />,
+  );
+  return screen.getByRole("button", { name: /^資料作成/ });
+}
+
 describe("タイムラインの表示", () => {
   test("記録を時間軸に置き、タスク名と時刻を表示する", () => {
     render(
@@ -54,17 +97,17 @@ describe("タイムラインの表示", () => {
       />,
     );
 
+    // 帯の名前はタスク名・プロジェクト名・時刻
     const block = screen.getByRole("button", {
-      name: "資料作成 09:15〜10:30",
+      name: "資料作成 社内ツール 09:15〜10:30",
     });
-    // タスク名と時刻を 1 行に並べる
-    expect(block.textContent).toBe("資料作成 09:15〜10:30");
+    // 3 行以上入る帯（75 分）は、タスク名・プロジェクト名・時刻を 1 行ずつ並べる
+    expect(lines(block)).toEqual(["資料作成", "社内ツール", "09:15〜10:30"]);
     expect(block.querySelectorAll(":scope > span")).toHaveLength(1);
-    expect(block.firstElementChild?.className).toContain("truncate");
     // 長い帯でも文字は上下の真ん中ではなく上端に寄せる
     expect(block.className).toContain("flex");
     expect(block.className).toContain("items-start");
-    expect(block.title).toBe("資料作成 09:15〜10:30");
+    expect(block.title).toBe("資料作成 社内ツール 09:15〜10:30");
     expect(block.style.top).toBe(`${(9 * 60 + 15) * MINUTE_PX}px`);
     expect(block.style.height).toBe(`${75 * MINUTE_PX}px`);
     expect(block.className).toContain("bg-project-teal/15");
@@ -86,6 +129,7 @@ describe("タイムラインの表示", () => {
       />,
     );
 
+    // プロジェクトがなければ、帯の名前にプロジェクト名は入れない
     const block = screen.getByRole("button", {
       name: `${t.untitled} 09:00〜10:00`,
     });
@@ -107,6 +151,10 @@ describe("タイムラインの表示", () => {
       />,
     );
 
+    // 30 分ぶんの高さの帯は 1 行
+    expect(lines(screen.getByRole("button", { name: /打ち合わせ/ }))).toEqual([
+      "打ち合わせ 13:00〜記録中",
+    ]);
     const style = blockStyle(/打ち合わせ 13:00〜記録中/);
     expect(style.top).toBe(`${13 * 60 * MINUTE_PX}px`);
     expect(style.height).toBe(`${30 * MINUTE_PX}px`);
@@ -308,6 +356,60 @@ describe("タイムラインの表示", () => {
     expect(
       screen.getByRole("group", { name: t.timeline.label }).scrollTop,
     ).toBe(14 * 60 * MINUTE_PX);
+  });
+});
+
+describe("帯の文字の並べ方", () => {
+  test("1 行しか入らない帯（44 分）は、タスク名・プロジェクト名・時刻を 1 行に並べる", () => {
+    const block = renderBlock(44);
+
+    expect(lines(block)).toEqual(["資料作成 社内ツール 09:00〜09:44"]);
+  });
+
+  test("2 行入る帯（45 分・64 分）は、1 行目にタスク名とプロジェクト名、時刻は帯の下端に寄せる", () => {
+    expect(lines(renderBlock(45))).toEqual([
+      "資料作成 社内ツール",
+      "09:00〜09:45",
+    ]);
+    cleanup();
+    const block = renderBlock(64);
+    expect(lines(block)).toEqual(["資料作成 社内ツール", "09:00〜10:04"]);
+    const content = block.firstElementChild as HTMLElement;
+    expect(content.className).toContain("flex-col");
+    expect(content.className).toContain("h-full");
+    expect(content.lastElementChild?.className).toContain("mt-auto");
+  });
+
+  test("3 行以上入る帯（65 分・3 時間）は 1 行ずつ並べ、時刻を帯の下端に寄せる", () => {
+    expect(lines(renderBlock(65))).toEqual([
+      "資料作成",
+      "社内ツール",
+      "09:00〜10:05",
+    ]);
+    cleanup();
+    const block = renderBlock(180);
+    expect(lines(block)).toEqual(["資料作成", "社内ツール", "09:00〜12:00"]);
+    const content = block.firstElementChild as HTMLElement;
+    // 帯の高さいっぱいの縦の並びにして、時刻の行を下端に寄せる
+    expect(content.className).toContain("flex-col");
+    expect(content.className).toContain("h-full");
+    expect(content.lastElementChild?.className).toContain("mt-auto");
+  });
+
+  test("プロジェクトのない記録はプロジェクト名を出さない", () => {
+    expect(lines(renderBlock(30, null))).toEqual(["資料作成 09:00〜09:30"]);
+    cleanup();
+    const twoLines = renderBlock(50, null);
+    expect(lines(twoLines)).toEqual(["資料作成", "09:00〜09:50"]);
+    expect(twoLines.firstElementChild?.lastElementChild?.className).toContain(
+      "mt-auto",
+    );
+    cleanup();
+    const block = renderBlock(180, null);
+    expect(lines(block)).toEqual(["資料作成", "09:00〜12:00"]);
+    expect(block.firstElementChild?.lastElementChild?.className).toContain(
+      "mt-auto",
+    );
   });
 });
 

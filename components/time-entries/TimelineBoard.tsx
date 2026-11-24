@@ -7,6 +7,7 @@ import { messages } from "@/lib/messages";
 import { formatDuration, formatTime } from "@/lib/time";
 import {
   DAY_MINUTES,
+  blockLineCount,
   MIN_BLOCK_MINUTES,
   initialScrollMinute,
   layoutTimeline,
@@ -296,7 +297,11 @@ function DayColumn({
       {blocks.map((block) => {
         const name = block.taskName || t.untitled;
         const range = rangeText(block);
-        const label = t.timeline.entryLabel(name, range);
+        const label = t.timeline.entryLabel(
+          name,
+          block.project?.name ?? null,
+          range,
+        );
         const height = Math.max(
           MIN_BLOCK_PX,
           (block.endMinute - block.startMinute) * MINUTE_PX,
@@ -323,10 +328,12 @@ function DayColumn({
               width: `calc((100% - ${gutter}) / ${block.columns} - 4px)`,
             }}
           >
-            <span className="block w-full min-w-0 truncate">
-              <span className="font-medium">{name}</span>{" "}
-              <span className="text-muted tabular-nums">{range}</span>
-            </span>
+            <BlockText
+              lines={blockLineCount(height)}
+              name={name}
+              projectName={block.project?.name ?? null}
+              range={range}
+            />
           </button>
         );
       })}
@@ -339,5 +346,57 @@ function DayColumn({
         />
       )}
     </div>
+  );
+}
+
+/**
+ * 帯の文字。入る行数で並べ方を変え、どの行も幅に入らない部分は「…」で省略する。
+ * 1 行: タスク名・プロジェクト名・時刻を 1 行に。2 行: タスク名とプロジェクト名 / 時刻（帯の下端）。
+ * 3 行以上: タスク名 / プロジェクト名 / 時刻（帯の下端）。プロジェクトがなければプロジェクト名は出さない
+ */
+function BlockText({
+  lines,
+  name,
+  projectName,
+  range,
+}: {
+  lines: number;
+  name: string;
+  projectName: string | null;
+  range: string;
+}) {
+  const nameText = <span className="font-medium">{name}</span>;
+  const projectText = projectName && (
+    <span className="text-muted">{projectName}</span>
+  );
+  const rangeClass = "truncate text-muted tabular-nums";
+
+  if (lines === 1) {
+    return (
+      <span className="block w-full min-w-0 truncate">
+        {nameText} {projectText && <>{projectText} </>}
+        <span className="text-muted tabular-nums">{range}</span>
+      </span>
+    );
+  }
+  if (lines === 2) {
+    return (
+      <span className="flex h-full w-full min-w-0 flex-col">
+        <span className="truncate">
+          {nameText}
+          {projectText && <> {projectText}</>}
+        </span>
+        <span className={`mt-auto ${rangeClass}`}>{range}</span>
+      </span>
+    );
+  }
+  return (
+    <span className="flex h-full w-full min-w-0 flex-col">
+      <span className="truncate font-medium">{name}</span>
+      {projectName && (
+        <span className="truncate text-muted">{projectName}</span>
+      )}
+      <span className={`mt-auto ${rangeClass}`}>{range}</span>
+    </span>
   );
 }
