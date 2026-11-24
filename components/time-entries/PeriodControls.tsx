@@ -2,7 +2,7 @@ import { CalendarDays, ChevronLeft, ChevronRight, Search } from "lucide-react";
 import Form from "next/form";
 import { IconButton } from "@/components/ui/IconButton";
 import { IconLink } from "@/components/ui/IconLink";
-import { fieldFocusClassName } from "@/components/ui/fieldStyles";
+import { DatePicker } from "@/components/ui/DatePicker";
 import { messages } from "@/lib/messages";
 import type { HistoryView } from "@/lib/time-entries/history";
 
@@ -66,21 +66,15 @@ function RangeForm({
   error?: string;
 }) {
   const field = (name: "from" | "to", label: string) => (
-    <div className="min-w-0 flex-1">
-      {/* ラベルは読み上げ用。画面では「開始日 〜 終了日」の並びで示す */}
-      <label htmlFor={`period-${name}`} className="sr-only">
-        {label}
-      </label>
-      <input
-        id={`period-${name}`}
-        name={name}
-        type="date"
-        defaultValue={values[name]}
-        aria-invalid={error ? true : undefined}
-        aria-describedby={error ? "period-range-error" : undefined}
-        className={`h-10 w-full min-w-0 rounded-md border border-border bg-background px-2 text-foreground ${fieldFocusClassName}`}
-      />
-    </div>
+    // 週の指定と同じ見た目の月のカレンダーで日付を選ぶ
+    <DatePicker
+      name={name}
+      defaultValue={values[name]}
+      label={label}
+      aria-invalid={error ? true : undefined}
+      aria-describedby={error ? "period-range-error" : undefined}
+      labels={t.weekPicker}
+    />
   );
 
   return (

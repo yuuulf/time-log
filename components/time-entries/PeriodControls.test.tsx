@@ -51,9 +51,13 @@ test("期間の指定中は「月ごとの表示」で渡したパスに戻る",
     screen.getByRole("link", { name: t.monthView }).getAttribute("href"),
   ).toBe("/summary");
   expect(screen.queryByRole("link", { name: t.prevMonth })).toBeNull();
-  expect(screen.getByLabelText<HTMLInputElement>(t.from).value).toBe(
-    "2026-10-01",
-  );
+  expect(
+    screen.getByRole("combobox", { name: new RegExp(`^${t.from}`) })
+      .textContent,
+  ).toBe("2026年10月1日");
+  expect(
+    (document.querySelector('input[name="from"]') as HTMLInputElement).value,
+  ).toBe("2026-10-01");
 });
 
 test("入力の誤りは理由を表示し、入力欄を誤りとして示す", () => {
@@ -61,17 +65,20 @@ test("入力の誤りは理由を表示し、入力欄を誤りとして示す",
 
   const alert = screen.getByRole("alert");
   expect(alert.textContent).toBe(t.errors.endBeforeStart);
-  const from = screen.getByLabelText<HTMLInputElement>(t.from);
+  const from = screen.getByRole("combobox", {
+    name: new RegExp(`^${t.from}`),
+  });
   expect(from.getAttribute("aria-invalid")).toBe("true");
   expect(from.getAttribute("aria-describedby")).toBe(alert.id);
 });
 
-test("開始日・終了日の入力欄は、フォーカスしたとき枠をテーマ色にする", () => {
+test("開始日・終了日は週の指定と同じ月のカレンダーで選び、フォーカスしたとき枠をテーマ色にする", () => {
   renderControls({});
 
   for (const label of [t.from, t.to]) {
-    expect(screen.getByLabelText(label).className).toContain(
-      "focus:border-primary",
-    );
+    const field = screen.getByRole("combobox", { name: label });
+    expect(field.className).toContain("focus-visible:border-primary");
+    expect(field.textContent).toBe(label);
   }
+  expect(document.querySelector('input[type="date"]')).toBeNull();
 });

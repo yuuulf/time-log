@@ -25,6 +25,10 @@ const entry = {
   endedAt: new Date("2026-10-15T10:00:00+09:00"),
 };
 
+/** 期間の入力欄の値（hidden の欄） */
+const dateValue = (name: "from" | "to") =>
+  (document.querySelector(`input[name="${name}"]`) as HTMLInputElement).value;
+
 const renderView = (
   params: Record<string, string>,
   entries: (typeof entry)[] = [],
@@ -79,8 +83,8 @@ describe("月の表示", () => {
   test("期間の入力欄は空", () => {
     renderView({});
 
-    expect(screen.getByLabelText<HTMLInputElement>(t.from).value).toBe("");
-    expect(screen.getByLabelText<HTMLInputElement>(t.to).value).toBe("");
+    expect(dateValue("from")).toBe("");
+    expect(dateValue("to")).toBe("");
   });
 });
 
@@ -107,12 +111,8 @@ describe("期間の表示", () => {
   test("入力欄に指定した期間が入っている", () => {
     renderView({ from: "2026-10-01", to: "2026-10-15" });
 
-    expect(screen.getByLabelText<HTMLInputElement>(t.from).value).toBe(
-      "2026-10-01",
-    );
-    expect(screen.getByLabelText<HTMLInputElement>(t.to).value).toBe(
-      "2026-10-15",
-    );
+    expect(dateValue("from")).toBe("2026-10-01");
+    expect(dateValue("to")).toBe("2026-10-15");
   });
 
   test("入力エラーなら理由を表示し、一覧は表示せず、入力した値を残す", () => {
@@ -121,9 +121,12 @@ describe("期間の表示", () => {
     expect(screen.getByRole("alert").textContent).toBe(t.errors.endBeforeStart);
     expect(screen.queryByRole("heading", { level: 2, name: /〜/ })).toBeNull();
     expect(screen.queryByText(t.empty)).toBeNull();
-    const from = screen.getByLabelText<HTMLInputElement>(t.from);
-    expect(from.value).toBe("2026-10-15");
-    expect(from.getAttribute("aria-invalid")).toBe("true");
+    expect(dateValue("from")).toBe("2026-10-15");
+    expect(
+      screen
+        .getByRole("combobox", { name: new RegExp(`^${t.from}`) })
+        .getAttribute("aria-invalid"),
+    ).toBe("true");
     expect(screen.getByRole("link", { name: t.monthView })).toBeDefined();
   });
 
@@ -193,7 +196,7 @@ describe("週のカレンダー", () => {
       screen.getByRole("link", { name: t.nextWeek }).getAttribute("href"),
     ).toBe("/history?week=2026-11-16");
     expect(screen.queryByRole("link", { name: t.prevMonth })).toBeNull();
-    expect(screen.queryByLabelText(t.from)).toBeNull();
+    expect(document.querySelector('input[name="from"]')).toBeNull();
     expect(
       screen.getByRole("group", { name: messages.timeEntries.timeline.label }),
     ).toBeDefined();
