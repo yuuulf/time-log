@@ -24,7 +24,7 @@
 
 ## 3. 確認
 
-- [ ] 3.1 `npm run format` / `npm run lint` / `npm run typecheck` / `npm test` / `npm run build` がすべて成功することを確かめる。フォーマットで差分が出たら機能変更とは別のコミットにする
+- [x] 3.1 `npm run format` / `npm run lint` / `npm run typecheck` / `npm test` / `npm run build` がすべて成功することを確かめる。フォーマットで差分が出たら機能変更とは別のコミットにする
 - [ ] 3.2 `npm run build` したアプリ（普段使いのアプリと重ならないポート）をブラウザで開き、spec のシナリオを確認する: 表示の切り替えと開き直したときの表示、帯の位置・色・重なり・今の時刻の線とスクロール、空いている場所と「記録の追加」からの追加（初期の時刻・誤り・閉じ方）、帯からの修正・削除、追加・修正のあと一覧と合計時間に反映されること、ライト・ダークの両方の見た目
 - [ ] 3.3 一時的な worktree で change をアーカイブし、`openspec validate --all --strict` が通ることを確認してから PR を作成し、CI のチェックがすべて成功することを確認する
 
