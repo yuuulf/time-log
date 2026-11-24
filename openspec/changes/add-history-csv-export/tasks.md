@@ -3,7 +3,7 @@
 ## 1. CSV の作成
 
 - [x] 1.1 `lib/time-entries/csv.ts` に `toEntriesCsv(entries)` を作る。BOM・列名の行・記録の行（古い順）を CRLF でつなぎ、値の囲みと中のダブルクォートの重ねは RFC 4180 に従う。列名は `lib/messages.ts` に置く（design「CSV の文字列は `lib/time-entries/csv.ts` の純粋な関数で作る」「BOM 付きの UTF-8 にする」）。`csv.test.ts` で、spec「CSV の形式」のシナリオ（記録の行・古い順・記録中・カンマとダブルクォート・タスク名とプロジェクトがない記録）と、BOM と CRLF、記録がないときは列名の行だけになることをテストする（コミット: 記録を CSV にする関数を追加）
-- [ ] 1.2 `app/history/export/route.ts` に `GET` を作る。クエリを `resolveHistoryQuery` で解釈し、`listEntriesBetween` で読んだ記録を `toEntriesCsv` で CSV にして、`Content-Type: text/csv; charset=utf-8` と、「記録 <期間の見出し>.csv」の `Content-Disposition`（`filename*` と ASCII の `filename`）を付けて返す。`rangeError` なら 400 を返す。ファイル名の文言は `lib/messages.ts` に置く（design「CSV はサーバーの Route Handler で作る」「ファイル名は…`filename*` で渡す」）。`route.test.ts` で、月・期間それぞれで範囲内の記録だけが入ること、ヘッダー、範囲の誤りで 400 になることを、テスト用の DB でテストする（コミット: 過去の記録の CSV を返す Route Handler を追加）
+- [x] 1.2 `app/history/export/route.ts` に `GET` を作る。クエリを `resolveHistoryQuery` で解釈し、`listEntriesBetween` で読んだ記録を `toEntriesCsv` で CSV にして、`Content-Type: text/csv; charset=utf-8` と、「記録 <期間の見出し>.csv」の `Content-Disposition`（`filename*` と ASCII の `filename`）を付けて返す。`rangeError` なら 400 を返す。ファイル名の文言は `lib/messages.ts` に置く（design「CSV はサーバーの Route Handler で作る」「ファイル名は…`filename*` で渡す」）。`route.test.ts` で、月・期間それぞれで範囲内の記録だけが入ること、ヘッダー、範囲の誤りで 400 になることを、テスト用の DB でテストする（コミット: 過去の記録の CSV を返す Route Handler を追加）
 
 ## 2. CSV 出力のボタン
 
