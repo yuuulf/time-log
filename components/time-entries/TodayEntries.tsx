@@ -16,12 +16,20 @@ type Props = {
   now: Date;
   /** プロジェクトの選択肢（登録順） */
   projects: EntryProject[];
+  /** タスク名の入力候補（タイムラインの入力欄で使う） */
+  suggestions: string[];
   /** 最初の表示（Cookie で覚えている表示） */
   initialView: TodayView;
 };
 
 /** トップページの「今日の記録」。見出しの横のボタンで一覧とタイムラインを切り替え、選んだ表示を Cookie に覚えておく */
-export function TodayEntries({ entries, now, projects, initialView }: Props) {
+export function TodayEntries({
+  entries,
+  now,
+  projects,
+  suggestions,
+  initialView,
+}: Props) {
   const [view, setView] = useState(initialView);
 
   const changeView = (next: TodayView) => {
@@ -31,7 +39,13 @@ export function TodayEntries({ entries, now, projects, initialView }: Props) {
   const toggle = <TodayViewToggle view={view} onChange={changeView} />;
 
   return view === "timeline" ? (
-    <EntryTimeline entries={entries} now={now} headingAction={toggle} />
+    <EntryTimeline
+      entries={entries}
+      now={now}
+      headingAction={toggle}
+      projects={projects}
+      suggestions={suggestions}
+    />
   ) : (
     <EntryList
       entries={entries}

@@ -61,6 +61,7 @@ export async function TimeTracker() {
         )}
         now={now}
         projects={projects}
+        suggestions={suggestions}
         initialView={initialView}
       />
     </div>

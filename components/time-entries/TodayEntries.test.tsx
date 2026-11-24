@@ -28,6 +28,7 @@ function renderToday(initialView: "list" | "timeline") {
       entries={entries}
       now={at("15:00:00")}
       projects={[]}
+      suggestions={[]}
       initialView={initialView}
     />,
   );

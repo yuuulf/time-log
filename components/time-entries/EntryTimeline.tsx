@@ -1,6 +1,16 @@
 "use client";
 
-import { useEffect, useRef, type ReactNode } from "react";
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  type MouseEvent,
+  type ReactNode,
+} from "react";
+import { Plus } from "lucide-react";
+import type { EntryProject } from "@/components/projects/types";
+import { IconButton } from "@/components/ui/IconButton";
 import { projectColorBlockClass } from "@/lib/projects/colors";
 import { messages } from "@/lib/messages";
 import {
@@ -13,9 +23,13 @@ import {
   DAY_MINUTES,
   layoutTimeline,
   minuteOfDay,
+  rangeBeforeNow,
+  rangeFromClick,
+  type TimeRange,
 } from "@/lib/time-entries/timeline";
 import { DayHeading } from "./DayHeading";
 import type { EntryItemData } from "./EntryItem";
+import { TimelineEntryEditor } from "./TimelineEntryEditor";
 
 const t = messages.timeEntries;
 
@@ -25,6 +39,9 @@ export const MINUTE_PX = 0.8;
 const MIN_BLOCK_PX = 20;
 /** 開いたときに、今の時刻より何分前を枠の上端にするか */
 const SCROLL_LEAD_MINUTES = 60;
+
+/** 入力欄が下にはみ出さないよう、上端をこの高さ（px）ぶん上に収める */
+const EDITOR_HEIGHT_PX = 300;
 
 const HOURS = Array.from({ length: 24 }, (_, hour) => hour);
 
@@ -45,6 +62,18 @@ type Props = {
   heading?: string;
   /** 見出しの横に置く要素（表示の切り替えなど） */
   headingAction?: ReactNode;
+  /** 入力欄のプロジェクトの選択肢（登録順） */
+  projects?: EntryProject[];
+  /** 入力欄のタスク名の入力候補 */
+  suggestions?: string[];
+};
+
+/** 開いている入力欄。returnFocus は Escape・「閉じる」で閉じたときにフォーカスを戻す場所 */
+type EditorState = {
+  mode: "create";
+  range: TimeRange;
+  top: number;
+  returnFocus: HTMLElement | null;
 };
 
 /**
@@ -56,6 +85,8 @@ export function EntryTimeline({
   now,
   heading = t.listHeading,
   headingAction,
+  projects = [],
+  suggestions = [],
 }: Props) {
   const dayStart = dayRange(now).from;
   const blocks = layoutTimeline(entries, dayStart);
@@ -75,6 +106,50 @@ export function EntryTimeline({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  const [editor, setEditor] = useState<EditorState | null>(null);
+
+  /** 入力欄を開く。top は分から求めた位置を、入力欄が下にはみ出さないよう収める */
+  const openCreate = (range: TimeRange) => {
+    const minute = minuteOfDay(range.startedAt, dayStart);
+    const active = document.activeElement;
+    setEditor({
+      mode: "create",
+      range,
+      top: Math.max(
+        0,
+        Math.min(
+          minute * MINUTE_PX,
+          DAY_MINUTES * MINUTE_PX - EDITOR_HEIGHT_PX,
+        ),
+      ),
+      returnFocus:
+        active instanceof HTMLElement && active !== document.body
+          ? active
+          : null,
+    });
+  };
+
+  const closeEditor = useCallback(
+    (returnFocus: boolean) => {
+      const target = editor?.returnFocus;
+      setEditor(null);
+      if (returnFocus) target?.focus();
+    },
+    [editor],
+  );
+
+  /**
+   * 帯のない場所を選んだら、その時刻から入力欄を開く（今より後なら開かない）。
+   * キーボードでは「記録の追加」ボタンで代える
+   */
+  const handleAreaClick = (event: MouseEvent<HTMLDivElement>) => {
+    if (event.target !== event.currentTarget) return;
+    const rect = event.currentTarget.getBoundingClientRect();
+    const minute = (event.clientY - rect.top) / MINUTE_PX;
+    const range = rangeFromClick(minute, entries, new Date(), dayStart);
+    if (range) openCreate(range);
+  };
+
   return (
     <section aria-labelledby="entry-list-heading" className="space-y-4">
       <div className="flex items-center gap-3">
@@ -85,6 +160,12 @@ export function EntryTimeline({
           {heading}
         </h2>
         {headingAction}
+        <IconButton
+          icon={Plus}
+          label={t.timeline.add}
+          className="ml-auto"
+          onClick={() => openCreate(rangeBeforeNow(new Date()))}
+        />
       </div>
       <section aria-label={dateHeading}>
         <DayHeading heading={dateHeading} totalMs={totalMs} />
@@ -107,7 +188,12 @@ export function EntryTimeline({
                 </span>
               </div>
             ))}
-            <div className="absolute inset-y-0 right-0 left-14">
+            {/* 帯のない場所を選ぶと記録を追加する。キーボードでは見出しの横の「記録の追加」ボタンで代える */}
+            <div
+              data-testid="timeline-area"
+              className="absolute inset-y-0 right-0 left-14 cursor-copy"
+              onClick={handleAreaClick}
+            >
               {blocks.map((block) => {
                 const name = block.taskName || t.untitled;
                 const range = rangeText(block);
@@ -144,6 +230,21 @@ export function EntryTimeline({
                 className="pointer-events-none absolute inset-x-0 h-px bg-primary"
                 style={{ top: nowMinute * MINUTE_PX }}
               />
+              {editor && (
+                <TimelineEntryEditor
+                  key={`${editor.range.startedAt.getTime()}-${editor.top}`}
+                  initial={{
+                    taskName: "",
+                    startedAt: editor.range.startedAt,
+                    endedAt: editor.range.endedAt,
+                    project: null,
+                  }}
+                  projects={projects}
+                  suggestions={suggestions}
+                  top={editor.top}
+                  onClose={closeEditor}
+                />
+              )}
             </div>
           </div>
         </div>
