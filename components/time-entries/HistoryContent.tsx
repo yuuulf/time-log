@@ -1,7 +1,7 @@
 import { FileSpreadsheet } from "lucide-react";
 import { IconDownloadLink } from "@/components/ui/IconDownloadLink";
 import { messages } from "@/lib/messages";
-import { toDateKey } from "@/lib/time";
+import { toDateKey, weekStart } from "@/lib/time";
 import type { HistoryPageView } from "@/lib/time-entries/history";
 import type { TodayView } from "@/lib/time-entries/today-view";
 import type { EntryProject } from "@/components/projects/types";
@@ -77,7 +77,7 @@ export function HistoryContent({
     <div className="space-y-6">
       {view.mode === "week" ? (
         <>
-          <WeekControls view={view} />
+          <WeekControls view={view} thisWeek={weekStart(now)} />
           <WeekCalendar
             heading={view.heading}
             days={view.days}

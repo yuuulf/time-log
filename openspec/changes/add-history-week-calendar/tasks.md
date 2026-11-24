@@ -15,7 +15,7 @@
 - [x] 2.5 README.md の「使い方」の「過去の記録」の説明に、一覧とカレンダー（週）の切り替え（今日の記録とは別に覚える）、週の切り替え、カレンダーからの追加・修正・削除、週の CSV 出力を追記する（コミット: README に過去の記録のカレンダーを追記）
 
 - [x] 2.6 `lib/time.ts` に `calendarWeeks(year, month)`（月曜日始まりで、その月を含む週ごとの日付）を足して `time.test.ts` でテストし、`components/ui/WeekPicker.tsx`（入力欄の見た目のボタン、月のカレンダー、行ごとの強調、今週より先は選べない、キーボード操作、hidden の値）を作って `WeekPicker.test.tsx` で spec「週の指定」のシナリオをテストする（design「週の指定は自前の月のカレンダー `WeekPicker` で選ぶ」）（コミット: 週を選ぶ入力欄を追加）
-- [ ] 2.7 `WeekControls` に `WeekPicker` と「表示」ボタンのフォームを足し、文言を `lib/messages.ts` に置く。`WeekControls.test.tsx`・`HistoryContent.test.tsx` を合わせ、README に週の指定を追記する（コミット: 週のカレンダーで週を指定できるようにする）
+- [x] 2.7 `WeekControls` に `WeekPicker` と「表示」ボタンのフォームを足し、文言を `lib/messages.ts` に置く。`WeekControls.test.tsx`・`HistoryContent.test.tsx` を合わせ、README に週の指定を追記する（コミット: 週のカレンダーで週を指定できるようにする）
 
 ## 3. 確認
 
