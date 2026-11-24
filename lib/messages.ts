@@ -134,10 +134,14 @@ export const messages = {
     monthNav: "表示する月",
     prevMonth: "前の月",
     nextMonth: "次の月",
+    /** 前後の月の右に置く、今月を表示するボタン */
+    thisMonth: "今月",
     monthView: "月ごとの表示",
     weekNav: "表示する週",
     prevWeek: "前の週",
     nextWeek: "次の週",
+    /** 前後の週の右に置く、今週を表示するボタン */
+    thisWeek: "今週",
     /** 週の指定の入力欄（自前の月のカレンダー） */
     weekPicker: {
       label: "週の指定",

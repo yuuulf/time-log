@@ -84,3 +84,36 @@ test("開始日・終了日は週の指定と同じ月のカレンダーで選�
   }
   expect(document.querySelector('input[type="date"]')).toBeNull();
 });
+
+/** 月の切り替えのボタン・リンクの名前を並び順で返す */
+const navNames = () =>
+  [
+    ...screen
+      .getByRole("navigation", { name: t.monthNav })
+      .querySelectorAll("a, button"),
+  ].map((el) => el.getAttribute("aria-label") ?? el.textContent);
+
+test("前後の月の右に「今月」を置き、今月を明示した行き先にする", () => {
+  renderControls({ month: "2026-08" });
+
+  expect(navNames()).toEqual([t.prevMonth, t.nextMonth, t.thisMonth]);
+  expect(
+    screen.getByRole("link", { name: t.thisMonth }).getAttribute("href"),
+  ).toBe("/summary?month=2026-11");
+});
+
+test("今月を表示しているときは「今月」を押せない", () => {
+  renderControls({});
+
+  expect(screen.queryByRole("link", { name: t.thisMonth })).toBeNull();
+  expect(
+    screen.getByRole("button", { name: t.thisMonth }).hasAttribute("disabled"),
+  ).toBe(true);
+  expect(navNames()).toEqual([t.prevMonth, t.nextMonth, t.thisMonth]);
+});
+
+test("期間の指定中は「今月」を出さない", () => {
+  renderControls({ from: "2026-10-01", to: "2026-10-15" });
+
+  expect(screen.queryByText(t.thisMonth)).toBeNull();
+});

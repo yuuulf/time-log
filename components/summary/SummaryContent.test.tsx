@@ -170,3 +170,23 @@ test("入力に誤りがあれば、「PDF 出力」ボタンを表示しない"
 
   expect(screen.queryByRole("button", { name: t.pdf })).toBeNull();
 });
+
+test("過去の月の集計から「今月」で今月の集計へ", () => {
+  renderSummary({ month: "2026-09" });
+
+  expect(
+    screen
+      .getByRole("link", { name: messages.history.thisMonth })
+      .getAttribute("href"),
+  ).toBe("/summary?month=2026-11");
+});
+
+test("今月の集計では「今月」を押せない", () => {
+  renderSummary({});
+
+  expect(
+    screen
+      .getByRole("button", { name: messages.history.thisMonth })
+      .hasAttribute("disabled"),
+  ).toBe(true);
+});

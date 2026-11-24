@@ -2,6 +2,7 @@ import { CalendarDays, ChevronLeft, ChevronRight, Search } from "lucide-react";
 import Form from "next/form";
 import { IconButton } from "@/components/ui/IconButton";
 import { IconLink } from "@/components/ui/IconLink";
+import { TextButton, TextLink } from "@/components/ui/TextButton";
 import { DatePicker } from "@/components/ui/DatePicker";
 import { messages } from "@/lib/messages";
 import type { HistoryView } from "@/lib/time-entries/history";
@@ -37,6 +38,14 @@ export function PeriodControls({
             />
           ) : (
             <IconButton icon={ChevronRight} label={t.nextMonth} disabled />
+          )}
+          {/* 今月を表示しているときは、位置を変えずに押せない状態で出す */}
+          {view.month === view.thisMonth ? (
+            <TextButton disabled>{t.thisMonth}</TextButton>
+          ) : (
+            <TextLink href={`${basePath}?month=${view.thisMonth}`}>
+              {t.thisMonth}
+            </TextLink>
           )}
         </nav>
       ) : (

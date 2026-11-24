@@ -2,6 +2,7 @@ import { ChevronLeft, ChevronRight, Search } from "lucide-react";
 import Form from "next/form";
 import { IconButton } from "@/components/ui/IconButton";
 import { IconLink } from "@/components/ui/IconLink";
+import { TextButton, TextLink } from "@/components/ui/TextButton";
 import { WeekPicker } from "@/components/ui/WeekPicker";
 import { messages } from "@/lib/messages";
 import type { WeekView } from "@/lib/time-entries/history";
@@ -36,6 +37,14 @@ export function WeekControls({
           />
         ) : (
           <IconButton icon={ChevronRight} label={t.nextWeek} disabled />
+        )}
+        {/* 今週を表示しているときは、位置を変えずに押せない状態で出す */}
+        {view.week === view.thisWeek ? (
+          <TextButton disabled>{t.thisWeek}</TextButton>
+        ) : (
+          <TextLink href={`/history?week=${view.thisWeek}`}>
+            {t.thisWeek}
+          </TextLink>
         )}
       </nav>
       {/* 表示中の週が変わったら入力欄を作り直し、URL の週を表示する */}
