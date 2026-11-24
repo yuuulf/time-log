@@ -1,10 +1,15 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, test, vi } from "vitest";
 import { messages } from "@/lib/messages";
-import { resolveHistoryQuery } from "@/lib/time-entries/history";
+import {
+  historySwitchHrefs,
+  resolveHistoryPageQuery,
+} from "@/lib/time-entries/history";
 import { HistoryContent } from "./HistoryContent";
 
+vi.mock("next/navigation", () => ({ useRouter: () => ({ push: vi.fn() }) }));
 vi.mock("@/lib/time-entries/actions", () => ({
+  createEntryAction: vi.fn(),
   updateEntryAction: vi.fn(),
   deleteEntryAction: vi.fn(),
   startEntryAction: vi.fn(),
@@ -20,16 +25,24 @@ const entry = {
   endedAt: new Date("2026-10-15T10:00:00+09:00"),
 };
 
+/** 期間の入力欄の値（hidden の欄） */
+const dateValue = (name: "from" | "to") =>
+  (document.querySelector(`input[name="${name}"]`) as HTMLInputElement).value;
+
 const renderView = (
   params: Record<string, string>,
   entries: (typeof entry)[] = [],
-) =>
-  render(
+) => {
+  const view = resolveHistoryPageQuery(params, now, "list");
+  return render(
     <HistoryContent
-      view={resolveHistoryQuery(params, now)}
+      view={view}
       entries={entries}
+      now={now}
+      switchHrefs={historySwitchHrefs(view, now)}
     />,
   );
+};
 
 describe("月の表示", () => {
   test("見出しに月を表示し、前後の月へのリンクを置く", () => {
@@ -70,8 +83,8 @@ describe("月の表示", () => {
   test("期間の入力欄は空", () => {
     renderView({});
 
-    expect(screen.getByLabelText<HTMLInputElement>(t.from).value).toBe("");
-    expect(screen.getByLabelText<HTMLInputElement>(t.to).value).toBe("");
+    expect(dateValue("from")).toBe("");
+    expect(dateValue("to")).toBe("");
   });
 });
 
@@ -98,12 +111,8 @@ describe("期間の表示", () => {
   test("入力欄に指定した期間が入っている", () => {
     renderView({ from: "2026-10-01", to: "2026-10-15" });
 
-    expect(screen.getByLabelText<HTMLInputElement>(t.from).value).toBe(
-      "2026-10-01",
-    );
-    expect(screen.getByLabelText<HTMLInputElement>(t.to).value).toBe(
-      "2026-10-15",
-    );
+    expect(dateValue("from")).toBe("2026-10-01");
+    expect(dateValue("to")).toBe("2026-10-15");
   });
 
   test("入力エラーなら理由を表示し、一覧は表示せず、入力した値を残す", () => {
@@ -112,9 +121,12 @@ describe("期間の表示", () => {
     expect(screen.getByRole("alert").textContent).toBe(t.errors.endBeforeStart);
     expect(screen.queryByRole("heading", { level: 2, name: /〜/ })).toBeNull();
     expect(screen.queryByText(t.empty)).toBeNull();
-    const from = screen.getByLabelText<HTMLInputElement>(t.from);
-    expect(from.value).toBe("2026-10-15");
-    expect(from.getAttribute("aria-invalid")).toBe("true");
+    expect(dateValue("from")).toBe("2026-10-15");
+    expect(
+      screen
+        .getByRole("textbox", { name: t.from })
+        .getAttribute("aria-invalid"),
+    ).toBe("true");
     expect(screen.getByRole("link", { name: t.monthView })).toBeDefined();
   });
 
@@ -164,5 +176,61 @@ describe("CSV 出力", () => {
     renderView({ from: "2026-10-15", to: "2026-10-01" });
 
     expect(screen.queryByRole("link", { name: t.csv.export })).toBeNull();
+  });
+});
+
+describe("週のカレンダー", () => {
+  test("週の見出しと週の切り替えを出し、月・期間の切り替えは出さない", () => {
+    renderView({ week: "2026-11-09" });
+
+    expect(
+      screen.getByRole("heading", {
+        level: 2,
+        name: "2026年11月9日〜2026年11月15日",
+      }),
+    ).toBeDefined();
+    expect(
+      screen.getByRole("link", { name: t.prevWeek }).getAttribute("href"),
+    ).toBe("/history?week=2026-11-02");
+    expect(
+      screen.getByRole("link", { name: t.nextWeek }).getAttribute("href"),
+    ).toBe("/history?week=2026-11-16");
+    expect(screen.queryByRole("link", { name: t.prevMonth })).toBeNull();
+    expect(document.querySelector('input[name="from"]')).toBeNull();
+    expect(
+      screen.getByRole("group", { name: messages.timeEntries.timeline.label }),
+    ).toBeDefined();
+  });
+
+  test("今週は「次の週」を選べない", () => {
+    renderView({ week: "2026-11-16" });
+
+    expect(screen.queryByRole("link", { name: t.nextWeek })).toBeNull();
+    expect(
+      screen.getByRole("button", { name: t.nextWeek }).hasAttribute("disabled"),
+    ).toBe(true);
+  });
+
+  test("「カレンダー」が押された状態で、CSV 出力は週の期間を出す", () => {
+    renderView({ week: "2026-11-09" });
+
+    expect(
+      screen
+        .getByRole("button", { name: messages.timeEntries.view.timeline })
+        .getAttribute("aria-pressed"),
+    ).toBe("true");
+    expect(
+      screen.getByRole("link", { name: t.csv.export }).getAttribute("href"),
+    ).toBe("/history/export?from=2026-11-09&to=2026-11-15");
+  });
+
+  test("一覧のときは「一覧」が押された状態", () => {
+    renderView({ month: "2026-10" });
+
+    expect(
+      screen
+        .getByRole("button", { name: messages.timeEntries.view.list })
+        .getAttribute("aria-pressed"),
+    ).toBe("true");
   });
 });

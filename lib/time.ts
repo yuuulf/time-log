@@ -154,6 +154,18 @@ export function dayRange(date: Date): { from: Date; to: Date } {
   return { from, to: new Date(from.getTime() + DAY_MS) };
 }
 
+/** その日を含む週の月曜日（日本時間の 0 時）。週は月曜日で区切る */
+export function weekStart(date: Date): Date {
+  const { from } = dayRange(date);
+  return new Date(from.getTime() - jstWeekdayFromMonday(date) * DAY_MS);
+}
+
+/** 日付を「11/16（月）」の形で表示する（週のカレンダーの列の見出し） */
+export function formatShortDayHeading(date: Date): string {
+  const { month, day } = jstParts(date);
+  return `${Number(month)}/${Number(day)}（${weekdayFormatter.format(date)}）`;
+}
+
 /** 開始時刻と終了時刻の区間 */
 export type TimeSpan = { startedAt: Date; endedAt: Date };
 
@@ -228,4 +240,55 @@ export function formatRangeHeading(first: Date, last: Date): string {
     return `${year}年${Number(month)}月${Number(day)}日`;
   };
   return `${day(first)}〜${day(last)}`;
+}
+
+/** 月のカレンダーの行（週）。月曜日始まりで、その月の日を含む週ごとに 7 日ずつの 0 時（日本時間） */
+export function calendarWeeks(ym: YearMonth): Date[][] {
+  const { from, to } = monthRange(ym);
+  const weeks: Date[][] = [];
+  for (
+    let first = weekStart(from);
+    first < to;
+    first = new Date(first.getTime() + 7 * DAY_MS)
+  ) {
+    weeks.push(
+      Array.from(
+        { length: 7 },
+        (_, i) => new Date(first.getTime() + i * DAY_MS),
+      ),
+    );
+  }
+  return weeks;
+}
+
+/** 日付の日（1〜31） */
+export function dayOfMonth(date: Date): number {
+  return Number(jstParts(date).day);
+}
+
+/** 日付を「2026/10/01」の形にする（日付の入力欄で編集するときの文字） */
+export function formatDateInput(date: Date): string {
+  return toDateKey(date).replaceAll("-", "/");
+}
+
+const DATE_INPUT = /^(\d{4})[/.-](\d{1,2})[/.-](\d{1,2})$/;
+const DATE_INPUT_JA = /^(\d{4})年(\d{1,2})月(\d{1,2})日$/;
+
+/**
+ * 日付の入力欄に入力した文字を、その日の日本時間 0 時として読む。
+ * 「2026/10/1」「2026-10-01」「2026.10.1」「2026年10月1日」の形を受け取り、全角の数字・記号も読む。
+ * 読めない、または存在しない日付なら null
+ */
+export function parseDateInput(text: string): Date | null {
+  const normalized = text
+    .trim()
+    .replace(/[０-９／－．]/g, (c) =>
+      String.fromCharCode(c.charCodeAt(0) - 0xfee0),
+    );
+  const match = DATE_INPUT.exec(normalized) ?? DATE_INPUT_JA.exec(normalized);
+  if (!match) return null;
+  const [, year, month, day] = match;
+  return parseDateValue(
+    `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`,
+  );
 }

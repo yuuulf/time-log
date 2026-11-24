@@ -135,6 +135,21 @@ export const messages = {
     prevMonth: "前の月",
     nextMonth: "次の月",
     monthView: "月ごとの表示",
+    weekNav: "表示する週",
+    prevWeek: "前の週",
+    nextWeek: "次の週",
+    /** 週の指定の入力欄（自前の月のカレンダー） */
+    weekPicker: {
+      label: "週の指定",
+      prevMonth: "前の月",
+      nextMonth: "次の月",
+      weekdays: ["月", "火", "水", "木", "金", "土", "日"],
+    },
+    /**
+     * 日付・週の入力欄の右端の、月のカレンダーを開くボタンの名前。
+     * クライアント部品には関数を渡せないので、サーバー部品で呼んで文字を渡す
+     */
+    calendarButton: (label: string) => `${label}のカレンダー`,
     rangeHeading: "期間の指定",
     from: "開始日",
     to: "終了日",

@@ -1,58 +1,16 @@
 "use client";
 
-import {
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-  type MouseEvent,
-  type ReactNode,
-} from "react";
+import type { ReactNode } from "react";
 import type { EntryProject } from "@/components/projects/types";
-import { projectColorBlockClass } from "@/lib/projects/colors";
 import { messages } from "@/lib/messages";
-import {
-  dayRange,
-  entryDurationMs,
-  formatDateHeading,
-  formatTime,
-} from "@/lib/time";
-import {
-  DAY_MINUTES,
-  MIN_BLOCK_MINUTES,
-  layoutTimeline,
-  minuteOfDay,
-  rangeFromClick,
-  type TimeRange,
-} from "@/lib/time-entries/timeline";
+import { dayRange, entryDurationMs, formatDateHeading } from "@/lib/time";
 import { DayHeading } from "./DayHeading";
 import type { EntryItemData } from "./EntryItem";
-import { TimelineEntryEditor } from "./TimelineEntryEditor";
+import { TimelineBoard } from "./TimelineBoard";
+
+export { MINUTE_PX } from "./TimelineBoard";
 
 const t = messages.timeEntries;
-
-/** 1 分の高さ（px）。1 時間 48px */
-export const MINUTE_PX = 0.8;
-/** 帯の最小の高さ（px）。短い記録も選べるようにする（重なりの判断と同じ長さ） */
-const MIN_BLOCK_PX = MIN_BLOCK_MINUTES * MINUTE_PX;
-/** 開いたときに、今の時刻より何分前を枠の上端にするか */
-const SCROLL_LEAD_MINUTES = 60;
-
-/** 帯の右に残す幅。記録のある時間でも、ここを選んで記録を追加できる */
-const ADD_GUTTER = "2rem";
-
-/** 入力欄が下にはみ出さないよう、上端をこの高さ（px）ぶん上に収める */
-const EDITOR_HEIGHT_PX = 300;
-
-const HOURS = Array.from({ length: 24 }, (_, hour) => hour);
-
-/** 帯の時刻の文言（記録中は終了の代わりに「記録中」） */
-function rangeText({ startedAt, endedAt }: EntryItemData): string {
-  return t.timeline.range(
-    formatTime(startedAt),
-    endedAt ? formatTime(endedAt) : t.running,
-  );
-}
 
 type Props = {
   /** 今日に開始した記録（順は問わない） */
@@ -69,14 +27,8 @@ type Props = {
   suggestions?: string[];
 };
 
-/** 開いている入力欄。returnFocus は Escape・「閉じる」で閉じたときにフォーカスを戻す場所 */
-type EditorState = (
-  { mode: "create"; range: TimeRange } | { mode: "edit"; entry: EntryItemData }
-) & { top: number; returnFocus: HTMLElement | null };
-
 /**
- * 今日の記録のタイムライン。上から 0 時〜24 時の目盛りを並べ、記録をプロジェクトの色の帯で置く。
- * 記録中の記録は決まった高さの帯にする。開いたときは今の時刻のあたりまでスクロールする
+ * 今日の記録のタイムライン。見出しと日付の見出し（合計時間）の下に、今日 1 日ぶんのタイムラインの格子を置く
  */
 export function EntryTimeline({
   entries,
@@ -86,78 +38,8 @@ export function EntryTimeline({
   projects = [],
   suggestions = [],
 }: Props) {
-  const dayStart = dayRange(now).from;
-  const blocks = layoutTimeline(entries, dayStart);
-  const nowMinute = minuteOfDay(now, dayStart);
   const totalMs = entries.reduce((sum, e) => sum + entryDurationMs(e), 0);
   const dateHeading = formatDateHeading(now);
-
-  const scrollRef = useRef<HTMLDivElement>(null);
-  useEffect(() => {
-    const scroller = scrollRef.current;
-    if (!scroller) return;
-    scroller.scrollTop = Math.max(
-      0,
-      (nowMinute - SCROLL_LEAD_MINUTES) * MINUTE_PX,
-    );
-    // 開いたときだけ合わせる（記録を操作するたびにスクロールを戻さない）
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  const [editor, setEditor] = useState<EditorState | null>(null);
-  const editingEntry =
-    editor?.mode === "edit"
-      ? entries.find((e) => e.id === editor.entry.id)
-      : undefined;
-
-  /** 入力欄を開く。上端は minute の位置にし、入力欄が下にはみ出さないよう収める */
-  const openEditor = (
-    target:
-      | { mode: "create"; range: TimeRange }
-      | { mode: "edit"; entry: EntryItemData },
-    minute: number,
-  ) => {
-    const active = document.activeElement;
-    setEditor({
-      ...target,
-      top: Math.max(
-        0,
-        Math.min(
-          minute * MINUTE_PX,
-          DAY_MINUTES * MINUTE_PX - EDITOR_HEIGHT_PX,
-        ),
-      ),
-      returnFocus:
-        active instanceof HTMLElement && active !== document.body
-          ? active
-          : null,
-    });
-  };
-  const openCreate = (range: TimeRange) =>
-    openEditor(
-      { mode: "create", range },
-      minuteOfDay(range.startedAt, dayStart),
-    );
-
-  const closeEditor = useCallback(
-    (returnFocus: boolean) => {
-      const target = editor?.returnFocus;
-      setEditor(null);
-      if (returnFocus) target?.focus();
-    },
-    [editor],
-  );
-
-  /**
-   * 帯のない場所を選んだら、その時刻から入力欄を開く（今より後なら開かない）。
-   */
-  const handleAreaClick = (event: MouseEvent<HTMLDivElement>) => {
-    if (event.target !== event.currentTarget) return;
-    const rect = event.currentTarget.getBoundingClientRect();
-    const minute = (event.clientY - rect.top) / MINUTE_PX;
-    const range = rangeFromClick(minute, entries, new Date(), dayStart);
-    if (range) openCreate(range);
-  };
 
   return (
     <section aria-labelledby="entry-list-heading" className="space-y-4">
@@ -172,109 +54,13 @@ export function EntryTimeline({
       </div>
       <section aria-label={dateHeading}>
         <DayHeading heading={dateHeading} totalMs={totalMs} />
-        <div
-          ref={scrollRef}
-          role="group"
-          aria-label={t.timeline.label}
-          className="max-h-[32rem] overflow-y-auto border-b border-border"
-        >
-          <div className="relative" style={{ height: DAY_MINUTES * MINUTE_PX }}>
-            {HOURS.map((hour) => (
-              <div
-                key={hour}
-                aria-hidden="true"
-                className="absolute inset-x-0 border-t border-border"
-                style={{ top: hour * 60 * MINUTE_PX }}
-              >
-                <span className="block w-12 pt-0.5 pr-2 text-right text-xs text-muted tabular-nums">
-                  {hour}:00
-                </span>
-              </div>
-            ))}
-            {/* 帯のない場所を選ぶと記録を追加する */}
-            <div
-              data-testid="timeline-area"
-              className="absolute inset-y-0 right-0 left-14 cursor-copy"
-              onClick={handleAreaClick}
-            >
-              {/* 今より後は追加できないので、追加用のポインタを出さない（帯より下に重ね、クリックは背景のクリックにしない） */}
-              <div
-                aria-hidden="true"
-                data-testid="timeline-future"
-                className="absolute inset-x-0 bottom-0 cursor-auto"
-                style={{ top: nowMinute * MINUTE_PX }}
-              />
-              {blocks.map((block) => {
-                const name = block.taskName || t.untitled;
-                const range = rangeText(block);
-                const label = t.timeline.entryLabel(name, range);
-                const height = Math.max(
-                  MIN_BLOCK_PX,
-                  (block.endMinute - block.startMinute) * MINUTE_PX,
-                );
-                return (
-                  <button
-                    key={block.id}
-                    type="button"
-                    onClick={(event) => {
-                      // クリックではフォーカスしないブラウザがあるので、閉じたときに戻す先として先にフォーカスする
-                      event.currentTarget.focus();
-                      openEditor(
-                        { mode: "edit", entry: block },
-                        block.startMinute,
-                      );
-                    }}
-                    aria-label={label}
-                    title={label}
-                    data-entry-id={block.id}
-                    className={`absolute overflow-hidden rounded-sm border-l-4 px-2 py-0.5 text-left text-xs text-foreground hover:brightness-95 focus-visible:z-10 focus-visible:outline-2 focus-visible:outline-primary ${projectColorBlockClass(block.project?.color ?? null)}`}
-                    style={{
-                      top: block.startMinute * MINUTE_PX,
-                      height,
-                      // 右端に追加のために選べる幅を残し、残りを段の数で分ける
-                      left: `calc((100% - ${ADD_GUTTER}) * ${block.column / block.columns})`,
-                      width: `calc((100% - ${ADD_GUTTER}) / ${block.columns} - 4px)`,
-                    }}
-                  >
-                    <span className="block truncate">
-                      <span className="font-medium">{name}</span>{" "}
-                      <span className="text-muted tabular-nums">{range}</span>
-                    </span>
-                  </button>
-                );
-              })}
-              <div
-                aria-hidden="true"
-                data-testid="timeline-now"
-                className="pointer-events-none absolute inset-x-0 h-px bg-primary"
-                style={{ top: nowMinute * MINUTE_PX }}
-              />
-              {editor?.mode === "create" && (
-                <TimelineEntryEditor
-                  key={`create-${editor.range.startedAt.getTime()}`}
-                  mode="create"
-                  range={editor.range}
-                  projects={projects}
-                  suggestions={suggestions}
-                  top={editor.top}
-                  onClose={closeEditor}
-                />
-              )}
-              {/* 保存のあとは新しくなった記録を渡す。記録が消えていたら（削除）出さない */}
-              {editingEntry && editor && (
-                <TimelineEntryEditor
-                  key={`edit-${editingEntry.id}`}
-                  mode="edit"
-                  entry={editingEntry}
-                  projects={projects}
-                  suggestions={suggestions}
-                  top={editor.top}
-                  onClose={closeEditor}
-                />
-              )}
-            </div>
-          </div>
-        </div>
+        <TimelineBoard
+          days={[{ dayStart: dayRange(now).from, entries }]}
+          now={now}
+          gutter="2rem"
+          projects={projects}
+          suggestions={suggestions}
+        />
       </section>
     </section>
   );

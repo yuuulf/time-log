@@ -48,6 +48,8 @@ type Common = {
   suggestions: string[];
   /** 入力欄の上端の位置（px。タイムラインの上からの位置） */
   top: number;
+  /** 入力欄の左端の位置（CSS の値）。省略時は右寄せ */
+  left?: string;
   /** 入力欄を閉じるときに呼ぶ。returnFocus が true なら開く前の場所にフォーカスを戻す */
   onClose: (returnFocus: boolean) => void;
 };
@@ -78,6 +80,7 @@ export function TimelineEntryEditor(props: Props) {
  */
 function EditorPanel({
   top,
+  left,
   requestClose,
   onEscape,
   menu,
@@ -85,6 +88,7 @@ function EditorPanel({
   children,
 }: {
   top: number;
+  left?: string;
   requestClose: (returnFocus: boolean) => void;
   onEscape: () => void;
   menu?: ReactNode;
@@ -121,7 +125,7 @@ function EditorPanel({
       aria-label={t.timeline.editorLabel}
       // 背景の追加用のポインタ（cursor-copy）を入力欄の中では出さない
       className="absolute right-0 z-20 w-72 max-w-full cursor-auto rounded-md border border-border bg-background p-3 shadow-lg"
-      style={{ top }}
+      style={{ top, left }}
       onKeyDown={(event) => {
         // プルダウン・メニューを開いているときの Escape は、それぞれが受け取って止める
         if (event.key === "Escape") {
@@ -185,6 +189,7 @@ function CreateEditor({
   projects,
   suggestions,
   top,
+  left,
   onClose,
 }: Common & { range: TimeRange }) {
   const id = useId();
@@ -206,6 +211,7 @@ function CreateEditor({
   return (
     <EditorPanel
       top={top}
+      left={left}
       requestClose={onClose}
       onEscape={() => onClose(true)}
       taskNameRef={taskNameRef}
@@ -320,6 +326,7 @@ function EditEditor({
   projects,
   suggestions,
   top,
+  left,
   onClose,
 }: Common & { entry: EntryItemData }) {
   const id = useId();
@@ -410,6 +417,7 @@ function EditEditor({
   return (
     <EditorPanel
       top={top}
+      left={left}
       requestClose={requestClose}
       onEscape={() => {
         skipBlurSave.current = true;

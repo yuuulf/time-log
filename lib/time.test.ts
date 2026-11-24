@@ -2,19 +2,24 @@
 import { afterEach, describe, expect, test } from "vitest";
 import {
   addMonths,
+  calendarWeeks,
+  dayOfMonth,
   compareMonths,
   currentMonth,
   dayRange,
   entryDurationMs,
   formatDateHeading,
+  formatDateInput,
   formatDuration,
   formatMonthDay,
   formatMonthDayWithWeekday,
   formatMonthHeading,
   formatRangeHeading,
+  formatShortDayHeading,
   formatTime,
   jstWeekdayFromMonday,
   monthRange,
+  parseDateInput,
   parseDateTimeLocalValue,
   parseDateValue,
   parseMonthValue,
@@ -22,6 +27,7 @@ import {
   toDateKey,
   toDateTimeLocalValue,
   toMonthValue,
+  weekStart,
 } from "./time";
 
 // 2026-11-18 00:05:30（日本時間）= 2026-11-17 15:05:30（UTC）
@@ -321,5 +327,91 @@ describe("サーバーのタイムゾーンに依存しない", () => {
       new Date("2026-10-31T15:00:00Z"),
     );
     expect(currentMonth(new Date("2026-10-31T15:30:00Z")).month).toBe(11);
+  });
+});
+
+describe("週", () => {
+  const jst = (value: string) => new Date(`${value}+09:00`);
+
+  test.each([
+    ["2026-11-16T00:00:00", "月曜日はその日"],
+    ["2026-11-19T15:00:00", "木曜日"],
+    ["2026-11-22T23:59:59", "日曜日の終わり"],
+  ])("%s（%s）を含む週の月曜日は 11月16日", (value) => {
+    expect(weekStart(jst(value))).toEqual(jst("2026-11-16T00:00:00"));
+  });
+
+  test("日本時間の月曜日 0:30（UTC では日曜日）も同じ週", () => {
+    expect(weekStart(jst("2026-11-23T00:30:00"))).toEqual(
+      jst("2026-11-23T00:00:00"),
+    );
+  });
+
+  test("月をまたぐ週", () => {
+    expect(weekStart(jst("2026-11-01T12:00:00"))).toEqual(
+      jst("2026-10-26T00:00:00"),
+    );
+  });
+
+  test("列の見出しは「11/16（月）」の形", () => {
+    expect(formatShortDayHeading(jst("2026-11-16T09:00:00"))).toBe(
+      "11/16（月）",
+    );
+    expect(formatShortDayHeading(jst("2026-11-22T23:00:00"))).toBe(
+      "11/22（日）",
+    );
+  });
+});
+
+describe("月のカレンダーの週", () => {
+  const jst = (value: string) => new Date(`${value}+09:00`);
+
+  test("2026年11月は 10月26日（月）の週から 11月30日（月）の週までの 6 行", () => {
+    const weeks = calendarWeeks({ year: 2026, month: 11 });
+
+    expect(weeks).toHaveLength(6);
+    expect(weeks[0][0]).toEqual(jst("2026-10-26T00:00:00"));
+    expect(weeks[0][6]).toEqual(jst("2026-11-01T00:00:00"));
+    expect(weeks[5][0]).toEqual(jst("2026-11-30T00:00:00"));
+    expect(weeks.every((w) => w.length === 7)).toBe(true);
+  });
+
+  test("1 日が月曜日の月はその週から始まる（2026年6月）", () => {
+    const weeks = calendarWeeks({ year: 2026, month: 6 });
+
+    expect(weeks[0][0]).toEqual(jst("2026-06-01T00:00:00"));
+    expect(weeks.at(-1)![6]).toEqual(jst("2026-07-05T00:00:00"));
+  });
+
+  test("日付の日", () => {
+    expect(dayOfMonth(jst("2026-11-16T23:00:00"))).toBe(16);
+  });
+});
+
+describe("日付の入力", () => {
+  const jst = (value: string) => new Date(`${value}+09:00`);
+  const oct1 = jst("2026-10-01T00:00:00");
+
+  test.each([
+    ["2026/10/1"],
+    ["2026/10/01"],
+    ["2026-10-01"],
+    ["2026.10.1"],
+    [" 2026/10/1 "],
+    ["２０２６／１０／１"],
+    ["2026年10月1日"],
+  ])("%j は 2026年10月1日", (text) => {
+    expect(parseDateInput(text)).toEqual(oct1);
+  });
+
+  test.each([["abc"], [""], ["2026/13/1"], ["2026/2/30"], ["26/10/1"]])(
+    "%j は読めない",
+    (text) => {
+      expect(parseDateInput(text)).toBeNull();
+    },
+  );
+
+  test("編集するときの文字は「2026/10/01」", () => {
+    expect(formatDateInput(oct1)).toBe("2026/10/01");
   });
 });
