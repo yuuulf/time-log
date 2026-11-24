@@ -18,7 +18,7 @@
 
 - [x] 2.6 `components/ui/IconButtonGroup.tsx`（つながった 1 組のアイコンボタン、`aria-pressed`）を作って `IconButtonGroup.test.tsx` でテストし、`TodayViewToggle` をそれに置き換える。帯の中身をタスク名と時刻の 1 行にする（design「『今日の記録』をクライアント部品…」「タイムラインは 1 時間 48px…」）。`TodayEntries.test.tsx`・`EntryTimeline.test.tsx` を合わせる（コミット: 表示の切り替えをボタングループにし、帯を 1 行にする）
 - [x] 2.7 入力欄の右上に「閉じる」（✕）と、修正のときだけ「その他の操作」（⋮）のメニューの「削除」を置き、追加の「追加」を文字のボタンにする。修正は保存のボタンをなくし、フォーカスが外れたとき・Enter・プロジェクトの選択で保存し、Escape は保存せずに閉じ、「閉じる」・外側では保存してから閉じる。`EntryItem` の `toValues`・`sameValue` を共通にする（design「入力欄は 1 つの `TimelineEntryEditor` を…」）。`EntryTimeline.test.tsx` で spec「タイムラインでの記録の修正と削除」「タイムラインの入力欄の開閉」のシナリオをテストする（コミット: タイムラインの入力欄を一覧と同じ操作にする）
-- [ ] 2.8 README の「使い方」のタイムラインの説明を、指摘を反映した操作に合わせる（コミット: README のタイムラインの説明を直す）
+- [x] 2.8 README の「使い方」のタイムラインの説明を、指摘を反映した操作に合わせる（コミット: README のタイムラインの説明を直す）
 
 ## 3. 確認
 
