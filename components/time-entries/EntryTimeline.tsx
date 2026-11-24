@@ -8,9 +8,7 @@ import {
   type MouseEvent,
   type ReactNode,
 } from "react";
-import { Plus } from "lucide-react";
 import type { EntryProject } from "@/components/projects/types";
-import { IconButton } from "@/components/ui/IconButton";
 import { projectColorBlockClass } from "@/lib/projects/colors";
 import { messages } from "@/lib/messages";
 import {
@@ -23,7 +21,6 @@ import {
   DAY_MINUTES,
   layoutTimeline,
   minuteOfDay,
-  rangeBeforeNow,
   rangeFromClick,
   type TimeRange,
 } from "@/lib/time-entries/timeline";
@@ -149,7 +146,6 @@ export function EntryTimeline({
 
   /**
    * 帯のない場所を選んだら、その時刻から入力欄を開く（今より後なら開かない）。
-   * キーボードでは「記録の追加」ボタンで代える
    */
   const handleAreaClick = (event: MouseEvent<HTMLDivElement>) => {
     if (event.target !== event.currentTarget) return;
@@ -169,12 +165,6 @@ export function EntryTimeline({
           {heading}
         </h2>
         {headingAction}
-        <IconButton
-          icon={Plus}
-          label={t.timeline.add}
-          className="ml-auto"
-          onClick={() => openCreate(rangeBeforeNow(new Date()))}
-        />
       </div>
       <section aria-label={dateHeading}>
         <DayHeading heading={dateHeading} totalMs={totalMs} />
@@ -197,7 +187,7 @@ export function EntryTimeline({
                 </span>
               </div>
             ))}
-            {/* 帯のない場所を選ぶと記録を追加する。キーボードでは見出しの横の「記録の追加」ボタンで代える */}
+            {/* 帯のない場所を選ぶと記録を追加する */}
             <div
               data-testid="timeline-area"
               className="absolute inset-y-0 right-0 left-14 cursor-copy"

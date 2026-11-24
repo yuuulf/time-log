@@ -2,7 +2,7 @@
 
 import { useEffect, useId, useRef } from "react";
 import type { LucideIcon } from "lucide-react";
-import { iconControlClassName } from "./IconButton";
+import { iconControlClassName, type IconVariant } from "./IconButton";
 import { nextIndex, usePopover } from "./usePopover";
 
 export type DropdownMenuItem = {
@@ -20,13 +20,21 @@ type Props = {
   label: string;
   items: DropdownMenuItem[];
   disabled?: boolean;
+  /** ボタンの見た目。省略時は secondary（枠あり） */
+  variant?: IconVariant;
 };
 
 /**
  * アイコンのボタンで開くメニュー（WAI-ARIA の menu button）。
  * 項目はアイコンと文字で表示する。開くと最初の項目にフォーカスし、上下の矢印キー・Home・End で移る
  */
-export function DropdownMenu({ icon: Icon, label, items, disabled }: Props) {
+export function DropdownMenu({
+  icon: Icon,
+  label,
+  items,
+  disabled,
+  variant = "secondary",
+}: Props) {
   const menuId = useId();
   const { open, setOpen, close, rootRef, triggerRef, rootProps } = usePopover();
   const itemRefs = useRef<(HTMLButtonElement | null)[]>([]);
@@ -58,7 +66,7 @@ export function DropdownMenu({ icon: Icon, label, items, disabled }: Props) {
             setOpen(true);
           }
         }}
-        className={iconControlClassName("secondary")}
+        className={iconControlClassName(variant)}
       >
         <Icon aria-hidden="true" className="size-4" />
       </button>

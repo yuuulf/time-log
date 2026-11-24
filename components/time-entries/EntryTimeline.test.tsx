@@ -19,6 +19,13 @@ const at = (time: string) => new Date(`2026-11-18T${time}+09:00`);
 const now = at("15:00:00");
 const project = { id: 1, name: "社内ツール", color: "teal" };
 
+/** タイムラインの dayStart からの分の位置（空いている場所）をクリックする */
+function clickArea(minute: number) {
+  const area = screen.getByTestId("timeline-area");
+  area.getBoundingClientRect = () => ({ top: 0 }) as DOMRect;
+  fireEvent.click(area, { clientY: minute * MINUTE_PX });
+}
+
 function blockStyle(name: RegExp) {
   return screen.getByRole("button", { name }).style;
 }
@@ -282,17 +289,6 @@ describe("タイムラインからの記録の追加", () => {
     ).toBeNull();
   });
 
-  test("「記録の追加」ボタンで今の時刻までの 30 分の入力欄が開く", () => {
-    vi.setSystemTime(at("15:10:40"));
-    renderTimeline();
-
-    fireEvent.click(screen.getByRole("button", { name: t.timeline.add }));
-
-    expect(time(field(t.startedAt).value)).toBe("2026-11-18T14:40:00");
-    expect(time(field(t.endedAt).value)).toBe("2026-11-18T15:10:00");
-    expect(document.activeElement).toBe(field(t.taskName));
-  });
-
   test("入力した内容を送り、保存できたら閉じる", async () => {
     vi.mocked(createEntryAction).mockResolvedValue({ ok: true });
     renderTimeline();
@@ -364,22 +360,35 @@ describe("タイムラインの入力欄の開閉", () => {
     vi.useRealTimers();
   });
 
-  test("Escape キーで保存せずに閉じ、「記録の追加」ボタンにフォーカスを戻す", () => {
+  test("Escape キーで保存せずに閉じる", () => {
     render(<EntryTimeline now={now} entries={[]} />);
-    const add = screen.getByRole("button", { name: t.timeline.add });
-    add.focus();
-    fireEvent.click(add);
+    clickArea(10 * 60);
 
     fireEvent.keyDown(document.activeElement!, { key: "Escape" });
 
     expect(editor()).toBeNull();
     expect(createEntryAction).not.toHaveBeenCalled();
-    expect(document.activeElement).toBe(add);
+  });
+
+  test("「記録の追加」ボタンはない", () => {
+    render(<EntryTimeline now={now} entries={[]} />);
+
+    expect(screen.queryByRole("button", { name: "記録の追加" })).toBeNull();
+  });
+
+  test("入力欄の中では追加用のポインタの形を出さない", () => {
+    render(<EntryTimeline now={now} entries={[]} />);
+    clickArea(10 * 60);
+
+    expect(screen.getByTestId("timeline-area").className).toContain(
+      "cursor-copy",
+    );
+    expect(editor()!.className).toContain("cursor-auto");
   });
 
   test("右上にバツのアイコンの「閉じる」がある", () => {
     render(<EntryTimeline now={now} entries={[]} />);
-    fireEvent.click(screen.getByRole("button", { name: t.timeline.add }));
+    clickArea(10 * 60);
 
     const close = within(editor()!).getByRole("button", {
       name: t.timeline.close,
@@ -388,11 +397,14 @@ describe("タイムラインの入力欄の開閉", () => {
     expect(close.parentElement).toBe(editor()!.firstElementChild);
     expect(close.parentElement?.className).toContain("justify-end");
     expect(close.textContent).toBe("");
+    // 枠を出さず、ポインタを合わせたときに背景を付ける
+    expect(close.classList.contains("border")).toBe(false);
+    expect(close.className).toContain("hover:bg-border/40");
   });
 
   test("「閉じる」で閉じる", () => {
     render(<EntryTimeline now={now} entries={[]} />);
-    fireEvent.click(screen.getByRole("button", { name: t.timeline.add }));
+    clickArea(10 * 60);
 
     fireEvent.click(screen.getByRole("button", { name: t.timeline.close }));
 
@@ -406,7 +418,7 @@ describe("タイムラインの入力欄の開閉", () => {
         <EntryTimeline now={now} entries={[]} />
       </div>,
     );
-    fireEvent.click(screen.getByRole("button", { name: t.timeline.add }));
+    clickArea(10 * 60);
 
     fireEvent.pointerDown(screen.getByText("外側"));
 
@@ -415,11 +427,9 @@ describe("タイムラインの入力欄の開閉", () => {
 
   test("入力欄は同時に 1 つだけ開く", () => {
     render(<EntryTimeline now={now} entries={[]} />);
-    const add = screen.getByRole("button", { name: t.timeline.add });
-
-    fireEvent.click(add);
-    fireEvent.pointerDown(add);
-    fireEvent.click(add);
+    clickArea(10 * 60);
+    fireEvent.pointerDown(screen.getByTestId("timeline-area"));
+    clickArea(11 * 60);
 
     expect(screen.getAllByRole("dialog")).toHaveLength(1);
   });
@@ -595,8 +605,10 @@ describe("タイムラインでの記録の修正と削除", () => {
     const more = within(editor()!).getByRole("button", {
       name: t.actions.more,
     });
-    // 「その他の操作」は「閉じる」の左隣
+    // 「その他の操作」は「閉じる」の左隣で、どちらも枠を出さない
     expect(more.closest("div")?.nextElementSibling).toBe(close);
+    expect(more.classList.contains("border")).toBe(false);
+    expect(close.classList.contains("border")).toBe(false);
     expect(
       within(editor()!).queryByRole("button", { name: t.actions.delete }),
     ).toBeNull();
@@ -625,7 +637,7 @@ describe("タイムラインでの記録の修正と削除", () => {
   });
 
   test("追加の入力欄には「その他の操作」がなく、「追加」は文字のボタン", () => {
-    fireEvent.click(screen.getByRole("button", { name: t.timeline.add }));
+    clickArea(10 * 60);
 
     expect(
       within(editor()!).queryByRole("button", { name: t.actions.more }),

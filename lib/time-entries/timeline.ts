@@ -113,12 +113,3 @@ export function rangeFromClick(
   if (end <= start) return null;
   return { startedAt: start, endedAt: end };
 }
-
-/** 「記録の追加」ボタンで開く入力欄の初期の時刻。今の時刻（分に切り捨て）の 30 分前〜今の時刻 */
-export function rangeBeforeNow(now: Date): TimeRange {
-  const endedAt = floorToMinute(now);
-  return {
-    startedAt: new Date(endedAt.getTime() - DEFAULT_LENGTH_MINUTES * MINUTE_MS),
-    endedAt,
-  };
-}

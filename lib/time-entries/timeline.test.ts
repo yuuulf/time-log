@@ -1,11 +1,6 @@
 // @vitest-environment node
 import { describe, expect, test } from "vitest";
-import {
-  layoutTimeline,
-  minuteOfDay,
-  rangeBeforeNow,
-  rangeFromClick,
-} from "./timeline";
+import { layoutTimeline, minuteOfDay, rangeFromClick } from "./timeline";
 
 const dayStart = new Date("2026-11-18T00:00:00+09:00");
 const at = (time: string) => new Date(`2026-11-18T${time}+09:00`);
@@ -152,14 +147,5 @@ describe("rangeFromClick", () => {
 
   test("入れられる長さがないときは null", () => {
     expect(rangeFromClick(min(15, 0), [], at("15:00:20"), dayStart)).toBeNull();
-  });
-});
-
-describe("rangeBeforeNow", () => {
-  test("今の時刻（分に切り捨て）の 30 分前から今の時刻まで", () => {
-    expect(rangeBeforeNow(at("15:10:40"))).toEqual({
-      startedAt: at("14:40:00"),
-      endedAt: at("15:10:00"),
-    });
   });
 });

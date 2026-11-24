@@ -119,7 +119,8 @@ function EditorPanel({
       ref={rootRef}
       role="dialog"
       aria-label={t.timeline.editorLabel}
-      className="absolute right-0 z-20 w-72 max-w-full rounded-md border border-border bg-background p-3 shadow-lg"
+      // 背景の追加用のポインタ（cursor-copy）を入力欄の中では出さない
+      className="absolute right-0 z-20 w-72 max-w-full cursor-auto rounded-md border border-border bg-background p-3 shadow-lg"
       style={{ top }}
       onKeyDown={(event) => {
         // プルダウン・メニューを開いているときの Escape は、それぞれが受け取って止める
@@ -134,6 +135,7 @@ function EditorPanel({
         <IconButton
           icon={X}
           label={t.timeline.close}
+          variant="ghost"
           // 押したときに入力欄のフォーカスを外さない（blur の保存と閉じるときの保存を二重にしない）
           onMouseDown={(event) => event.preventDefault()}
           onClick={() => requestClose(true)}
@@ -418,6 +420,7 @@ function EditEditor({
         <DropdownMenu
           icon={MoreVertical}
           label={t.actions.more}
+          variant="ghost"
           disabled={deleting}
           items={[
             {

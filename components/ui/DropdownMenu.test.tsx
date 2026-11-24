@@ -125,3 +125,24 @@ test("危険な項目は危険の色で表示する", () => {
     "text-foreground",
   );
 });
+
+test("ボタンの見た目は既定で枠あり、ghost を指定すると枠なし", () => {
+  render(
+    <>
+      <DropdownMenu icon={MoreVertical} label="既定" items={[]} />
+      <DropdownMenu
+        icon={MoreVertical}
+        label="枠なし"
+        items={[]}
+        variant="ghost"
+      />
+    </>,
+  );
+
+  expect(
+    screen.getByRole("button", { name: "既定" }).classList.contains("border"),
+  ).toBe(true);
+  expect(
+    screen.getByRole("button", { name: "枠なし" }).classList.contains("border"),
+  ).toBe(false);
+});

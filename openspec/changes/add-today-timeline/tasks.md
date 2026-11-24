@@ -20,7 +20,7 @@
 - [x] 2.7 入力欄の右上に「閉じる」（✕）と、修正のときだけ「その他の操作」（⋮）のメニューの「削除」を置き、追加の「追加」を文字のボタンにする。修正は保存のボタンをなくし、フォーカスが外れたとき・Enter・プロジェクトの選択で保存し、Escape は保存せずに閉じ、「閉じる」・外側では保存してから閉じる。`EntryItem` の `toValues`・`sameValue` を共通にする（design「入力欄は 1 つの `TimelineEntryEditor` を…」）。`EntryTimeline.test.tsx` で spec「タイムラインでの記録の修正と削除」「タイムラインの入力欄の開閉」のシナリオをテストする（コミット: タイムラインの入力欄を一覧と同じ操作にする）
 - [x] 2.8 README の「使い方」のタイムラインの説明を、指摘を反映した操作に合わせる（コミット: README のタイムラインの説明を直す）
 
-- [ ] 2.9 「記録の追加」ボタン（＋）と `rangeBeforeNow` をなくす。入力欄の中のポインタを `cursor-auto` に戻す。`controlVariants` に `ghost` を足し、`DropdownMenu` に `variant` を渡せるようにして、入力欄の「閉じる」「その他の操作」を枠のない見た目にする（design「空いている場所の選択はポインタで扱う」「入力欄は 1 つの `TimelineEntryEditor` を…」）。`IconButton.test.tsx`・`DropdownMenu.test.tsx`・`EntryTimeline.test.tsx`・`timeline.test.ts` を合わせ、README から「記録の追加」ボタンの説明を消す（コミット: タイムラインの追加ボタンをなくし、入力欄の見た目を直す）
+- [x] 2.9 「記録の追加」ボタン（＋）と `rangeBeforeNow` をなくす。入力欄の中のポインタを `cursor-auto` に戻す。`controlVariants` に `ghost` を足し、`DropdownMenu` に `variant` を渡せるようにして、入力欄の「閉じる」「その他の操作」を枠のない見た目にする（design「空いている場所の選択はポインタで扱う」「入力欄は 1 つの `TimelineEntryEditor` を…」）。`IconButton.test.tsx`・`DropdownMenu.test.tsx`・`EntryTimeline.test.tsx`・`timeline.test.ts` を合わせ、README から「記録の追加」ボタンの説明を消す（コミット: タイムラインの追加ボタンをなくし、入力欄の見た目を直す）
 
 ## 3. 確認
 
