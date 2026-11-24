@@ -7,7 +7,7 @@ export default function ProjectDetailPage({
   params,
 }: PageProps<"/projects/[id]">) {
   return (
-    <main className="mx-auto w-full max-w-3xl min-w-0 flex-1 px-4 py-12">
+    <main className="mx-auto w-full max-w-3xl min-w-0 flex-1 px-4 py-6">
       {/* params はリクエストごとに決まるので、<Suspense> の中で待つ */}
       <Suspense
         fallback={

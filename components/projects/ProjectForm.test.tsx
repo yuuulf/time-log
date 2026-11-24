@@ -104,3 +104,11 @@ describe("登録", () => {
     expect(router.push).not.toHaveBeenCalled();
   });
 });
+
+test("見出しはほかのページと同じ 20px の太字", () => {
+  render(<ProjectForm />);
+
+  expect(screen.getByRole("heading", { level: 1 }).className).toContain(
+    "text-xl",
+  );
+});

@@ -26,3 +26,19 @@ test("ページ見出しの下に集計を置く", () => {
 test("タブのタイトルはページで設定せず、レイアウトの「TimeLog」だけにする", () => {
   expect("metadata" in page).toBe(false);
 });
+
+test("見出しと余白は過去の記録と同じ大きさ（印刷では余白なしのまま）", () => {
+  const { container } = render(
+    <SummaryPage
+      params={Promise.resolve({})}
+      searchParams={Promise.resolve({})}
+    />,
+  );
+
+  const heading = screen.getByRole("heading", { level: 1 });
+  expect(heading.className).toContain("text-xl");
+  const main = container.querySelector("main")!;
+  expect(main.className).toContain("py-6");
+  expect(main.className).toContain("print:py-0");
+  expect(heading.nextElementSibling?.className).toContain("mt-4");
+});

@@ -141,7 +141,7 @@ export function ProjectDetail({
     <div className="space-y-6">
       <div className="space-y-2">
         <BackLink />
-        <h1 className="text-3xl font-bold break-words text-foreground">
+        <h1 className="text-xl font-bold break-words text-foreground">
           {project.name}
         </h1>
         {archived && <p className="text-sm text-muted">{t.archived.notice}</p>}
