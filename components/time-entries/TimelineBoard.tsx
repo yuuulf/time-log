@@ -351,7 +351,7 @@ function DayColumn({
 
 /**
  * 帯の文字。入る行数で並べ方を変え、どの行も幅に入らない部分は「…」で省略する。
- * 1 行: タスク名・プロジェクト名・時刻を 1 行に。2 行: タスク名とプロジェクト名 / 時刻。
+ * 1 行: タスク名・プロジェクト名・時刻を 1 行に。2 行: タスク名とプロジェクト名 / 時刻（帯の下端）。
  * 3 行以上: タスク名 / プロジェクト名 / 時刻（帯の下端）。プロジェクトがなければプロジェクト名は出さない
  */
 function BlockText({
@@ -381,12 +381,12 @@ function BlockText({
   }
   if (lines === 2) {
     return (
-      <span className="flex w-full min-w-0 flex-col">
+      <span className="flex h-full w-full min-w-0 flex-col">
         <span className="truncate">
           {nameText}
           {projectText && <> {projectText}</>}
         </span>
-        <span className={rangeClass}>{range}</span>
+        <span className={`mt-auto ${rangeClass}`}>{range}</span>
       </span>
     );
   }

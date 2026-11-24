@@ -366,16 +366,18 @@ describe("帯の文字の並べ方", () => {
     expect(lines(block)).toEqual(["資料作成 社内ツール 09:00〜09:44"]);
   });
 
-  test("2 行入る帯（45 分・64 分）は、1 行目にタスク名とプロジェクト名、2 行目に時刻", () => {
+  test("2 行入る帯（45 分・64 分）は、1 行目にタスク名とプロジェクト名、時刻は帯の下端に寄せる", () => {
     expect(lines(renderBlock(45))).toEqual([
       "資料作成 社内ツール",
       "09:00〜09:45",
     ]);
     cleanup();
-    expect(lines(renderBlock(64))).toEqual([
-      "資料作成 社内ツール",
-      "09:00〜10:04",
-    ]);
+    const block = renderBlock(64);
+    expect(lines(block)).toEqual(["資料作成 社内ツール", "09:00〜10:04"]);
+    const content = block.firstElementChild as HTMLElement;
+    expect(content.className).toContain("flex-col");
+    expect(content.className).toContain("h-full");
+    expect(content.lastElementChild?.className).toContain("mt-auto");
   });
 
   test("3 行以上入る帯（65 分・3 時間）は 1 行ずつ並べ、時刻を帯の下端に寄せる", () => {
@@ -397,7 +399,11 @@ describe("帯の文字の並べ方", () => {
   test("プロジェクトのない記録はプロジェクト名を出さない", () => {
     expect(lines(renderBlock(30, null))).toEqual(["資料作成 09:00〜09:30"]);
     cleanup();
-    expect(lines(renderBlock(50, null))).toEqual(["資料作成", "09:00〜09:50"]);
+    const twoLines = renderBlock(50, null);
+    expect(lines(twoLines)).toEqual(["資料作成", "09:00〜09:50"]);
+    expect(twoLines.firstElementChild?.lastElementChild?.className).toContain(
+      "mt-auto",
+    );
     cleanup();
     const block = renderBlock(180, null);
     expect(lines(block)).toEqual(["資料作成", "09:00〜12:00"]);
