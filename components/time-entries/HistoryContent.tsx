@@ -66,10 +66,12 @@ export function HistoryContent({
         view={view.mode === "week" ? "timeline" : "list"}
         hrefs={switchHrefs}
       />
+      {/* 表示の切り替えと紛れないよう、見出しの行の右端に寄せる */}
       <IconDownloadLink
         href={csvHref(view)}
         icon={FileSpreadsheet}
         label={t.csv.export}
+        className="ml-auto"
       />
     </>
   );

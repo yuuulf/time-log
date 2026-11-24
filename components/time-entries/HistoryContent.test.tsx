@@ -252,3 +252,18 @@ describe("今月・今週のボタン", () => {
     ).toBe("/history?week=2026-11-16");
   });
 });
+
+describe("CSV 出力の位置", () => {
+  test.each([[{ month: "2026-10" }], [{ week: "2026-11-09" }]])(
+    "%j では見出しの行の最後に置き、右端に寄せる",
+    (params) => {
+      renderView(params);
+
+      const link = screen.getByRole("link", { name: t.csv.export });
+      const row = document.getElementById("entry-list-heading")!.parentElement!;
+      expect(link.parentElement).toBe(row);
+      expect(row.lastElementChild).toBe(link);
+      expect(link.className).toContain("ml-auto");
+    },
+  );
+});
