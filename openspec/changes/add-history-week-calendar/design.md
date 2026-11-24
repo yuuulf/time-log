@@ -92,6 +92,14 @@ TimelineBoard props:
 - キーボード: 開いたら選んでいる日（最初は表示中の週の月曜日）にフォーカスし、左右の矢印で 1 日、上下で 1 週動かす（月の外に出たら月を切り替える）。Enter で選び、Escape で閉じてボタンにフォーカスを戻す
 - 値は hidden の `<input name="week">` で送る。`WeekControls` は `next/form` の `Form`（`action="/history"`）で囲み、`WeekPicker` と「表示」（`Search` の `IconButton`、期間の指定と同じ）を並べる。送ると `?week=<月曜日>` になり、今の週の解釈（`resolveHistoryPageQuery`）でそのまま表示される
 
+### 月のカレンダーを `MonthCalendar` にまとめ、週の指定と期間の日付で使う
+
+週の指定だけが自前のカレンダーで、期間の開始日・終了日がブラウザ標準のカレンダーだと見た目がそろわないため（ユーザーの指摘）、月のカレンダーの部分を `components/ui/MonthCalendar.tsx` に切り出し、`WeekPicker` と新しい `DatePicker`（`components/ui/DatePicker.tsx`）で使う。
+
+- `MonthCalendar` props: `mode`（`"week"` は行ごとに強調して週を選ぶ、`"day"` は日ごとに強調して日を選ぶ）、`selected`（日の 0 時、または未選択の `null`）、`max`（選べるいちばん後の日。省略で制限なし）、`onSelect(date)`、文言。月の切り替え・曜日の見出し・キーボード操作（矢印・Enter）・開いたときのフォーカスを持つ
+- `DatePicker` は `WeekPicker` と同じ入力欄の見た目のボタン（カレンダーのアイコンと「2026年10月1日」、未入力なら「開始日」などを控えめな色で）と hidden の `<input name>` を持つ。値は今の `type="date"` と同じ「2026-10-01」の形なので、`PeriodControls` のフォームと `resolveHistoryQuery` は変えない。`aria-invalid` のときは枠を `border-danger` にする
+- 開いたカレンダー（`WeekPicker`・`DatePicker`）は `z-40` にする。週のカレンダーの列の見出し（`sticky`、`z-30`）に隠れていたため
+
 ### 週のカレンダーは `EntryHistory` で記録と入力候補を読む
 
 週のときは `listEntriesBetween(db, range.from, range.to)` で週の記録を読み、`WeekCalendar` に渡す前に開始日ごとに分ける（`toDateKey` で `days` に振り分ける）。入力欄のために `listTaskNameSuggestions(db, now)` も読む。追加・修正・削除の Server Action は今のまま `refresh()` するので、`EntryHistory` が読み直して反映される。
