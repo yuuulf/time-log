@@ -154,6 +154,18 @@ export function dayRange(date: Date): { from: Date; to: Date } {
   return { from, to: new Date(from.getTime() + DAY_MS) };
 }
 
+/** その日を含む週の月曜日（日本時間の 0 時）。週は月曜日で区切る */
+export function weekStart(date: Date): Date {
+  const { from } = dayRange(date);
+  return new Date(from.getTime() - jstWeekdayFromMonday(date) * DAY_MS);
+}
+
+/** 日付を「11/16（月）」の形で表示する（週のカレンダーの列の見出し） */
+export function formatShortDayHeading(date: Date): string {
+  const { month, day } = jstParts(date);
+  return `${Number(month)}/${Number(day)}（${weekdayFormatter.format(date)}）`;
+}
+
 /** 開始時刻と終了時刻の区間 */
 export type TimeSpan = { startedAt: Date; endedAt: Date };
 

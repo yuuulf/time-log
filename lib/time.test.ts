@@ -12,6 +12,7 @@ import {
   formatMonthDayWithWeekday,
   formatMonthHeading,
   formatRangeHeading,
+  formatShortDayHeading,
   formatTime,
   jstWeekdayFromMonday,
   monthRange,
@@ -22,6 +23,7 @@ import {
   toDateKey,
   toDateTimeLocalValue,
   toMonthValue,
+  weekStart,
 } from "./time";
 
 // 2026-11-18 00:05:30（日本時間）= 2026-11-17 15:05:30（UTC）
@@ -321,5 +323,38 @@ describe("サーバーのタイムゾーンに依存しない", () => {
       new Date("2026-10-31T15:00:00Z"),
     );
     expect(currentMonth(new Date("2026-10-31T15:30:00Z")).month).toBe(11);
+  });
+});
+
+describe("週", () => {
+  const jst = (value: string) => new Date(`${value}+09:00`);
+
+  test.each([
+    ["2026-11-16T00:00:00", "月曜日はその日"],
+    ["2026-11-19T15:00:00", "木曜日"],
+    ["2026-11-22T23:59:59", "日曜日の終わり"],
+  ])("%s（%s）を含む週の月曜日は 11月16日", (value) => {
+    expect(weekStart(jst(value))).toEqual(jst("2026-11-16T00:00:00"));
+  });
+
+  test("日本時間の月曜日 0:30（UTC では日曜日）も同じ週", () => {
+    expect(weekStart(jst("2026-11-23T00:30:00"))).toEqual(
+      jst("2026-11-23T00:00:00"),
+    );
+  });
+
+  test("月をまたぐ週", () => {
+    expect(weekStart(jst("2026-11-01T12:00:00"))).toEqual(
+      jst("2026-10-26T00:00:00"),
+    );
+  });
+
+  test("列の見出しは「11/16（月）」の形", () => {
+    expect(formatShortDayHeading(jst("2026-11-16T09:00:00"))).toBe(
+      "11/16（月）",
+    );
+    expect(formatShortDayHeading(jst("2026-11-22T23:00:00"))).toBe(
+      "11/22（日）",
+    );
   });
 });

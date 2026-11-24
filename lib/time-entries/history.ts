@@ -8,9 +8,12 @@ import {
   monthRange,
   parseDateValue,
   parseMonthValue,
+  toDateKey,
   toMonthValue,
+  weekStart,
   type YearMonth,
 } from "@/lib/time";
+import type { TodayView } from "./today-view";
 
 /** 期間に指定できる最大の日数（開始日と終了日を含む） */
 export const MAX_RANGE_DAYS = 366;
@@ -109,4 +112,75 @@ function resolveRange(from: string, to: string): HistoryView {
     range: { from: firstDay, to: new Date(lastDay.getTime() + DAY_MS) },
     values,
   };
+}
+
+/** 「過去の記録」の週のカレンダーで表示する内容 */
+export type WeekView = {
+  mode: "week";
+  /** 週の期間（「2026年11月16日〜2026年11月22日」） */
+  heading: string;
+  range: DateRange;
+  /** 表示中の週の月曜日の値（「2026-11-16」） */
+  week: string;
+  /** 前の週の月曜日の値 */
+  prevWeek: string;
+  /** 次の週の月曜日の値。今週なら null */
+  nextWeek: string | null;
+  /** 月曜日〜日曜日の各日の 0 時（日本時間） */
+  days: Date[];
+};
+
+/** 「過去の記録」ページで表示する内容（一覧の月・期間か、週のカレンダー） */
+export type HistoryPageView = HistoryView | WeekView;
+
+/** 月曜日 weekFirst の週の表示を作る */
+function weekView(weekFirst: Date, thisWeek: Date): WeekView {
+  const days = Array.from(
+    { length: 7 },
+    (_, i) => new Date(weekFirst.getTime() + i * DAY_MS),
+  );
+  const isThisWeek = weekFirst.getTime() === thisWeek.getTime();
+  return {
+    mode: "week",
+    heading: formatRangeHeading(days[0], days[6]),
+    range: { from: weekFirst, to: new Date(weekFirst.getTime() + 7 * DAY_MS) },
+    week: toDateKey(weekFirst),
+    prevWeek: toDateKey(new Date(weekFirst.getTime() - 7 * DAY_MS)),
+    nextWeek: isThisWeek
+      ? null
+      : toDateKey(new Date(weekFirst.getTime() + 7 * DAY_MS)),
+    days,
+  };
+}
+
+/** 週の値（日付）から週の表示を作る。正しくない日付や今週より先なら今週、月曜日でなければその日を含む週 */
+function resolveWeek(value: string | undefined, now: Date): WeekView {
+  const thisWeek = weekStart(now);
+  const parsed = value ? parseDateValue(value) : null;
+  const first = parsed ? weekStart(parsed) : thisWeek;
+  return weekView(first > thisWeek ? thisWeek : first, thisWeek);
+}
+
+/**
+ * 「過去の記録」ページの URL のクエリと、覚えている表示（Cookie）から表示する内容を決める。
+ * from・to があれば期間、week があれば週、month があれば月を表示する。
+ * どれもなければ、覚えている表示がカレンダー（timeline）なら今週、それ以外は今月
+ */
+export function resolveHistoryPageQuery(
+  params: HistorySearchParams,
+  now: Date,
+  preferred: TodayView,
+): HistoryPageView {
+  const hasRange =
+    first(params.from) !== undefined || first(params.to) !== undefined;
+  const week = first(params.week);
+  if (!hasRange && week !== undefined) return resolveWeek(week, now);
+  if (
+    !hasRange &&
+    first(params.month) === undefined &&
+    preferred === "timeline"
+  ) {
+    return resolveWeek(undefined, now);
+  }
+  return resolveHistoryQuery(params, now);
 }

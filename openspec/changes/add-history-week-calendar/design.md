@@ -22,14 +22,14 @@
 
 ### 週の表示は URL の `week` で決め、何も指定がないときだけ Cookie を見る
 
-`resolveHistoryQuery(params, now, preferred)` に、Cookie から読んだ表示 `preferred`（`"list" | "timeline"`）を渡す。決め方は次の順。
+「過去の記録」ページ用に `resolveHistoryPageQuery(params, now, preferred)` を足し、Cookie から読んだ表示 `preferred`（`"list" | "timeline"`）を渡す。`resolveHistoryQuery` は「集計」ページと CSV の Route Handler でも使っていて、週を返すと `PeriodControls` などが扱えないため変えず、週以外はそれに任せる。決め方は次の順。
 
 1. `from` か `to` があれば期間（今までどおり）
 2. `week` があれば週（`mode: "week"`）。日付として正しくなければ、または今週より先なら今週。月曜日でなければその日を含む週
 3. `month` があれば月（今までどおり）
 4. 何もなければ、`preferred` が `timeline` なら今週、それ以外は今月
 
-`HistoryView` に `{ mode: "week"; heading; range; week: "2026-11-16"; prevWeek: string; nextWeek: string | null; days: Date[] }` を足す（`days` は月〜日の各日の 0 時）。見出しは `formatRangeHeading(月曜日, 日曜日)`。
+`HistoryView` とは別の型 `WeekView`（`{ mode: "week"; heading; range; week: "2026-11-16"; prevWeek: string; nextWeek: string | null; days: Date[] }`）を作り、ページの表示は `HistoryPageView = HistoryView | WeekView` にする（`days` は月〜日の各日の 0 時）。見出しは `formatRangeHeading(月曜日, 日曜日)`。
 
 URL を表示の決め手にすることで、週を再読み込みやリンクで開き直せ、サーバーが最初から正しい週の記録を読める。Cookie はサイドバーの「過去の記録」（クエリなし）で開いたときの表示だけに使う。
 
