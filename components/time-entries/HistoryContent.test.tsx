@@ -234,3 +234,21 @@ describe("週のカレンダー", () => {
     ).toBe("true");
   });
 });
+
+describe("今月・今週のボタン", () => {
+  test("過去の月の一覧から「今月」で今月の一覧へ（月を明示）", () => {
+    renderView({ month: "2026-08" });
+
+    expect(
+      screen.getByRole("link", { name: t.thisMonth }).getAttribute("href"),
+    ).toBe("/history?month=2026-11");
+  });
+
+  test("過去の週のカレンダーから「今週」で今週へ", () => {
+    renderView({ week: "2026-10-12" });
+
+    expect(
+      screen.getByRole("link", { name: t.thisWeek }).getAttribute("href"),
+    ).toBe("/history?week=2026-11-16");
+  });
+});

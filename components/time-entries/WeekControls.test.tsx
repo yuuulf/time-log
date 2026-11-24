@@ -52,3 +52,28 @@ test("週の入力欄に表示中の週を出し、「表示」で /history に�
     screen.getByRole("button", { name: t.show }).getAttribute("type"),
   ).toBe("submit");
 });
+
+const navNames = () =>
+  [
+    ...screen
+      .getByRole("navigation", { name: t.weekNav })
+      .querySelectorAll("a, button"),
+  ].map((el) => el.getAttribute("aria-label") ?? el.textContent);
+
+test("前後の週の右に「今週」を置き、今週を行き先にする", () => {
+  render(<WeekControls view={week("2026-10-12")} thisWeek={thisWeek} />);
+
+  expect(navNames()).toEqual([t.prevWeek, t.nextWeek, t.thisWeek]);
+  expect(
+    screen.getByRole("link", { name: t.thisWeek }).getAttribute("href"),
+  ).toBe("/history?week=2026-11-23");
+});
+
+test("今週を表示しているときは「今週」を押せない", () => {
+  render(<WeekControls view={week("2026-11-23")} thisWeek={thisWeek} />);
+
+  expect(screen.queryByRole("link", { name: t.thisWeek })).toBeNull();
+  expect(
+    screen.getByRole("button", { name: t.thisWeek }).hasAttribute("disabled"),
+  ).toBe(true);
+});
