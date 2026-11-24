@@ -43,8 +43,10 @@ describe("タイムラインの表示", () => {
     const block = screen.getByRole("button", {
       name: "資料作成 09:15〜10:30",
     });
-    expect(block.textContent).toContain("資料作成");
-    expect(block.textContent).toContain("09:15〜10:30");
+    // タスク名と時刻を 1 行に並べる
+    expect(block.textContent).toBe("資料作成 09:15〜10:30");
+    expect(block.querySelectorAll(":scope > span")).toHaveLength(1);
+    expect(block.firstElementChild?.className).toContain("truncate");
     expect(block.title).toBe("資料作成 09:15〜10:30");
     expect(block.style.top).toBe(`${(9 * 60 + 15) * MINUTE_PX}px`);
     expect(block.style.height).toBe(`${75 * MINUTE_PX}px`);

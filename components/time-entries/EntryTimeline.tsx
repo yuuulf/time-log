@@ -230,9 +230,9 @@ export function EntryTimeline({
                       width: `calc(${100 / block.columns}% - 4px)`,
                     }}
                   >
-                    <span className="block truncate font-medium">{name}</span>
-                    <span className="block truncate text-muted tabular-nums">
-                      {range}
+                    <span className="block truncate">
+                      <span className="font-medium">{name}</span>{" "}
+                      <span className="text-muted tabular-nums">{range}</span>
                     </span>
                   </button>
                 );
