@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { darkFaviconMedia, favicons } from "@/components/layout/favicons";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { messages } from "@/lib/messages";
 import "./globals.css";
@@ -22,11 +23,11 @@ export const metadata: Metadata = {
   // media に対応していないブラウザでもロゴが出るよう、ライト用は media なしにする
   icons: {
     icon: [
-      { url: "/icon-light.png", type: "image/png" },
+      { url: favicons.normal.light, type: "image/png" },
       {
-        url: "/icon-dark.png",
+        url: favicons.normal.dark,
         type: "image/png",
-        media: "(prefers-color-scheme: dark)",
+        media: darkFaviconMedia,
       },
     ],
   },
