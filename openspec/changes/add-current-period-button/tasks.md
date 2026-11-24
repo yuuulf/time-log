@@ -7,7 +7,7 @@
 ## 2. ボタン
 
 - [x] 2.1 `PeriodControls` の月の切り替えに「今月」（`TextLink`、今月なら押せない `TextButton`）を「前の月」「次の月」の右に置き、`WeekControls` に「今週」を同じく「前の週」「次の週」の右に置く。文言は `lib/messages.ts` に置く（design「『今月』『今週』は文字のボタンにし…」）。`PeriodControls.test.tsx`・`WeekControls.test.tsx`・`HistoryContent.test.tsx`・`SummaryContent.test.tsx` で、行き先（`/history?month=…`・`/summary?month=…`・`/history?week=…`）、並び順、今月・今週で押せないこと、期間の指定中は出ないことをテストする（コミット: 過去の記録と集計に今月と今週のボタンを追加）
-- [ ] 2.2 README.md の「使い方」の「過去の記録」と「集計」の説明に「今月」「今週」のボタンを追記する（コミット: README に今月と今週のボタンを追記）
+- [x] 2.2 README.md の「使い方」の「過去の記録」と「集計」の説明に「今月」「今週」のボタンを追記する（コミット: README に今月と今週のボタンを追記）
 
 ## 3. 確認
 
