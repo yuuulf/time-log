@@ -82,6 +82,16 @@ TimelineBoard props:
 
 週の「CSV 出力」のリンクは `/history/export?from=<月曜日>&to=<日曜日>` にする。Route Handler は変えずに期間として解釈され、ファイル名は「記録 2026年11月16日〜2026年11月22日.csv」になる。
 
+### 週の指定は自前の月のカレンダー `WeekPicker` で選ぶ
+
+ブラウザ標準の `<input type="week">` は週を行ごと選べるが、Safari・Firefox では文字の入力欄になるため、どのブラウザでも同じ見た目になるよう自前で作る（ユーザーの判断）。`components/ui/WeekPicker.tsx`（クライアント部品）は、入力欄と同じ見た目のボタン（カレンダーのアイコンと週の期間の文字）と、押すと開く月のカレンダー（`usePopover` で外側・Escape で閉じる）を持つ。
+
+- 月のカレンダーは月曜日始まりで、その月を含む週を行にする（行の日付は `lib/time.ts` の `calendarWeeks(year, month)` で求める）。行は `role="row"`、日は `role="gridcell"` の中のボタンにし、全体を `role="grid"` にする
+- ポインタを合わせた行（`hover`）と選んでいる週の行に背景を付ける。日を選ぶとその週の月曜日を値にして閉じ、ボタンの文字を新しい週にする
+- 今週より先の週の日は `disabled`。「前の月」「次の月」（`ChevronLeft`・`ChevronRight`、`ghost`）で月を切り替える
+- キーボード: 開いたら選んでいる日（最初は表示中の週の月曜日）にフォーカスし、左右の矢印で 1 日、上下で 1 週動かす（月の外に出たら月を切り替える）。Enter で選び、Escape で閉じてボタンにフォーカスを戻す
+- 値は hidden の `<input name="week">` で送る。`WeekControls` は `next/form` の `Form`（`action="/history"`）で囲み、`WeekPicker` と「表示」（`Search` の `IconButton`、期間の指定と同じ）を並べる。送ると `?week=<月曜日>` になり、今の週の解釈（`resolveHistoryPageQuery`）でそのまま表示される
+
 ### 週のカレンダーは `EntryHistory` で記録と入力候補を読む
 
 週のときは `listEntriesBetween(db, range.from, range.to)` で週の記録を読み、`WeekCalendar` に渡す前に開始日ごとに分ける（`toDateKey` で `days` に振り分ける）。入力欄のために `listTaskNameSuggestions(db, now)` も読む。追加・修正・削除の Server Action は今のまま `refresh()` するので、`EntryHistory` が読み直して反映される。

@@ -14,9 +14,12 @@
 - [x] 2.4 週のカレンダーでの追加・修正・削除を確かめ、足りないところを直す（その日の列の記録からの初期の時刻、明日以降の列で開かないこと）。`WeekCalendar.test.tsx` で spec「週のカレンダーでの記録の操作」のシナリオをテストする（コミット: 週のカレンダーから記録を追加・修正できるようにする）
 - [x] 2.5 README.md の「使い方」の「過去の記録」の説明に、一覧とカレンダー（週）の切り替え（今日の記録とは別に覚える）、週の切り替え、カレンダーからの追加・修正・削除、週の CSV 出力を追記する（コミット: README に過去の記録のカレンダーを追記）
 
+- [ ] 2.6 `lib/time.ts` に `calendarWeeks(year, month)`（月曜日始まりで、その月を含む週ごとの日付）を足して `time.test.ts` でテストし、`components/ui/WeekPicker.tsx`（入力欄の見た目のボタン、月のカレンダー、行ごとの強調、今週より先は選べない、キーボード操作、hidden の値）を作って `WeekPicker.test.tsx` で spec「週の指定」のシナリオをテストする（design「週の指定は自前の月のカレンダー `WeekPicker` で選ぶ」）（コミット: 週を選ぶ入力欄を追加）
+- [ ] 2.7 `WeekControls` に `WeekPicker` と「表示」ボタンのフォームを足し、文言を `lib/messages.ts` に置く。`WeekControls.test.tsx`・`HistoryContent.test.tsx` を合わせ、README に週の指定を追記する（コミット: 週のカレンダーで週を指定できるようにする）
+
 ## 3. 確認
 
-- [x] 3.1 `npm run format` / `npm run lint` / `npm run typecheck` / `npm test` / `npm run build` がすべて成功することを確かめる。フォーマットで差分が出たら機能変更とは別のコミットにする
+- [ ] 3.1 `npm run format` / `npm run lint` / `npm run typecheck` / `npm test` / `npm run build` がすべて成功することを確かめる。フォーマットで差分が出たら機能変更とは別のコミットにする
 - [ ] 3.2 `npm run build` したアプリ（普段使いのアプリと重ならないポート）をブラウザで開き、spec のシナリオを確認する: 表示の切り替えと行き先・覚えておくこと（今日の記録と別）、週の列・見出し・合計時間・帯・今の時刻の線・最初のスクロール、週の切り替えと URL、週のカレンダーからの追加・修正・削除、明日以降の列で追加できないこと、週の CSV、今日の記録のタイムラインが変わっていないこと、ライト・ダークの見た目
 - [ ] 3.3 一時的な worktree で change をアーカイブし、`openspec validate --all --strict` が通ることを確認してから PR を作成し、CI のチェックがすべて成功することを確認する
 
