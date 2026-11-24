@@ -6,7 +6,7 @@
 - [x] 1.2 `HistoryContent` の「CSV 出力」を `ml-auto` で見出しの行の右端に寄せる（design「『CSV 出力』は `ml-auto` で…」）。`HistoryContent.test.tsx` で一覧・週とも「CSV 出力」が見出しの行の最後にあり右端に寄ることをテストし、README の「見出しの横」を直す（コミット: CSV 出力のボタンを見出しの行の右端に移す）
 - [x] 1.3 各ページの見出しを `text-xl`、`<main>` を `py-6`、見出しの下を `mt-4` にする（design「見出しは `text-xl`…」）。各ページのテスト（`app/*/page.test.tsx`・`ProjectDetail.test.tsx`・`ProjectForm.test.tsx`）で見出しのクラスを確かめる（コミット: ページの見出しと余白を小さくする）
 - [x] 1.4 `TimelineBoard` の枠を `max-h-[35rem]` にする。`EntryTimeline.test.tsx` で枠が `max-h-[35rem]` を持つことをテストする（コミット: カレンダーの枠を高くする）
-- [ ] 1.5 `TimelineBoard` で、開いたとき・画面の大きさが変わったときに枠の高さを `max(560, 画面の高さ − 枠の上端の位置 − 24)` px にする（design「タイムラインの枠の高さは、最小 560px で画面の下端まで広げる」）。`EntryTimeline.test.tsx` で画面が高いとき・低いとき・画面の大きさが変わったときの高さをテストする（コミット: カレンダーの枠を画面の高さに合わせて広げる）
+- [x] 1.5 `TimelineBoard` で、開いたとき・画面の大きさが変わったときに枠の高さを `max(560, 画面の高さ − 枠の上端の位置 − 24)` px にする（design「タイムラインの枠の高さは、最小 560px で画面の下端まで広げる」）。`EntryTimeline.test.tsx` で画面が高いとき・低いとき・画面の大きさが変わったときの高さをテストする（コミット: カレンダーの枠を画面の高さに合わせて広げる）
 
 ## 2. 確認
 

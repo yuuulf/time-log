@@ -25,6 +25,10 @@ export const MINUTE_PX = 0.8;
 const MIN_BLOCK_PX = MIN_BLOCK_MINUTES * MINUTE_PX;
 /** 開いたときに、見せる時刻より何分前を枠の上端にするか */
 const SCROLL_LEAD_MINUTES = 60;
+/** 枠の高さの最小（max-h-[35rem] と同じ） */
+const MIN_FRAME_PX = 560;
+/** ページの下の余白（<main> の py-6） */
+const PAGE_BOTTOM_PX = 24;
 /** 入力欄が下にはみ出さないよう、上端をこの高さ（px）ぶん上に収める */
 const EDITOR_HEIGHT_PX = 300;
 
@@ -89,6 +93,24 @@ export function TimelineBoard({
     );
     // 開いたときだけ合わせる（記録を操作するたびにスクロールを戻さない）
     // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // 枠の高さ。最小は 560px（クラスの max-h-[35rem]）で、画面が高ければ枠の下端を画面の下端
+  // （<main> の下の余白を除く）まで広げる。枠の上にある要素の高さはページで違うので、位置を測る
+  useEffect(() => {
+    const scroller = scrollRef.current;
+    if (!scroller) return;
+    const fit = () => {
+      const top = scroller.getBoundingClientRect().top + window.scrollY;
+      const height = Math.max(
+        MIN_FRAME_PX,
+        window.innerHeight - top - PAGE_BOTTOM_PX,
+      );
+      scroller.style.maxHeight = `${height}px`;
+    };
+    fit();
+    window.addEventListener("resize", fit);
+    return () => window.removeEventListener("resize", fit);
   }, []);
 
   const [editor, setEditor] = useState<EditorState | null>(null);

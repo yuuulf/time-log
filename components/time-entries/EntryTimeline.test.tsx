@@ -254,12 +254,52 @@ describe("タイムラインの表示", () => {
     );
   });
 
-  test("格子は高さ 560px（35rem）までの枠に入れ、枠の中でスクロールする", () => {
-    render(<EntryTimeline now={now} entries={[]} />);
+  describe("枠の高さ", () => {
+    /** 画面の高さと、枠の上端の位置（ページの上から。スクロールしていない状態）を決めて描く */
+    const renderWith = (innerHeight: number, top: number) => {
+      vi.stubGlobal("innerHeight", innerHeight);
+      const original = HTMLElement.prototype.getBoundingClientRect;
+      vi.spyOn(
+        HTMLElement.prototype,
+        "getBoundingClientRect",
+      ).mockImplementation(function (this: HTMLElement) {
+        return this.getAttribute("role") === "group"
+          ? ({ top } as DOMRect)
+          : original.call(this);
+      });
+      render(<EntryTimeline now={now} entries={[]} />);
+      return screen.getByRole("group", { name: t.timeline.label });
+    };
 
-    const timeline = screen.getByRole("group", { name: t.timeline.label });
-    expect(timeline.className).toContain("max-h-[35rem]");
-    expect(timeline.className).toContain("overflow-y-auto");
+    afterEach(() => {
+      vi.unstubAllGlobals();
+      vi.restoreAllMocks();
+    });
+
+    test("最小は 560px（35rem）で、枠の中でスクロールする", () => {
+      const timeline = renderWith(700, 300);
+
+      expect(timeline.className).toContain("max-h-[35rem]");
+      expect(timeline.className).toContain("overflow-y-auto");
+      expect(timeline.style.maxHeight).toBe("560px");
+    });
+
+    test("画面が高いときは、枠の下端を画面の下端（下の余白 24px を除く）まで広げる", () => {
+      const timeline = renderWith(1200, 200);
+
+      expect(timeline.style.maxHeight).toBe("976px");
+    });
+
+    test("画面の大きさが変わったら合わせ直す", () => {
+      const timeline = renderWith(1200, 200);
+
+      act(() => {
+        vi.stubGlobal("innerHeight", 1000);
+        window.dispatchEvent(new Event("resize"));
+      });
+
+      expect(timeline.style.maxHeight).toBe("776px");
+    });
   });
 
   test("開いたときは今の時刻の 1 時間前までスクロールする", () => {
