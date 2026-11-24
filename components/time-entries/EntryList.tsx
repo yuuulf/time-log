@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { messages } from "@/lib/messages";
 import {
   entryDurationMs,
@@ -48,6 +49,8 @@ type Props = {
   emptyMessage?: string;
   /** 修正フォームのプロジェクトの選択肢（登録順） */
   projects?: EntryProject[];
+  /** 見出しの横に置く要素（「過去の記録」の「CSV 出力」など） */
+  headingAction?: ReactNode;
 };
 
 /** 記録の一覧 */
@@ -56,15 +59,19 @@ export function EntryList({
   heading = t.listHeading,
   emptyMessage = t.empty,
   projects = [],
+  headingAction,
 }: Props) {
   return (
     <section aria-labelledby="entry-list-heading" className="space-y-4">
-      <h2
-        id="entry-list-heading"
-        className="text-lg font-semibold text-foreground"
-      >
-        {heading}
-      </h2>
+      <div className="flex items-center gap-3">
+        <h2
+          id="entry-list-heading"
+          className="text-lg font-semibold text-foreground"
+        >
+          {heading}
+        </h2>
+        {headingAction}
+      </div>
       {entries.length === 0 ? (
         <p className="text-sm text-muted">{emptyMessage}</p>
       ) : (

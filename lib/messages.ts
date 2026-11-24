@@ -123,6 +123,21 @@ export const messages = {
     rangeSeparator: "〜",
     show: "表示",
     empty: "この期間の記録はありません。",
+    csv: {
+      /** 「CSV 出力」ボタンの名前 */
+      export: "CSV 出力",
+      /** CSV の 1 行目の列名 */
+      columns: [
+        "日付",
+        "開始時刻",
+        "終了時刻",
+        "作業時間（分）",
+        "タスク名",
+        "プロジェクト",
+      ],
+      /** ダウンロードするファイルの名前（例: 「記録 2026年11月.csv」） */
+      filename: (heading: string) => `記録 ${heading}.csv`,
+    },
     errors: {
       dateRequired: "開始日と終了日を入力してください。",
       endBeforeStart: "終了日は開始日以降にしてください。",

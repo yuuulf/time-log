@@ -29,6 +29,8 @@ export type HistoryView =
       mode: "month";
       heading: string;
       range: DateRange;
+      /** 表示中の月の値（「2026-11」） */
+      month: string;
       /** 前の月の値（「2026-10」） */
       prevMonth: string;
       /** 次の月の値。今月なら null */
@@ -79,6 +81,7 @@ function resolveMonth(
     mode: "month",
     heading: formatMonthHeading(month),
     range: monthRange(month),
+    month: toMonthValue(month),
     prevMonth: toMonthValue(addMonths(month, -1)),
     nextMonth: isThisMonth ? null : toMonthValue(addMonths(month, 1)),
   };

@@ -126,3 +126,43 @@ describe("期間の表示", () => {
     expect(button.closest("form")?.getAttribute("action")).toBe("/history");
   });
 });
+
+describe("CSV 出力", () => {
+  const csvLink = () => screen.getByRole("link", { name: t.csv.export });
+
+  test("月の表示では、見出しの横にその月の CSV のリンクを置く", () => {
+    renderView({ month: "2026-10" }, [entry]);
+
+    expect(csvLink().getAttribute("href")).toBe(
+      "/history/export?month=2026-10",
+    );
+    expect(csvLink().hasAttribute("download")).toBe(true);
+    // 見出しと同じ行に並ぶ
+    expect(
+      screen.getByRole("heading", { level: 2, name: "2026年10月" })
+        .parentElement,
+    ).toContain(csvLink());
+  });
+
+  test("今月を表示しているときも月を明示する", () => {
+    renderView({});
+
+    expect(csvLink().getAttribute("href")).toBe(
+      "/history/export?month=2026-11",
+    );
+  });
+
+  test("期間の表示では、その期間の CSV のリンクを置く", () => {
+    renderView({ from: "2026-10-01", to: "2026-10-15" });
+
+    expect(csvLink().getAttribute("href")).toBe(
+      "/history/export?from=2026-10-01&to=2026-10-15",
+    );
+  });
+
+  test("期間の入力に誤りがあるときは出さない", () => {
+    renderView({ from: "2026-10-15", to: "2026-10-01" });
+
+    expect(screen.queryByRole("link", { name: t.csv.export })).toBeNull();
+  });
+});
