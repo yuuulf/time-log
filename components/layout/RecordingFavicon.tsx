@@ -15,9 +15,8 @@ const pairs = [
  * `media` などほかの属性は変えないので、ライト・ダークの出し分けはブラウザに任せる
  */
 export function applyFavicons(recording: boolean) {
-  const links = document.head.querySelectorAll<HTMLLinkElement>(
-    'link[rel="icon"]',
-  );
+  const links =
+    document.head.querySelectorAll<HTMLLinkElement>('link[rel="icon"]');
   for (const link of links) {
     const href = link.getAttribute("href");
     for (const [normal, rec] of pairs) {
