@@ -14,6 +14,7 @@ export function AppLogo() {
         alt=""
         width={SIZE}
         height={SIZE}
+        unoptimized
         className="size-6 shrink-0 dark:hidden"
       />
       <Image
@@ -21,6 +22,7 @@ export function AppLogo() {
         alt=""
         width={SIZE}
         height={SIZE}
+        unoptimized
         className="hidden size-6 shrink-0 dark:block"
       />
     </>
