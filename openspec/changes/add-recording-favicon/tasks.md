@@ -8,7 +8,7 @@
 ## 2. ファビコンの切り替え
 
 - [x] 2.1 `components/layout/favicons.ts` に通常用と記録中用のファビコンの URL をまとめ、`app/layout.tsx` の `metadata.icons` をそこから参照する形にする（design「ファビコンの URL を 1 か所にまとめる」）。振る舞いは変わらないことを、既存の `app/layout.test.tsx` のメタデータのテストが同じ値のまま通ることで確かめる（コミット: ファビコンの URL を 1 か所にまとめる）
-- [ ] 2.2 `components/layout/RecordingFavicon.tsx` を作り、`recording` に合わせて `<head>` の `link[rel="icon"]` の `href` を記録中用・通常用に書き換える（ページ移動のたびに書き換え直す）（design「切り替えはクライアント部品で <link rel="icon"> の href を書き換える」）。`RecordingFavicon.test.tsx` で、`true` で記録中用の URL になること、`false` にすると元に戻ること、アンマウントで元に戻ること、`media` が変わらないことをテストする（コミット: 記録中のファビコンを切り替える部品を追加）
+- [x] 2.2 `components/layout/RecordingFavicon.tsx` を作り、`recording` に合わせて `<head>` の `link[rel="icon"]` の `href` を記録中用・通常用に書き換える（ページ移動のたびに書き換え直す）（design「切り替えはクライアント部品で <link rel="icon"> の href を書き換える」）。`RecordingFavicon.test.tsx` で、`true` で記録中用の URL になること、`false` にすると元に戻ること、アンマウントで元に戻ること、`media` が変わらないことをテストする（コミット: 記録中のファビコンを切り替える部品を追加）
 - [ ] 2.3 `RunningTaskView.tsx` に `<RecordingFavicon recording={running !== null} />` を置く。`RunningTaskView.test.tsx` で、記録中なら `<head>` のファビコンが記録中用に、記録中でなければ通常用になることをテストする。`npm test` が通ることを確かめる（コミット: 記録中はファビコンを変える）
 
 ## 3. ドキュメントと確認
