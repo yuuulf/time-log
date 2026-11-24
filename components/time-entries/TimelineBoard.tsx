@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import type { EntryProject } from "@/components/projects/types";
 import { projectColorBlockClass } from "@/lib/projects/colors";
 import { messages } from "@/lib/messages";
-import { formatTime } from "@/lib/time";
+import { formatDuration, formatTime } from "@/lib/time";
 import {
   DAY_MINUTES,
   MIN_BLOCK_MINUTES,
@@ -53,6 +53,8 @@ type Props = {
   now: Date;
   /** 帯の右に残す幅。記録のある時間でも、ここを選んで記録を追加できる */
   gutter: string;
+  /** 列の見出し（週のカレンダーで使う）。枠の上に固定して、日付とその日の合計時間を出す */
+  dayHeaders?: { label: string; totalMs: number }[];
   /** 入力欄のプロジェクトの選択肢（登録順） */
   projects: EntryProject[];
   /** 入力欄のタスク名の入力候補 */
@@ -73,6 +75,7 @@ export function TimelineBoard({
   days,
   now,
   gutter,
+  dayHeaders,
   projects,
   suggestions,
 }: Props) {
@@ -141,6 +144,24 @@ export function TimelineBoard({
       aria-label={t.timeline.label}
       className="max-h-[32rem] overflow-y-auto border-b border-border"
     >
+      {dayHeaders && (
+        // スクロールしても日付が見えるよう、枠の上に固定する。目盛りの列と幅をそろえる
+        <div className="sticky top-0 z-30 flex border-b border-border bg-background pl-14">
+          {dayHeaders.map(({ label, totalMs }) => (
+            <div
+              key={label}
+              data-testid="timeline-day-header"
+              className="min-w-0 flex-1 border-l border-border px-1 py-1 text-center text-xs"
+            >
+              <p className="truncate font-medium text-foreground">{label}</p>
+              <p className="truncate text-muted tabular-nums">
+                <span className="sr-only">{t.dayTotal} </span>
+                {formatDuration(totalMs)}
+              </p>
+            </div>
+          ))}
+        </div>
+      )}
       <div className="relative" style={{ height: DAY_MINUTES * MINUTE_PX }}>
         {HOURS.map((hour) => (
           <div

@@ -9,7 +9,7 @@
 ## 2. 週のカレンダー
 
 - [x] 2.1 `EntryTimeline` から格子・日の列・帯・今の時刻の線・今より後の領域・背景のクリック・入力欄の状態を `TimelineBoard` に切り出し、`EntryTimeline` はそれを 1 日で使う形にする（design「タイムラインの格子を `TimelineBoard` に切り出し…」）。既存の `EntryTimeline.test.tsx` を変えずに通すことで今日の記録が変わらないことを確かめる（コミット: タイムラインの格子を部品に切り出す）
-- [ ] 2.2 `TimelineBoard` を複数の日に対応させ（列ごとの帯・今日の列だけの今の時刻の線・明日以降の列全体の今より後の領域・列見出し・`gutter`・入力欄の横の位置）、`WeekCalendar` を作る。`TimelineBoard.test.tsx`・`WeekCalendar.test.tsx` で spec「週のカレンダーの表示」のシナリオ（列と見出し・帯の列と位置・日ごとの合計時間・今週の今の時刻・最初のスクロール）をテストする（コミット: 週のカレンダーを追加）
+- [x] 2.2 `TimelineBoard` を複数の日に対応させ（列ごとの帯・今日の列だけの今の時刻の線・明日以降の列全体の今より後の領域・列見出し・`gutter`・入力欄の横の位置）、`WeekCalendar` を作る。`TimelineBoard.test.tsx`・`WeekCalendar.test.tsx` で spec「週のカレンダーの表示」のシナリオ（列と見出し・帯の列と位置・日ごとの合計時間・今週の今の時刻・最初のスクロール）をテストする（コミット: 週のカレンダーを追加）
 - [ ] 2.3 `WeekControls`（「前の週」「次の週」）と `HistoryViewToggle`（Cookie を書いて移動）を作り、`EntryHistory` で Cookie を読んで週の記録と入力候補を渡し、`HistoryContent` で週なら `WeekControls` と `WeekCalendar`、それ以外は今までの表示を出す。週の「CSV 出力」は `from`・`to` のリンクにする。文言は `lib/messages.ts` に置く（design「週の切り替えは `WeekControls` にし…」「週のカレンダーは `EntryHistory` で…」）。`WeekControls.test.tsx`・`HistoryViewToggle.test.tsx`・`HistoryContent.test.tsx` で、週の切り替えのリンク、今週の「次の週」が押せないこと、週のときに月・期間の切り替えを出さないこと、切り替えで Cookie を書いて行き先へ移動すること、週の CSV のリンクをテストする（コミット: 過去の記録を週のカレンダーに切り替えられるようにする）
 - [ ] 2.4 週のカレンダーでの追加・修正・削除を確かめ、足りないところを直す（その日の列の記録からの初期の時刻、明日以降の列で開かないこと）。`WeekCalendar.test.tsx` で spec「週のカレンダーでの記録の操作」のシナリオをテストする（コミット: 週のカレンダーから記録を追加・修正できるようにする）
 - [ ] 2.5 README.md の「使い方」の「過去の記録」の説明に、一覧とカレンダー（週）の切り替え（今日の記録とは別に覚える）、週の切り替え、カレンダーからの追加・修正・削除、週の CSV 出力を追記する（コミット: README に過去の記録のカレンダーを追記）
