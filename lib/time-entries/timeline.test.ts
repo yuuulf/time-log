@@ -1,6 +1,7 @@
 // @vitest-environment node
 import { describe, expect, test } from "vitest";
 import {
+  blockLineCount,
   initialScrollMinute,
   layoutTimeline,
   minuteOfDay,
@@ -210,5 +211,22 @@ describe("initialScrollMinute", () => {
   test("記録がなければ 8 時", () => {
     const later = new Date("2026-11-25T12:00:00+09:00");
     expect(initialScrollMinute(days(false), later)).toBe(min(8, 0));
+  });
+});
+
+describe("blockLineCount", () => {
+  test.each([
+    [20, 1],
+    [35, 1],
+    [36, 2],
+    [51, 2],
+    [52, 3],
+    [144, 8],
+  ])("高さ %ipx の帯には %i 行入る", (height, lines) => {
+    expect(blockLineCount(height)).toBe(lines);
+  });
+
+  test("1 行も入らない高さでも 1 行とする", () => {
+    expect(blockLineCount(10)).toBe(1);
   });
 });
