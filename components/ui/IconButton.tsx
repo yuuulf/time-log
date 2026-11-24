@@ -9,6 +9,8 @@ export const controlVariants = {
     "border border-border bg-background text-foreground hover:bg-border/40 disabled:opacity-50",
   danger:
     "border border-border bg-background text-danger hover:bg-danger/10 disabled:opacity-50",
+  /** 枠を出さず、ポインタを合わせたときだけ背景でボタンの形を示す（入力欄の右上の「閉じる」など） */
+  ghost: "text-foreground hover:bg-border/40 disabled:opacity-50",
 } as const;
 
 export type IconVariant = keyof typeof controlVariants;

@@ -37,6 +37,24 @@ export const messages = {
     empty: "今日の記録はまだありません。",
     loading: "記録を読み込んでいます…",
     confirmDelete: "この記録を削除しますか？",
+    /** 「今日の記録」の表示の切り替え */
+    view: {
+      label: "表示",
+      list: "一覧",
+      timeline: "カレンダー",
+    },
+    timeline: {
+      /** タイムラインの領域の読み上げ名 */
+      label: "タイムライン",
+      /** 入力欄（追加・修正）の読み上げ名 */
+      editorLabel: "記録の入力",
+      create: "追加",
+      close: "閉じる",
+      /** 帯の時刻（例: 「09:15〜10:30」） */
+      range: (start: string, end: string) => `${start}〜${end}`,
+      /** 帯の読み上げ名（例: 「資料作成 09:15〜10:30」） */
+      entryLabel: (taskName: string, range: string) => `${taskName} ${range}`,
+    },
     actions: {
       start: "開始",
       stop: "終了",

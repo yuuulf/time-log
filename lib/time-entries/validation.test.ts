@@ -1,7 +1,11 @@
 // @vitest-environment node
 import { describe, expect, test } from "vitest";
 import { messages } from "@/lib/messages";
-import { validateStartInput, validateUpdateInput } from "./validation";
+import {
+  validateCreateInput,
+  validateStartInput,
+  validateUpdateInput,
+} from "./validation";
 
 const errors = messages.timeEntries.errors;
 const now = new Date("2026-11-18T12:00:00+09:00");
@@ -164,5 +168,65 @@ describe("修正の入力チェック（記録中の記録）", () => {
         options,
       ),
     ).toEqual({ ok: false, errors: { endedAt: errors.endWhileRunning } });
+  });
+});
+
+describe("追加の入力チェック", () => {
+  const valid = {
+    taskName: " 打ち合わせ ",
+    startedAt: "2026-11-18T10:30:00",
+    endedAt: "2026-11-18T11:00:00",
+  };
+
+  test("正しい入力", () => {
+    expect(validateCreateInput(valid, now)).toEqual({
+      ok: true,
+      value: {
+        taskName: "打ち合わせ",
+        startedAt: new Date("2026-11-18T10:30:00+09:00"),
+        endedAt: new Date("2026-11-18T11:00:00+09:00"),
+      },
+    });
+  });
+
+  test("タスク名が長すぎる", () => {
+    const result = validateCreateInput(
+      { ...valid, taskName: "あ".repeat(201) },
+      now,
+    );
+    expect(result).toEqual({
+      ok: false,
+      errors: { taskName: errors.taskNameTooLong },
+    });
+  });
+
+  test("終了時刻が開始時刻より前", () => {
+    const result = validateCreateInput(
+      { ...valid, endedAt: "2026-11-18T10:00:00" },
+      now,
+    );
+    expect(result).toEqual({
+      ok: false,
+      errors: { endedAt: errors.endBeforeStart },
+    });
+  });
+
+  test("未来の時刻", () => {
+    const result = validateCreateInput(
+      { ...valid, endedAt: "2026-11-18T12:30:00" },
+      now,
+    );
+    expect(result).toEqual({
+      ok: false,
+      errors: { endedAt: errors.timeInFuture },
+    });
+  });
+
+  test("終了時刻が空", () => {
+    const result = validateCreateInput({ ...valid, endedAt: "" }, now);
+    expect(result).toEqual({
+      ok: false,
+      errors: { endedAt: errors.timeRequired },
+    });
   });
 });

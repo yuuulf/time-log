@@ -3,6 +3,7 @@ import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 import { createDb, type Db } from "@/lib/db/client";
 import { messages } from "@/lib/messages";
 import {
+  createEntryAction,
   deleteEntryAction,
   startEntryAction,
   stopEntryAction,
@@ -251,5 +252,77 @@ describe("プロジェクト", () => {
       project: { name: "社内ツール" },
     });
     expect(refresh).not.toHaveBeenCalled();
+  });
+});
+
+describe("追加", () => {
+  const fields = {
+    taskName: " 打ち合わせ ",
+    startedAt: "2026-11-18T10:30:00",
+    endedAt: "2026-11-18T11:00:00",
+  };
+
+  test("終了済みの記録を保存して refresh する", async () => {
+    const state = await createEntryAction({}, form(fields));
+
+    expect(state).toEqual({ ok: true });
+    expect(listEntriesOfDay(db, now)).toMatchObject([
+      {
+        taskName: "打ち合わせ",
+        startedAt: new Date("2026-11-18T10:30:00+09:00"),
+        endedAt: new Date("2026-11-18T11:00:00+09:00"),
+        project: null,
+      },
+    ]);
+    expect(refresh).toHaveBeenCalledOnce();
+  });
+
+  test("プロジェクトを紐づけて保存する", async () => {
+    const project = createProject(
+      db,
+      { name: "社内ツール", color: "teal", clientName: "", description: "" },
+      now,
+    );
+
+    await createEntryAction(
+      {},
+      form({ ...fields, projectId: String(project.id) }),
+    );
+
+    expect(listEntriesOfDay(db, now)[0].project?.name).toBe("社内ツール");
+  });
+
+  test("記録中の記録は変えない", async () => {
+    await startEntryAction({}, form({ taskName: "資料作成" }));
+
+    await createEntryAction({}, form(fields));
+
+    expect(getRunningEntry(db)).toMatchObject({
+      taskName: "資料作成",
+      endedAt: null,
+    });
+  });
+
+  test("入力エラーなら保存せずエラーを返す", async () => {
+    const state = await createEntryAction(
+      {},
+      form({ ...fields, endedAt: "2026-11-18T10:00:00" }),
+    );
+
+    expect(state).toEqual({ errors: { endedAt: errors.endBeforeStart } });
+    expect(listEntriesOfDay(db, now)).toHaveLength(0);
+    expect(refresh).not.toHaveBeenCalled();
+  });
+
+  test("削除されたプロジェクトでは保存しない", async () => {
+    const state = await createEntryAction(
+      {},
+      form({ ...fields, projectId: "999" }),
+    );
+
+    expect(state).toEqual({
+      errors: { projectId: messages.projects.errors.notFound },
+    });
+    expect(listEntriesOfDay(db, now)).toHaveLength(0);
   });
 });

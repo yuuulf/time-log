@@ -21,15 +21,23 @@ import {
   type ActionState,
 } from "@/lib/time-entries/actions";
 import { isComposing } from "@/lib/keyboard";
+import {
+  FIELDS,
+  sameValue,
+  toValues,
+  type Field,
+  type Values,
+} from "./entryValues";
 import { messages } from "@/lib/messages";
 import {
   formatDuration,
   formatTime,
   parseDateTimeLocalValue,
-  toDateTimeLocalValue,
 } from "@/lib/time";
 
 const t = messages.timeEntries;
+
+type Errors = NonNullable<ActionState["errors"]>;
 
 export type EntryItemData = {
   id: number;
@@ -40,32 +48,6 @@ export type EntryItemData = {
   /** 紐づいたプロジェクト。なければ null */
   project?: EntryProject | null;
 };
-
-/** 行で直接編集する欄 */
-type Field = "taskName" | "startedAt" | "endedAt";
-type Values = Record<Field, string>;
-type Errors = NonNullable<ActionState["errors"]>;
-
-const FIELDS: Field[] = ["taskName", "startedAt", "endedAt"];
-
-/** 保存済みの記録から、入力欄の値を作る */
-function toValues(entry: EntryItemData): Values {
-  return {
-    taskName: entry.taskName,
-    startedAt: toDateTimeLocalValue(entry.startedAt),
-    endedAt: entry.endedAt ? toDateTimeLocalValue(entry.endedAt) : "",
-  };
-}
-
-/**
- * 2 つの入力値が同じかどうか。時刻はブラウザが秒の 0 を省くことがあるので、日時として比べる
- */
-function sameValue(field: Field, a: string, b: string): boolean {
-  if (field === "taskName" || a === b) return a === b;
-  const left = parseDateTimeLocalValue(a);
-  const right = parseDateTimeLocalValue(b);
-  return left !== null && right !== null && left.getTime() === right.getTime();
-}
 
 /**
  * 記録 1 件の行。タスク名・開始時刻・終了時刻をその場で編集し、値を変えてフォーカスが外れたとき
