@@ -22,9 +22,11 @@
 
 - [x] 2.9 「記録の追加」ボタン（＋）と `rangeBeforeNow` をなくす。入力欄の中のポインタを `cursor-auto` に戻す。`controlVariants` に `ghost` を足し、`DropdownMenu` に `variant` を渡せるようにして、入力欄の「閉じる」「その他の操作」を枠のない見た目にする（design「空いている場所の選択はポインタで扱う」「入力欄は 1 つの `TimelineEntryEditor` を…」）。`IconButton.test.tsx`・`DropdownMenu.test.tsx`・`EntryTimeline.test.tsx`・`timeline.test.ts` を合わせ、README から「記録の追加」ボタンの説明を消す（コミット: タイムラインの追加ボタンをなくし、入力欄の見た目を直す）
 
+- [ ] 2.10 `layoutTimeline` の重なりの判断を、描く高さ（最小 `MIN_BLOCK_MINUTES` 分）で行い、短い記録が上下に重なって見えるときも別の段に置く。`EntryTimeline` の最小の高さを `MIN_BLOCK_MINUTES` から求める（design「帯の位置と重なり…」）。`timeline.test.ts`・`EntryTimeline.test.tsx` で spec「タイムラインの表示」の「短い記録が続くとき」をテストする（コミット: 短い記録の帯が重ならないようにする）
+
 ## 3. 確認
 
-- [x] 3.1 `npm run format` / `npm run lint` / `npm run typecheck` / `npm test` / `npm run build` がすべて成功することを確かめる。フォーマットで差分が出たら機能変更とは別のコミットにする
+- [ ] 3.1 `npm run format` / `npm run lint` / `npm run typecheck` / `npm test` / `npm run build` がすべて成功することを確かめる。フォーマットで差分が出たら機能変更とは別のコミットにする
 - [ ] 3.2 `npm run build` したアプリ（普段使いのアプリと重ならないポート）をブラウザで開き、spec のシナリオを確認する: 表示の切り替えと開き直したときの表示、帯の位置・色・重なり・今の時刻の線とスクロール、空いている場所と「記録の追加」からの追加（初期の時刻・誤り・閉じ方）、帯からの修正・削除、追加・修正のあと一覧と合計時間に反映されること、ライト・ダークの両方の見た目
 - [ ] 3.3 一時的な worktree で change をアーカイブし、`openspec validate --all --strict` が通ることを確認してから PR を作成し、CI のチェックがすべて成功することを確認する
 
