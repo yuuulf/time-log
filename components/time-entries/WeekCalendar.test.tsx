@@ -1,5 +1,9 @@
-import { render, screen, within } from "@testing-library/react";
-import { describe, expect, test, vi } from "vitest";
+import { act, fireEvent, render, screen, within } from "@testing-library/react";
+import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
+import {
+  createEntryAction,
+  updateEntryAction,
+} from "@/lib/time-entries/actions";
 import { messages } from "@/lib/messages";
 import { MINUTE_PX } from "./TimelineBoard";
 import { WeekCalendar } from "./WeekCalendar";
@@ -186,5 +190,125 @@ describe("週のカレンダーの表示", () => {
     expect(
       screen.getByRole("button", { name: /^資料作成 / }).style.width,
     ).toContain("1rem");
+  });
+});
+
+describe("週のカレンダーでの記録の操作", () => {
+  const editor = () =>
+    screen.queryByRole("dialog", { name: t.timeline.editorLabel });
+  const field = (label: string) =>
+    within(editor()!).getByLabelText(label) as HTMLInputElement;
+  const time = (value: string) => (value.length === 16 ? `${value}:00` : value);
+  /** n 番目の列の、0 時からの分の位置をクリックする */
+  const clickColumn = (index: number, minute: number) => {
+    const area = columns()[index];
+    area.getBoundingClientRect = () => ({ top: 0 }) as DOMRect;
+    fireEvent.click(area, { clientY: minute * MINUTE_PX });
+  };
+
+  beforeEach(() => {
+    vi.useFakeTimers({ toFake: ["Date"] });
+    vi.mocked(createEntryAction).mockReset();
+    vi.mocked(updateEntryAction).mockReset();
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  test("過去の日の列の空いている場所を選ぶと、その日の時刻の入力欄が開き、追加を送る", async () => {
+    vi.setSystemTime(later);
+    vi.mocked(createEntryAction).mockResolvedValue({ ok: true });
+    render(
+      <WeekCalendar heading={heading} days={days} entries={[]} now={later} />,
+    );
+
+    clickColumn(1, 10 * 60 + 40);
+
+    expect(time(field(t.startedAt).value)).toBe("2026-11-17T10:30:00");
+    expect(time(field(t.endedAt).value)).toBe("2026-11-17T11:00:00");
+
+    fireEvent.change(field(t.taskName), { target: { value: "打ち合わせ" } });
+    await act(async () => {
+      fireEvent.click(screen.getByRole("button", { name: t.timeline.create }));
+    });
+
+    const formData = vi.mocked(createEntryAction).mock.calls[0][1];
+    expect(formData.get("taskName")).toBe("打ち合わせ");
+    expect(time(String(formData.get("startedAt")))).toBe("2026-11-17T10:30:00");
+    expect(editor()).toBeNull();
+  });
+
+  test("初期の時刻はその日の列の記録から決め、ほかの日の記録は数えない", () => {
+    vi.setSystemTime(later);
+    render(
+      <WeekCalendar
+        heading={heading}
+        days={days}
+        entries={[
+          {
+            id: 1,
+            taskName: "A",
+            startedAt: jst("2026-11-17T11:00:00"),
+            endedAt: jst("2026-11-17T12:00:00"),
+            project: null,
+          },
+          {
+            id: 2,
+            taskName: "B",
+            startedAt: jst("2026-11-18T10:00:00"),
+            endedAt: jst("2026-11-18T10:50:00"),
+            project: null,
+          },
+        ]}
+        now={later}
+      />,
+    );
+
+    clickColumn(1, 10 * 60 + 55);
+
+    expect(time(field(t.startedAt).value)).toBe("2026-11-17T10:45:00");
+    expect(time(field(t.endedAt).value)).toBe("2026-11-17T11:00:00");
+  });
+
+  test("帯を選ぶと修正の入力欄が開き、フォーカスを外すと保存する", async () => {
+    vi.setSystemTime(later);
+    vi.mocked(updateEntryAction).mockResolvedValue({ ok: true });
+    render(
+      <WeekCalendar
+        heading={heading}
+        days={days}
+        entries={entries}
+        now={later}
+      />,
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: /^資料作成 / }));
+    fireEvent.change(field(t.endedAt), {
+      target: { value: "2026-11-17T10:30:00" },
+    });
+    await act(async () => {
+      fireEvent.blur(field(t.endedAt));
+    });
+
+    const [id, , formData] = vi.mocked(updateEntryAction).mock.calls[0];
+    expect(id).toBe(1);
+    expect(time(String(formData.get("endedAt")))).toBe("2026-11-17T10:30:00");
+  });
+
+  test("明日以降の列を選んでも入力欄は開かない", () => {
+    const today = jst("2026-11-18T15:00:00");
+    vi.setSystemTime(today);
+    render(
+      <WeekCalendar heading={heading} days={days} entries={[]} now={today} />,
+    );
+
+    clickColumn(3, 10 * 60);
+
+    expect(editor()).toBeNull();
+    expect(columns()[3].className).toContain("cursor-copy");
+    expect(
+      within(columns()[3]).getByTestId("timeline-future").className,
+    ).toContain("cursor-auto");
   });
 });
