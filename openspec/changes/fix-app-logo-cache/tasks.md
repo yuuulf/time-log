@@ -2,7 +2,7 @@
 
 ## 1. ロゴの表示
 
-- [ ] 1.1 `components/layout/AppLogo.tsx` の 2 つの `Image` に `unoptimized` を付け、`/icon-light.png`・`/icon-dark.png` を直接読むようにする（design「`AppLogo` の `Image` に `unoptimized` を付ける」）。`AppLogo.test.tsx` で、`src` が `/icon-light.png`・`/icon-dark.png` そのもの（`/_next/image` を通らない）であることを確かめるようにテストを直す。`npm test` が通ることを確かめる（コミット: アプリ名のロゴを縮小せずに表示する）
+- [x] 1.1 `components/layout/AppLogo.tsx` の 2 つの `Image` に `unoptimized` を付け、`/icon-light.png`・`/icon-dark.png` を直接読むようにする（design「`AppLogo` の `Image` に `unoptimized` を付ける」）。`AppLogo.test.tsx` で、`src` が `/icon-light.png`・`/icon-dark.png` そのもの（`/_next/image` を通らない）であることを確かめるようにテストを直す。`npm test` が通ることを確かめる（コミット: アプリ名のロゴを縮小せずに表示する）
 
 ## 2. ドキュメントと確認
 
