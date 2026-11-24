@@ -9,7 +9,7 @@
 
 ## 2. 確認
 
-- [ ] 2.1 `npm run format` / `npm run lint` / `npm run typecheck` / `npm test` / `npm run build` がすべて成功することを確かめる。フォーマットで差分が出たら機能変更とは別のコミットにする
+- [x] 2.1 `npm run format` / `npm run lint` / `npm run typecheck` / `npm test` / `npm run build` がすべて成功することを確かめる。フォーマットで差分が出たら機能変更とは別のコミットにする
 - [ ] 2.2 `npm run build` したアプリ（普段使いのアプリと重ならないポート）をブラウザで開き、spec のシナリオを確認する: 今日のタイムラインと週のカレンダーの枠の高さ（560px）、長い帯の文字が上端にあること、「CSV 出力」が見出しの行の右端にあること（一覧・週）、各ページの見出しと余白、「集計」の PDF 出力が変わらないこと、ライト・ダークの見た目
 - [ ] 2.3 一時的な worktree で change をアーカイブし、`openspec validate --all --strict` が通ることを確認してから PR を作成し、CI のチェックがすべて成功することを確認する
 
