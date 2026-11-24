@@ -254,6 +254,14 @@ describe("タイムラインの表示", () => {
     );
   });
 
+  test("格子は高さ 560px（35rem）までの枠に入れ、枠の中でスクロールする", () => {
+    render(<EntryTimeline now={now} entries={[]} />);
+
+    const timeline = screen.getByRole("group", { name: t.timeline.label });
+    expect(timeline.className).toContain("max-h-[35rem]");
+    expect(timeline.className).toContain("overflow-y-auto");
+  });
+
   test("開いたときは今の時刻の 1 時間前までスクロールする", () => {
     render(<EntryTimeline now={now} entries={[]} />);
 

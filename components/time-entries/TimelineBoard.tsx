@@ -142,7 +142,7 @@ export function TimelineBoard({
       ref={scrollRef}
       role="group"
       aria-label={t.timeline.label}
-      className="max-h-[32rem] overflow-y-auto border-b border-border"
+      className="max-h-[35rem] overflow-y-auto border-b border-border"
     >
       {dayHeaders && (
         // スクロールしても日付が見えるよう、枠の上に固定する。目盛りの列と幅をそろえる
