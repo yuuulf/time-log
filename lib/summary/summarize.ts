@@ -1,10 +1,9 @@
 import type { EntryProject } from "@/lib/time-entries/repository";
 import type { DateRange } from "@/lib/time-entries/history";
-import { jstWeekdayFromMonday, toDateKey } from "@/lib/time";
+import { entryDurationMs, jstWeekdayFromMonday, toDateKey } from "@/lib/time";
 
 // 日本時間には夏時間がないため、1 日はいつも 24 時間
 const DAY_MS = 24 * 60 * 60 * 1000;
-const MINUTE_MS = 60 * 1000;
 
 /** 集計に使う記録 */
 export type SummaryEntry = {
@@ -43,20 +42,13 @@ export type Summary = {
   projects: ProjectTotal[];
 };
 
-/** 記録の作業時間。記録の一覧の表示と同じく、分に切り捨てる。記録中なら 0 */
-function durationMs(entry: SummaryEntry): number {
-  if (!entry.endedAt) return 0;
-  const ms = Math.max(0, entry.endedAt.getTime() - entry.startedAt.getTime());
-  return Math.floor(ms / MINUTE_MS) * MINUTE_MS;
-}
-
 /** 記録の作業時間の合計と、記録（記録中を含む）を開始した日の数 */
 function totals(entries: SummaryEntry[]): {
   totalMs: number;
   workDays: number;
 } {
   return {
-    totalMs: entries.reduce((sum, e) => sum + durationMs(e), 0),
+    totalMs: entries.reduce((sum, e) => sum + entryDurationMs(e), 0),
     workDays: new Set(entries.map((e) => toDateKey(e.startedAt))).size,
   };
 }

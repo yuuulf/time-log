@@ -114,3 +114,138 @@ test("プロジェクトの名前と選択肢を渡す", () => {
     "社内ツール",
   ]);
 });
+
+/** 日付の見出しの行（見出しと合計の入った要素） */
+const headingRow = (date: string) =>
+  screen.getByRole("heading", { level: 3, name: date }).parentElement!;
+
+test("日付の見出しの右端に、その日の終了済みの記録の合計時間を表示する", () => {
+  render(
+    <EntryList
+      entries={[
+        {
+          id: 3,
+          taskName: "打ち合わせ",
+          startedAt: at("2026-11-18", "13:00:00"),
+          endedAt: at("2026-11-18", "13:30:00"),
+        },
+        {
+          id: 2,
+          taskName: "資料作成",
+          startedAt: at("2026-11-18", "09:00:00"),
+          endedAt: at("2026-11-18", "10:00:00"),
+        },
+        {
+          id: 1,
+          taskName: "調査",
+          startedAt: at("2026-11-17", "10:00:00"),
+          endedAt: at("2026-11-17", "12:00:00"),
+        },
+      ]}
+    />,
+  );
+
+  expect(headingRow("2026年11月18日（水）").textContent).toContain(
+    `${t.dayTotal} 1時間30分`,
+  );
+  expect(headingRow("2026年11月17日（火）").textContent).toContain(
+    `${t.dayTotal} 2時間0分`,
+  );
+  // 見出しと区切りの名前は日付のまま
+  expect(
+    screen
+      .getAllByRole("heading", { level: 3 })
+      .map((heading) => heading.textContent),
+  ).toEqual(["2026年11月18日（水）", "2026年11月17日（火）"]);
+  expect(
+    screen.getByRole("region", { name: "2026年11月18日（水）" }),
+  ).toBeDefined();
+});
+
+test("合計の「合計」は読み上げ用で、見た目には時間だけを出す", () => {
+  render(
+    <EntryList
+      entries={[
+        {
+          id: 1,
+          taskName: "資料作成",
+          startedAt: at("2026-11-18", "09:00:00"),
+          endedAt: at("2026-11-18", "09:45:00"),
+        },
+      ]}
+    />,
+  );
+
+  const label = within(headingRow("2026年11月18日（水）")).getByText(
+    t.dayTotal,
+  );
+  expect(label.className).toContain("sr-only");
+});
+
+test("合計は記録ごとに秒を切り捨ててから足す", () => {
+  render(
+    <EntryList
+      entries={[
+        {
+          id: 2,
+          taskName: "資料作成",
+          startedAt: at("2026-11-18", "10:00:00"),
+          endedAt: at("2026-11-18", "10:10:30"),
+        },
+        {
+          id: 1,
+          taskName: "資料作成",
+          startedAt: at("2026-11-18", "09:00:00"),
+          endedAt: at("2026-11-18", "09:10:30"),
+        },
+      ]}
+    />,
+  );
+
+  expect(headingRow("2026年11月18日（水）").textContent).toContain("20分");
+  expect(headingRow("2026年11月18日（水）").textContent).not.toContain("21分");
+});
+
+test("記録中の記録は合計に含めない", () => {
+  render(
+    <EntryList
+      entries={[
+        {
+          id: 2,
+          taskName: "打ち合わせ",
+          startedAt: at("2026-11-18", "13:00:00"),
+          endedAt: null,
+        },
+        {
+          id: 1,
+          taskName: "資料作成",
+          startedAt: at("2026-11-18", "09:00:00"),
+          endedAt: at("2026-11-18", "10:00:00"),
+        },
+      ]}
+    />,
+  );
+
+  expect(headingRow("2026年11月18日（水）").textContent).toContain(
+    `${t.dayTotal} 1時間0分`,
+  );
+});
+
+test("記録中の記録だけの日は「0分」と表示する", () => {
+  render(
+    <EntryList
+      entries={[
+        {
+          id: 1,
+          taskName: "打ち合わせ",
+          startedAt: at("2026-11-18", "13:00:00"),
+          endedAt: null,
+        },
+      ]}
+    />,
+  );
+
+  expect(headingRow("2026年11月18日（水）").textContent).toContain(
+    `${t.dayTotal} 0分`,
+  );
+});

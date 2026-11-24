@@ -5,6 +5,7 @@ import {
   compareMonths,
   currentMonth,
   dayRange,
+  entryDurationMs,
   formatDateHeading,
   formatDuration,
   formatMonthDay,
@@ -82,6 +83,33 @@ describe("formatDuration", () => {
     [10 * 60 * 60_000, "10時間0分"],
   ])("%d ミリ秒は「%s」", (milliseconds, expected) => {
     expect(formatDuration(milliseconds)).toBe(expected);
+  });
+});
+
+describe("entryDurationMs", () => {
+  const start = new Date("2026-11-18T09:00:00+09:00");
+  const after = (ms: number) => new Date(start.getTime() + ms);
+
+  test("作業時間を分に切り捨てる", () => {
+    expect(
+      entryDurationMs({
+        startedAt: start,
+        endedAt: after(10 * 60_000 + 30_000),
+      }),
+    ).toBe(10 * 60_000);
+    expect(entryDurationMs({ startedAt: start, endedAt: after(59_000) })).toBe(
+      0,
+    );
+  });
+
+  test("記録中なら 0", () => {
+    expect(entryDurationMs({ startedAt: start, endedAt: null })).toBe(0);
+  });
+
+  test("終了が開始より前でも負にならない", () => {
+    expect(entryDurationMs({ startedAt: start, endedAt: after(-60_000) })).toBe(
+      0,
+    );
   });
 });
 

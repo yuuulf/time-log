@@ -27,6 +27,8 @@ export const messages = {
     startedAt: "開始時刻",
     endedAt: "終了時刻",
     duration: "作業時間",
+    /** 日付の見出しの右端の、その日の合計時間の前に付ける読み上げ用の文言 */
+    dayTotal: "合計",
     running: "記録中",
     untitled: "（タスク名なし）",
     runningHeading: "記録中のタスク",
