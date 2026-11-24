@@ -13,7 +13,7 @@
 
 - [x] 3.1 `npm run format` / `npm run lint` / `npm run typecheck` / `npm test` / `npm run build` がすべて成功することを確かめる。フォーマットで差分が出たら機能変更とは別のコミットにする
 - [x] 3.2 `npm run build` したアプリ（普段使いのアプリと重ならないポート）をブラウザで開き、spec のシナリオを確認する: トップページと「過去の記録」で日付の見出しの右端に合計が出ること、記録中の記録が含まれないこと、記録の終了・削除で再読み込みなしに合計が変わること、幅 375px で見出しの行が崩れず横スクロールが出ないこと
-- [ ] 3.3 一時的な worktree で change をアーカイブし、`openspec validate --all --strict` が通ることを確認してから PR を作成し、CI のチェックがすべて成功することを確認する
+- [x] 3.3 一時的な worktree で change をアーカイブし、`openspec validate --all --strict` が通ることを確認してから PR を作成し、CI のチェックがすべて成功することを確認する
 
 ## Workflow follow-up
 
