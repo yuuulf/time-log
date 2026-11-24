@@ -1,6 +1,11 @@
 // @vitest-environment node
 import { describe, expect, test } from "vitest";
-import { layoutTimeline, minuteOfDay, rangeFromClick } from "./timeline";
+import {
+  initialScrollMinute,
+  layoutTimeline,
+  minuteOfDay,
+  rangeFromClick,
+} from "./timeline";
 
 const dayStart = new Date("2026-11-18T00:00:00+09:00");
 const at = (time: string) => new Date(`2026-11-18T${time}+09:00`);
@@ -170,5 +175,40 @@ describe("rangeFromClick", () => {
 
   test("入れられる長さがないときは null", () => {
     expect(rangeFromClick(min(15, 0), [], at("15:00:20"), dayStart)).toBeNull();
+  });
+});
+
+describe("initialScrollMinute", () => {
+  const nextDay = new Date("2026-11-19T00:00:00+09:00");
+  const days = (withEntries: boolean) => [
+    {
+      dayStart,
+      entries: withEntries ? [entry("13:00:00", "14:00:00")] : [],
+    },
+    {
+      dayStart: nextDay,
+      entries: withEntries
+        ? [
+            {
+              startedAt: new Date("2026-11-19T10:00:00+09:00"),
+              endedAt: new Date("2026-11-19T11:00:00+09:00"),
+            },
+          ]
+        : [],
+    },
+  ];
+
+  test("今日を含めば今の時刻", () => {
+    expect(initialScrollMinute(days(true), at("15:30:00"))).toBe(min(15, 30));
+  });
+
+  test("今日を含まなければ、いちばん早く始まる記録（日の 0 時からの分）", () => {
+    const later = new Date("2026-11-25T12:00:00+09:00");
+    expect(initialScrollMinute(days(true), later)).toBe(min(10, 0));
+  });
+
+  test("記録がなければ 8 時", () => {
+    const later = new Date("2026-11-25T12:00:00+09:00");
+    expect(initialScrollMinute(days(false), later)).toBe(min(8, 0));
   });
 });

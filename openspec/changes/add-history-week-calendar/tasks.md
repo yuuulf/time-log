@@ -4,7 +4,7 @@
 
 - [x] 1.1 `lib/time.ts` に `weekStart(date)`（日本時間の月曜日の 0 時）と `formatShortDayHeading(date)`（「11/16（月）」）を足し、`time.test.ts` でテストする。`lib/time-entries/history.ts` に、`week` のクエリと Cookie の表示 `preferred` を解釈する `resolveHistoryPageQuery` を加え（`resolveHistoryQuery` は「集計」・CSV でも使うので変えない）、`mode: "week"`（見出し・範囲・前後の週・各日）を返す（design「週の表示は URL の `week` で決め…」）。`history.test.ts` で、spec「週の切り替え」のシナリオ（月曜日でない日付・正しくない日付・今週より先・前後の週・今週は次の週なし）と、指定がないときに Cookie で今週か今月になること、`from`・`to` が `week` より優先され、`month` の指定は Cookie より優先されることをテストする（コミット: 過去の記録の週の表示を解釈する）
 - [x] 1.2 `history.ts` に `historySwitchHrefs(view, now)` を、`today-view.ts` に `HISTORY_VIEW_COOKIE` と `viewCookie(name, view)` を足す（design「切り替え先の URL はサーバーで求め…」）。`history.test.ts` で spec「過去の記録の表示の切り替え」の行き先（月・期間・今月・範囲の誤り → 週、週 → 月）を、`today-view.test.ts` で Cookie の文字列をテストする（コミット: 過去の記録の表示を切り替える行き先と Cookie を追加）
-- [ ] 1.3 `lib/time-entries/timeline.ts` に `initialScrollMinute(days, now)` を足し、`timeline.test.ts` で今日を含む・含まない（いちばん早い記録）・記録がない（8 時）をテストする（design「開いたときのスクロールの位置は純粋な関数で求める」）（コミット: タイムラインの最初のスクロールの位置を求める関数を追加）
+- [x] 1.3 `lib/time-entries/timeline.ts` に `initialScrollMinute(days, now)` を足し、`timeline.test.ts` で今日を含む・含まない（いちばん早い記録）・記録がない（8 時）をテストする（design「開いたときのスクロールの位置は純粋な関数で求める」）（コミット: タイムラインの最初のスクロールの位置を求める関数を追加）
 
 ## 2. 週のカレンダー
 

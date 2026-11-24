@@ -124,3 +124,26 @@ export function rangeFromClick(
   if (end <= start) return null;
   return { startedAt: start, endedAt: end };
 }
+
+/** 記録がないときに、開いたときの枠に見せる時刻（分）。8 時 */
+const DEFAULT_SCROLL_MINUTE = 8 * 60;
+
+/**
+ * 開いたときに見せる時刻（その日の 0 時からの分）。今日を含めば今の時刻、
+ * 含まなければ表示する記録でいちばん早い開始、記録がなければ 8 時
+ */
+export function initialScrollMinute(
+  days: { dayStart: Date; entries: TimelineEntry[] }[],
+  now: Date,
+): number {
+  const today = days.find(
+    ({ dayStart }) =>
+      now >= dayStart &&
+      now.getTime() < dayStart.getTime() + DAY_MINUTES * MINUTE_MS,
+  );
+  if (today) return minuteOfDay(now, today.dayStart);
+  const starts = days.flatMap(({ dayStart, entries }) =>
+    entries.map((e) => minuteOfDay(e.startedAt, dayStart)),
+  );
+  return starts.length > 0 ? Math.min(...starts) : DEFAULT_SCROLL_MINUTE;
+}
