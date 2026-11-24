@@ -17,7 +17,7 @@
 - [x] 2.6 `lib/time.ts` に `calendarWeeks(year, month)`（月曜日始まりで、その月を含む週ごとの日付）を足して `time.test.ts` でテストし、`components/ui/WeekPicker.tsx`（入力欄の見た目のボタン、月のカレンダー、行ごとの強調、今週より先は選べない、キーボード操作、hidden の値）を作って `WeekPicker.test.tsx` で spec「週の指定」のシナリオをテストする（design「週の指定は自前の月のカレンダー `WeekPicker` で選ぶ」）（コミット: 週を選ぶ入力欄を追加）
 - [x] 2.7 `WeekControls` に `WeekPicker` と「表示」ボタンのフォームを足し、文言を `lib/messages.ts` に置く。`WeekControls.test.tsx`・`HistoryContent.test.tsx` を合わせ、README に週の指定を追記する（コミット: 週のカレンダーで週を指定できるようにする）
 
-- [ ] 2.8 月のカレンダーを `components/ui/MonthCalendar.tsx` に切り出して `WeekPicker` で使い、開いたカレンダーを `z-40` にする（design「月のカレンダーを `MonthCalendar` にまとめ…」）。`WeekPicker.test.tsx` を通し、隠れないこと（`z-40`）を確かめる（コミット: 月のカレンダーを部品に切り出し、隠れないようにする）
+- [x] 2.8 月のカレンダーを `components/ui/MonthCalendar.tsx` に切り出して `WeekPicker` で使い、開いたカレンダーを `z-40` にする（design「月のカレンダーを `MonthCalendar` にまとめ…」）。`WeekPicker.test.tsx` を通し、隠れないこと（`z-40`）を確かめる（コミット: 月のカレンダーを部品に切り出し、隠れないようにする）
 - [ ] 2.9 `components/ui/DatePicker.tsx` を作り、`PeriodControls` の開始日・終了日を置き換える。`DatePicker.test.tsx` で spec「期間の日付の入力欄」のシナリオを、`PeriodControls.test.tsx`・`HistoryContent.test.tsx`・`SummaryContent.test.tsx` を合わせて値・誤りの表示・送り方をテストし、README を合わせる（コミット: 期間の日付を週の指定と同じカレンダーで選べるようにする）
 
 ## 3. 確認

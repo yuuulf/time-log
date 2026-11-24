@@ -103,6 +103,13 @@ describe("週の指定", () => {
     expect(document.activeElement).toBe(day("2026年10月26日（月）"));
   });
 
+  test("開いたカレンダーは週のカレンダーの列の見出し（z-30）より手前に出す", () => {
+    const { trigger } = setup();
+    fireEvent.click(trigger);
+
+    expect(screen.getByRole("dialog").className).toContain("z-40");
+  });
+
   test("Escape キーで選ばずに閉じ、入力欄にフォーカスを戻す", () => {
     const { trigger, hidden } = setup();
     fireEvent.click(trigger);
