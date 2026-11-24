@@ -34,6 +34,8 @@ export type HistoryView =
       range: DateRange;
       /** 表示中の月の値（「2026-11」） */
       month: string;
+      /** 今月の値（「今月」のボタンの行き先） */
+      thisMonth: string;
       /** 前の月の値（「2026-10」） */
       prevMonth: string;
       /** 次の月の値。今月なら null */
@@ -85,6 +87,7 @@ function resolveMonth(
     heading: formatMonthHeading(month),
     range: monthRange(month),
     month: toMonthValue(month),
+    thisMonth: toMonthValue(thisMonth),
     prevMonth: toMonthValue(addMonths(month, -1)),
     nextMonth: isThisMonth ? null : toMonthValue(addMonths(month, 1)),
   };
@@ -126,6 +129,8 @@ export type WeekView = {
   prevWeek: string;
   /** 次の週の月曜日の値。今週なら null */
   nextWeek: string | null;
+  /** 今週の月曜日の値（「今週」のボタンの行き先） */
+  thisWeek: string;
   /** 月曜日〜日曜日の各日の 0 時（日本時間） */
   days: Date[];
 };
@@ -149,6 +154,7 @@ function weekView(weekFirst: Date, thisWeek: Date): WeekView {
     nextWeek: isThisWeek
       ? null
       : toDateKey(new Date(weekFirst.getTime() + 7 * DAY_MS)),
+    thisWeek: toDateKey(thisWeek),
     days,
   };
 }

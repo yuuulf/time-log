@@ -2,7 +2,7 @@
 
 ## 1. 今月・今週の値
 
-- [ ] 1.1 `lib/time-entries/history.ts` の月の表示に `thisMonth`、`WeekView` に `thisWeek` を足す（design「行き先は今月・今週の値を明示した URL にする」）。`history.test.ts` の期待値を合わせ、過去の月・週でも今月・今週の値が入ることをテストする（コミット: 月と週の表示に今月と今週の値を追加）
+- [x] 1.1 `lib/time-entries/history.ts` の月の表示に `thisMonth`、`WeekView` に `thisWeek` を足す（design「行き先は今月・今週の値を明示した URL にする」）。`history.test.ts` の期待値を合わせ、過去の月・週でも今月・今週の値が入ることをテストする（コミット: 月と週の表示に今月と今週の値を追加）
 
 ## 2. ボタン
 
