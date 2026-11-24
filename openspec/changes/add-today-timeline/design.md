@@ -42,7 +42,7 @@
 DOM から切り離してテストできるよう、計算はすべて純粋な関数にする。時刻は日本時間の 0 時からの分（0〜1440）で扱う。
 
 - `minuteOfDay(date, dayStart)`: 0 時からの分（範囲外は 0〜1440 に丸める。この変更より前に保存された翌日に終わる記録は 24 時で切る）
-- `layoutTimeline(entries, now, dayStart)`: 各記録の `startMinute`・`endMinute`（記録中は開始の 30 分後。`RUNNING_BLOCK_MINUTES = 30`）と、重なりの段 `column`・`columns` を返す。開始の早い順に並べ、時間が続けて重なる記録をひとまとまりにし、まとまりの中で空いている最も左の段に置く。帯の幅は `1 / columns`
+- `layoutTimeline(entries, dayStart)`: 各記録の `startMinute`・`endMinute`（記録中は開始の 30 分後。`RUNNING_BLOCK_MINUTES = 30`）と、重なりの段 `column`・`columns` を返す。開始の早い順に並べ、時間が続けて重なる記録をひとまとまりにし、まとまりの中で空いている最も左の段に置く。帯の幅は `1 / columns`
 - `rangeFromClick(minute, entries, now, dayStart)`: 選んだ分から入力欄の初期の開始・終了の日時を返す。今の時刻より後なら `null`。開始は 15 分単位に切り捨て、選んだ位置より前で終わる記録の終了のほうが遅ければそこにする。終了は開始の 30 分後と、選んだ位置より後で始まる記録の開始と、今の時刻（分に切り捨て）のうち最も早いもの。記録中の記録は終了時刻がないので「前で終わる記録」には数えない（その開始時刻は「後で始まる記録」として数える）
 - `rangeBeforeNow(now)`: 「記録の追加」ボタン用。今の時刻（分に切り捨て）の 30 分前〜今の時刻
 
