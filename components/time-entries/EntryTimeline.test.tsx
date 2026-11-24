@@ -377,6 +377,19 @@ describe("タイムラインの入力欄の開閉", () => {
     expect(document.activeElement).toBe(add);
   });
 
+  test("右上にバツのアイコンの「閉じる」がある", () => {
+    render(<EntryTimeline now={now} entries={[]} />);
+    fireEvent.click(screen.getByRole("button", { name: t.timeline.add }));
+
+    const close = within(editor()!).getByRole("button", {
+      name: t.timeline.close,
+    });
+    // 入力欄の最初の行（右寄せ）に置く
+    expect(close.parentElement).toBe(editor()!.firstElementChild);
+    expect(close.parentElement?.className).toContain("justify-end");
+    expect(close.textContent).toBe("");
+  });
+
   test("「閉じる」で閉じる", () => {
     render(<EntryTimeline now={now} entries={[]} />);
     fireEvent.click(screen.getByRole("button", { name: t.timeline.add }));
@@ -414,6 +427,7 @@ describe("タイムラインの入力欄の開閉", () => {
 
 describe("タイムラインでの記録の修正と削除", () => {
   const archived = { id: 9, name: "旧案件", color: "pink" };
+  const other = { id: 2, name: "A 社サイト改修", color: "blue" };
   const entries = [
     {
       id: 5,
@@ -435,15 +449,25 @@ describe("タイムラインでの記録の修正と削除", () => {
   const field = (label: string) =>
     within(editor()!).queryByLabelText(label) as HTMLInputElement | null;
   const time = (value: string) => (value.length === 16 ? `${value}:00` : value);
+  const openBlock = (name: RegExp) => {
+    const block = screen.getByRole("button", { name });
+    fireEvent.click(block);
+    return block;
+  };
+  const sent = () => {
+    const [id, , formData] = vi.mocked(updateEntryAction).mock.calls[0];
+    return { id, formData };
+  };
 
   beforeEach(() => {
     vi.mocked(updateEntryAction).mockReset();
+    vi.mocked(updateEntryAction).mockResolvedValue({ ok: true });
     vi.mocked(deleteEntryAction).mockReset();
     render(
       <EntryTimeline
         now={now}
         entries={entries}
-        projects={[project]}
+        projects={[project, other]}
         suggestions={[]}
       />,
     );
@@ -453,9 +477,8 @@ describe("タイムラインでの記録の修正と削除", () => {
     vi.restoreAllMocks();
   });
 
-  test("帯を選ぶと今の値の入った入力欄が開き、「保存」で修正を送って閉じる", async () => {
-    vi.mocked(updateEntryAction).mockResolvedValue({ ok: true });
-    fireEvent.click(screen.getByRole("button", { name: /^資料作成 / }));
+  test("帯を選ぶと今の値の入った入力欄が開き、保存・追加のボタンはない", () => {
+    openBlock(/^資料作成 /);
 
     expect(field(t.taskName)!.value).toBe("資料作成");
     expect(time(field(t.startedAt)!.value)).toBe("2026-11-18T09:00:00");
@@ -463,24 +486,89 @@ describe("タイムラインでの記録の修正と削除", () => {
     expect(
       within(editor()!).getByRole("button", { name: /社内ツール/ }),
     ).toBeDefined();
+    expect(
+      within(editor()!).queryByRole("button", { name: "保存" }),
+    ).toBeNull();
+    expect(
+      within(editor()!).queryByRole("button", { name: t.timeline.create }),
+    ).toBeNull();
+  });
+
+  test("時刻を変えてフォーカスを外すと保存する", async () => {
+    openBlock(/^資料作成 /);
 
     fireEvent.change(field(t.endedAt)!, {
       target: { value: "2026-11-18T10:30:00" },
     });
     await act(async () => {
-      fireEvent.click(screen.getByRole("button", { name: t.timeline.save }));
+      fireEvent.blur(field(t.endedAt)!);
     });
 
-    const [id, , formData] = vi.mocked(updateEntryAction).mock.calls[0];
+    const { id, formData } = sent();
     expect(id).toBe(5);
     expect(formData.get("taskName")).toBe("資料作成");
     expect(formData.get("projectId")).toBe("1");
     expect(time(String(formData.get("endedAt")))).toBe("2026-11-18T10:30:00");
-    expect(editor()).toBeNull();
+    // 保存しても入力欄は開いたまま
+    expect(editor()).not.toBeNull();
   });
 
-  test("記録中の記録の帯では終了時刻の欄を出さず、アーカイブしたプロジェクトの名前を出す", () => {
-    fireEvent.click(screen.getByRole("button", { name: /^打ち合わせ / }));
+  test("Enter キーで確定すると保存する", async () => {
+    openBlock(/^資料作成 /);
+    const input = field(t.taskName)!;
+    input.focus();
+
+    fireEvent.change(input, { target: { value: "資料レビュー" } });
+    await act(async () => {
+      fireEvent.keyDown(input, { key: "Enter" });
+    });
+
+    expect(sent().formData.get("taskName")).toBe("資料レビュー");
+  });
+
+  test("値を変えずにフォーカスを外しても保存しない", () => {
+    openBlock(/^資料作成 /);
+
+    fireEvent.blur(field(t.taskName)!);
+
+    expect(updateEntryAction).not.toHaveBeenCalled();
+  });
+
+  test("プロジェクトを選ぶと保存する", async () => {
+    openBlock(/^資料作成 /);
+
+    fireEvent.click(
+      within(editor()!).getByRole("button", { name: /社内ツール/ }),
+    );
+    await act(async () => {
+      fireEvent.click(screen.getByRole("option", { name: /A 社サイト改修/ }));
+    });
+
+    expect(sent().formData.get("projectId")).toBe("2");
+  });
+
+  test("誤りがあれば開いたまま値を残して理由を表示する", async () => {
+    vi.mocked(updateEntryAction).mockResolvedValue({
+      errors: { endedAt: t.errors.endBeforeStart },
+    });
+    openBlock(/^資料作成 /);
+
+    fireEvent.change(field(t.endedAt)!, {
+      target: { value: "2026-11-18T08:30:00" },
+    });
+    await act(async () => {
+      fireEvent.blur(field(t.endedAt)!);
+    });
+
+    expect(editor()).not.toBeNull();
+    expect(time(field(t.endedAt)!.value)).toBe("2026-11-18T08:30:00");
+    expect(within(editor()!).getByRole("alert").textContent).toBe(
+      t.errors.endBeforeStart,
+    );
+  });
+
+  test("記録中の記録の帯では終了時刻の欄を出さず、アーカイブしたプロジェクトの名前を出す", async () => {
+    openBlock(/^打ち合わせ /);
 
     expect(field(t.taskName)!.value).toBe("打ち合わせ");
     expect(field(t.startedAt)).not.toBeNull();
@@ -488,15 +576,34 @@ describe("タイムラインでの記録の修正と削除", () => {
     expect(
       within(editor()!).getByRole("button", { name: /旧案件/ }),
     ).toBeDefined();
+
+    fireEvent.change(field(t.taskName)!, { target: { value: "定例" } });
+    await act(async () => {
+      fireEvent.blur(field(t.taskName)!);
+    });
+    expect(sent().formData.has("endedAt")).toBe(false);
   });
 
-  test("「削除」で確認してから削除し、閉じる", async () => {
+  test("右上に「閉じる」と「その他の操作」を置き、メニューの「削除」で確認してから削除して閉じる", async () => {
     vi.spyOn(window, "confirm").mockReturnValue(true);
     vi.mocked(deleteEntryAction).mockResolvedValue({ ok: true });
-    fireEvent.click(screen.getByRole("button", { name: /^資料作成 / }));
+    openBlock(/^資料作成 /);
 
+    const close = within(editor()!).getByRole("button", {
+      name: t.timeline.close,
+    });
+    const more = within(editor()!).getByRole("button", {
+      name: t.actions.more,
+    });
+    // 「その他の操作」は「閉じる」の左隣
+    expect(more.closest("div")?.nextElementSibling).toBe(close);
+    expect(
+      within(editor()!).queryByRole("button", { name: t.actions.delete }),
+    ).toBeNull();
+
+    fireEvent.click(more);
     await act(async () => {
-      fireEvent.click(screen.getByRole("button", { name: t.actions.delete }));
+      fireEvent.click(screen.getByRole("menuitem", { name: t.actions.delete }));
     });
 
     expect(window.confirm).toHaveBeenCalledWith(t.confirmDelete);
@@ -506,31 +613,87 @@ describe("タイムラインでの記録の修正と削除", () => {
 
   test("削除の確認で取り消すと削除せず、入力欄は開いたまま", () => {
     vi.spyOn(window, "confirm").mockReturnValue(false);
-    fireEvent.click(screen.getByRole("button", { name: /^資料作成 / }));
+    openBlock(/^資料作成 /);
 
-    fireEvent.click(screen.getByRole("button", { name: t.actions.delete }));
+    fireEvent.click(
+      within(editor()!).getByRole("button", { name: t.actions.more }),
+    );
+    fireEvent.click(screen.getByRole("menuitem", { name: t.actions.delete }));
 
     expect(deleteEntryAction).not.toHaveBeenCalled();
     expect(editor()).not.toBeNull();
   });
 
-  test("「閉じる」で保存せずに閉じ、フォーカスは帯に戻る", () => {
-    const block = screen.getByRole("button", { name: /^資料作成 / });
-    fireEvent.click(block);
-    fireEvent.change(field(t.taskName)!, { target: { value: "資料レビュー" } });
+  test("追加の入力欄には「その他の操作」がなく、「追加」は文字のボタン", () => {
+    fireEvent.click(screen.getByRole("button", { name: t.timeline.add }));
 
-    fireEvent.click(screen.getByRole("button", { name: t.timeline.close }));
+    expect(
+      within(editor()!).queryByRole("button", { name: t.actions.more }),
+    ).toBeNull();
+    expect(
+      within(editor()!).getByRole("button", { name: t.timeline.create })
+        .textContent,
+    ).toBe("追加");
+  });
+
+  test("Escape キーでは変えている値を保存せずに閉じ、フォーカスは帯に戻る", () => {
+    const block = openBlock(/^資料作成 /);
+    const input = field(t.taskName)!;
+    input.focus();
+    fireEvent.change(input, { target: { value: "資料レビュー" } });
+
+    fireEvent.keyDown(input, { key: "Escape" });
 
     expect(editor()).toBeNull();
     expect(updateEntryAction).not.toHaveBeenCalled();
     expect(document.activeElement).toBe(block);
   });
 
-  test("追加の入力欄には「削除」がない", () => {
-    fireEvent.click(screen.getByRole("button", { name: t.timeline.add }));
+  test("「閉じる」では保存していない値を保存してから閉じ、フォーカスは帯に戻る", async () => {
+    const block = openBlock(/^資料作成 /);
+    fireEvent.change(field(t.taskName)!, { target: { value: "資料レビュー" } });
 
-    expect(
-      within(editor()!).queryByRole("button", { name: t.actions.delete }),
-    ).toBeNull();
+    await act(async () => {
+      fireEvent.click(
+        within(editor()!).getByRole("button", { name: t.timeline.close }),
+      );
+    });
+
+    expect(updateEntryAction).toHaveBeenCalledOnce();
+    expect(sent().formData.get("taskName")).toBe("資料レビュー");
+    expect(editor()).toBeNull();
+    expect(document.activeElement).toBe(block);
+  });
+
+  test("「閉じる」での保存に誤りがあれば閉じない", async () => {
+    vi.mocked(updateEntryAction).mockResolvedValue({
+      errors: { taskName: t.errors.taskNameTooLong },
+    });
+    openBlock(/^資料作成 /);
+    fireEvent.change(field(t.taskName)!, {
+      target: { value: "あ".repeat(201) },
+    });
+
+    await act(async () => {
+      fireEvent.click(
+        within(editor()!).getByRole("button", { name: t.timeline.close }),
+      );
+    });
+
+    expect(editor()).not.toBeNull();
+    expect(within(editor()!).getByRole("alert").textContent).toBe(
+      t.errors.taskNameTooLong,
+    );
+  });
+
+  test("値を変えずに「閉じる」と保存しない", () => {
+    openBlock(/^資料作成 /);
+
+    fireEvent.click(
+      within(editor()!).getByRole("button", { name: t.timeline.close }),
+    );
+
+    expect(updateEntryAction).not.toHaveBeenCalled();
+    expect(editor()).toBeNull();
   });
 });

@@ -104,6 +104,10 @@ export function EntryTimeline({
   }, []);
 
   const [editor, setEditor] = useState<EditorState | null>(null);
+  const editingEntry =
+    editor?.mode === "edit"
+      ? entries.find((e) => e.id === editor.entry.id)
+      : undefined;
 
   /** 入力欄を開く。上端は minute の位置にし、入力欄が下にはみ出さないよう収める */
   const openEditor = (
@@ -243,29 +247,23 @@ export function EntryTimeline({
                 className="pointer-events-none absolute inset-x-0 h-px bg-primary"
                 style={{ top: nowMinute * MINUTE_PX }}
               />
-              {editor && (
+              {editor?.mode === "create" && (
                 <TimelineEntryEditor
-                  key={
-                    editor.mode === "edit"
-                      ? `edit-${editor.entry.id}`
-                      : `create-${editor.range.startedAt.getTime()}`
-                  }
-                  entryId={editor.mode === "edit" ? editor.entry.id : undefined}
-                  initial={
-                    editor.mode === "edit"
-                      ? {
-                          taskName: editor.entry.taskName,
-                          startedAt: editor.entry.startedAt,
-                          endedAt: editor.entry.endedAt,
-                          project: editor.entry.project ?? null,
-                        }
-                      : {
-                          taskName: "",
-                          startedAt: editor.range.startedAt,
-                          endedAt: editor.range.endedAt,
-                          project: null,
-                        }
-                  }
+                  key={`create-${editor.range.startedAt.getTime()}`}
+                  mode="create"
+                  range={editor.range}
+                  projects={projects}
+                  suggestions={suggestions}
+                  top={editor.top}
+                  onClose={closeEditor}
+                />
+              )}
+              {/* 保存のあとは新しくなった記録を渡す。記録が消えていたら（削除）出さない */}
+              {editingEntry && editor && (
+                <TimelineEntryEditor
+                  key={`edit-${editingEntry.id}`}
+                  mode="edit"
+                  entry={editingEntry}
                   projects={projects}
                   suggestions={suggestions}
                   top={editor.top}

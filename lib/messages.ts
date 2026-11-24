@@ -51,7 +51,6 @@ export const messages = {
       /** 入力欄（追加・修正）の読み上げ名 */
       editorLabel: "記録の入力",
       create: "追加",
-      save: "保存",
       close: "閉じる",
       /** 帯の時刻（例: 「09:15〜10:30」） */
       range: (start: string, end: string) => `${start}〜${end}`,
