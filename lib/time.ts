@@ -86,6 +86,24 @@ export function formatDuration(milliseconds: number): string {
   return hours > 0 ? `${hours}時間${minutes}分` : `${minutes}分`;
 }
 
+const MINUTE_MS = 60 * 1000;
+
+/**
+ * 記録 1 件の作業時間（ミリ秒）。記録の一覧の表示と同じく分に切り捨てる。記録中（endedAt が null）なら 0。
+ * 日の合計や集計は、これを足し合わせて記録の一覧に並ぶ作業時間の合計と一致させる
+ */
+export function entryDurationMs({
+  startedAt,
+  endedAt,
+}: {
+  startedAt: Date;
+  endedAt: Date | null;
+}): number {
+  if (!endedAt) return 0;
+  const ms = Math.max(0, endedAt.getTime() - startedAt.getTime());
+  return Math.floor(ms / MINUTE_MS) * MINUTE_MS;
+}
+
 /** `<input type="datetime-local" step="1">` に入れる値（日本時間の「2026-11-18T09:05:30」） */
 export function toDateTimeLocalValue(date: Date): string {
   const { year, month, day, hour, minute, second } = jstParts(date);

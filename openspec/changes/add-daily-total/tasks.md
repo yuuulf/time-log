@@ -2,7 +2,7 @@
 
 ## 1. 作業時間の計算をまとめる
 
-- [ ] 1.1 `lib/time.ts` に `entryDurationMs({ startedAt, endedAt })`（作業時間を分に切り捨てたミリ秒。記録中は 0）を追加し、`lib/summary/summarize.ts` の `durationMs` をこれに置き換える（design「記録 1 件の作業時間の関数を `lib/time.ts` に置き、集計と共有する」）。`lib/time.test.ts` で、秒の切り捨て・記録中は 0・終了が開始より前でも負にならないことをテストし、既存の `summarize.test.ts` が変更なしで通ることを確かめる（コミット: 記録の作業時間の計算を共通にする）
+- [x] 1.1 `lib/time.ts` に `entryDurationMs({ startedAt, endedAt })`（作業時間を分に切り捨てたミリ秒。記録中は 0）を追加し、`lib/summary/summarize.ts` の `durationMs` をこれに置き換える（design「記録 1 件の作業時間の関数を `lib/time.ts` に置き、集計と共有する」）。`lib/time.test.ts` で、秒の切り捨て・記録中は 0・終了が開始より前でも負にならないことをテストし、既存の `summarize.test.ts` が変更なしで通ることを確かめる（コミット: 記録の作業時間の計算を共通にする）
 
 ## 2. 日ごとの合計時間
 
