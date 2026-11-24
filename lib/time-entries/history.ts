@@ -184,3 +184,33 @@ export function resolveHistoryPageQuery(
   }
   return resolveHistoryQuery(params, now);
 }
+
+/**
+ * 表示の切り替えの行き先。一覧からカレンダーへは、表示中の月・期間の最後の日を含む週（今週より先なら今週。
+ * 範囲の誤りなら今週）。カレンダーから一覧へは、表示中の週の月曜日を含む月
+ */
+export function historySwitchHrefs(
+  view: HistoryPageView,
+  now: Date,
+): Record<TodayView, string> {
+  if (view.mode === "week") {
+    return {
+      list: `/history?month=${view.week.slice(0, 7)}`,
+      timeline: `/history?week=${view.week}`,
+    };
+  }
+  const listHref =
+    view.mode === "month"
+      ? `/history?month=${view.month}`
+      : `/history?${new URLSearchParams(view.values)}`;
+  const lastDay =
+    view.mode === "rangeError"
+      ? now
+      : new Date(view.range.to.getTime() - DAY_MS);
+  const thisWeek = weekStart(now);
+  const target = weekStart(lastDay);
+  return {
+    list: listHref,
+    timeline: `/history?week=${toDateKey(target > thisWeek ? thisWeek : target)}`,
+  };
+}

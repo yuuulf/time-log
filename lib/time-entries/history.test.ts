@@ -1,7 +1,11 @@
 // @vitest-environment node
 import { describe, expect, test } from "vitest";
 import { messages } from "@/lib/messages";
-import { resolveHistoryPageQuery, resolveHistoryQuery } from "./history";
+import {
+  historySwitchHrefs,
+  resolveHistoryPageQuery,
+  resolveHistoryQuery,
+} from "./history";
 import type { TodayView } from "./today-view";
 
 const errors = messages.history.errors;
@@ -207,5 +211,48 @@ describe("過去の記録ページの表示（週のカレンダー）", () => {
     expect(
       week({ week: "2026-11-16", from: "2026-10-01", to: "2026-10-15" }),
     ).toMatchObject({ mode: "range" });
+  });
+});
+
+describe("表示の切り替えの行き先", () => {
+  const today = jst("2026-11-24T15:00:00");
+  const hrefs = (
+    params: Record<string, string>,
+    preferred: TodayView = "list",
+  ) =>
+    historySwitchHrefs(
+      resolveHistoryPageQuery(params, today, preferred),
+      today,
+    );
+
+  test("過去の月からカレンダーへは、その月の最後の日を含む週", () => {
+    expect(hrefs({ month: "2026-10" })).toEqual({
+      list: "/history?month=2026-10",
+      timeline: "/history?week=2026-10-26",
+    });
+  });
+
+  test("今月からカレンダーへは今週（最後の日が今週より先）", () => {
+    expect(hrefs({}).timeline).toBe("/history?week=2026-11-23");
+  });
+
+  test("期間からカレンダーへは、期間の最後の日を含む週", () => {
+    expect(hrefs({ from: "2026-10-01", to: "2026-10-15" })).toEqual({
+      list: "/history?from=2026-10-01&to=2026-10-15",
+      timeline: "/history?week=2026-10-12",
+    });
+  });
+
+  test("期間の入力に誤りがあるときのカレンダーは今週", () => {
+    expect(hrefs({ from: "2026-10-15", to: "2026-10-01" }).timeline).toBe(
+      "/history?week=2026-11-23",
+    );
+  });
+
+  test("週から一覧へは、週の月曜日を含む月", () => {
+    expect(hrefs({ week: "2026-10-26" })).toEqual({
+      list: "/history?month=2026-10",
+      timeline: "/history?week=2026-10-26",
+    });
   });
 });
