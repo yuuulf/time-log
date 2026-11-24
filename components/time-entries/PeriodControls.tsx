@@ -73,7 +73,7 @@ function RangeForm({
       label={label}
       aria-invalid={error ? true : undefined}
       aria-describedby={error ? "period-range-error" : undefined}
-      labels={t.weekPicker}
+      labels={{ ...t.weekPicker, calendar: t.calendarButton(label) }}
     />
   );
 

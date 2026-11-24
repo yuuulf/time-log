@@ -2,11 +2,12 @@ import { fireEvent, render, screen, within } from "@testing-library/react";
 import { describe, expect, test, vi } from "vitest";
 import { DatePicker } from "./DatePicker";
 
+const CALENDAR = "開始日のカレンダー";
 const labels = {
   prevMonth: "前の月",
   nextMonth: "次の月",
   weekdays: ["月", "火", "水", "木", "金", "土", "日"],
-  calendar: (label: string) => `${label}のカレンダー`,
+  calendar: CALENDAR,
 };
 
 function setup(defaultValue: string, invalid = false) {

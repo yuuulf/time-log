@@ -48,7 +48,10 @@ export function WeekControls({
           name="week"
           value={view.days[0]}
           maxWeek={thisWeek}
-          labels={t.weekPicker}
+          labels={{
+            ...t.weekPicker,
+            calendar: t.calendarButton(t.weekPicker.label),
+          }}
         />
         <IconButton type="submit" icon={Search} label={t.show} />
       </Form>

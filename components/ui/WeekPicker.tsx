@@ -11,7 +11,7 @@ type Props = {
   /** 選べるいちばん後の週の月曜日（今週）。これより先の週は選べない */
   maxWeek: Date;
   labels: CalendarFieldLabels & {
-    /** 入力欄の名前（例: 「表示する週」） */
+    /** 入力欄の名前（例: 「週の指定」） */
     label: string;
   };
 };

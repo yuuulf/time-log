@@ -3,12 +3,13 @@ import { describe, expect, test } from "vitest";
 import { WeekPicker } from "./WeekPicker";
 
 const jst = (value: string) => new Date(`${value}+09:00`);
+const CALENDAR = "週の指定のカレンダー";
 const labels = {
-  label: "表示する週",
+  label: "週の指定",
   prevMonth: "前の月",
   nextMonth: "次の月",
   weekdays: ["月", "火", "水", "木", "金", "土", "日"],
-  calendar: (label: string) => `${label}のカレンダー`,
+  calendar: CALENDAR,
 };
 // 今週は 2026年11月23日〜29日
 const maxWeek = jst("2026-11-23T00:00:00");
@@ -19,8 +20,8 @@ function setup(value = maxWeek) {
       <WeekPicker name="week" value={value} maxWeek={maxWeek} labels={labels} />
     </form>,
   );
-  const input = screen.getByRole("textbox", { name: "表示する週" });
-  const button = screen.getByRole("button", { name: "表示する週のカレンダー" });
+  const input = screen.getByRole("textbox", { name: "週の指定" });
+  const button = screen.getByRole("button", { name: "週の指定のカレンダー" });
   const hidden = container.querySelector(
     'input[name="week"]',
   ) as HTMLInputElement;

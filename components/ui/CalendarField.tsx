@@ -17,8 +17,8 @@ import { MonthCalendar, type MonthCalendarLabels } from "./MonthCalendar";
 import { usePopover } from "./usePopover";
 
 export type CalendarFieldLabels = MonthCalendarLabels & {
-  /** カレンダーを開くボタンの名前（例: 「開始日のカレンダー」） */
-  calendar: (label: string) => string;
+  /** カレンダーを開くボタンの名前（例: 「開始日のカレンダー」）。サーバー部品から渡せるよう文字にする */
+  calendar: string;
 };
 
 type Props = {
@@ -30,7 +30,7 @@ type Props = {
   value: Date | null;
   /** 選べるいちばん後の日。week ならその日を含む週まで。省略で制限なし */
   max?: Date;
-  /** 入力欄の名前（「開始日」「表示する週」など）。未入力のときは入力欄にも控えめに出す */
+  /** 入力欄の名前（「開始日」「週の指定」など）。未入力のときは入力欄にも控えめに出す */
   label: string;
   /** フォーカスしていないときの見やすい文字（日付は「2026年10月1日」、週は期間） */
   display: (value: Date) => string;
@@ -120,7 +120,7 @@ export function CalendarField({
       <IconButton
         ref={triggerRef}
         icon={CalendarDays}
-        label={labels.calendar(label)}
+        label={labels.calendar}
         variant="ghost"
         aria-haspopup="dialog"
         aria-expanded={open}
@@ -137,7 +137,7 @@ export function CalendarField({
         // 週のカレンダーの列の見出し（sticky、z-30）などより手前に出す
         <div
           role="dialog"
-          aria-label={labels.calendar(label)}
+          aria-label={labels.calendar}
           className="absolute top-full left-0 z-40 mt-1 w-72 rounded-md border border-border bg-background p-3 shadow-lg"
         >
           <MonthCalendar

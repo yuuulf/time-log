@@ -79,7 +79,7 @@ test("開始日・終了日は週の指定と同じ月のカレンダーで選�
     expect(field.className).toContain("focus:border-primary");
     expect(field.placeholder).toBe(label);
     expect(
-      screen.getByRole("button", { name: t.weekPicker.calendar(label) }),
+      screen.getByRole("button", { name: t.calendarButton(label) }),
     ).toBeDefined();
   }
   expect(document.querySelector('input[type="date"]')).toBeNull();
