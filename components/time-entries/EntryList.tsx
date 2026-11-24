@@ -1,12 +1,8 @@
 import type { ReactNode } from "react";
 import { messages } from "@/lib/messages";
-import {
-  entryDurationMs,
-  formatDateHeading,
-  formatDuration,
-  toDateKey,
-} from "@/lib/time";
+import { entryDurationMs, formatDateHeading, toDateKey } from "@/lib/time";
 import type { EntryProject } from "@/components/projects/types";
+import { DayHeading } from "./DayHeading";
 import { EntryItem, type EntryItemData } from "./EntryItem";
 
 const t = messages.timeEntries;
@@ -77,13 +73,7 @@ export function EntryList({
       ) : (
         groupByDate(entries).map((group) => (
           <section key={group.key} aria-label={group.heading}>
-            <div className="flex items-baseline justify-between gap-4 border-b border-border pb-1 text-sm font-medium text-muted">
-              <h3>{group.heading}</h3>
-              <p className="tabular-nums">
-                <span className="sr-only">{t.dayTotal} </span>
-                {formatDuration(group.totalMs)}
-              </p>
-            </div>
+            <DayHeading heading={group.heading} totalMs={group.totalMs} />
             <ul className="divide-y divide-border">
               {group.entries.map((entry) => (
                 <li key={entry.id}>
