@@ -401,6 +401,19 @@ describe("タイムラインの入力欄の開閉", () => {
     expect(screen.queryByRole("button", { name: "記録の追加" })).toBeNull();
   });
 
+  test("今の時刻の線より下では追加用のポインタの形を出さず、選んでも開かない", () => {
+    render(<EntryTimeline now={now} entries={[]} />);
+
+    const future = screen.getByTestId("timeline-future");
+    expect(future.className).toContain("cursor-auto");
+    expect(future.style.top).toBe(`${15 * 60 * MINUTE_PX}px`);
+    expect(future.parentElement).toBe(screen.getByTestId("timeline-area"));
+    expect(future.parentElement?.className).toContain("cursor-copy");
+
+    fireEvent.click(future, { clientY: 16 * 60 * MINUTE_PX });
+    expect(editor()).toBeNull();
+  });
+
   test("入力欄の中では追加用のポインタの形を出さない", () => {
     render(<EntryTimeline now={now} entries={[]} />);
     clickArea(10 * 60);

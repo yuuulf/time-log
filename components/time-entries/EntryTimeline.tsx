@@ -194,6 +194,13 @@ export function EntryTimeline({
               className="absolute inset-y-0 right-0 left-14 cursor-copy"
               onClick={handleAreaClick}
             >
+              {/* 今より後は追加できないので、追加用のポインタを出さない（帯より下に重ね、クリックは背景のクリックにしない） */}
+              <div
+                aria-hidden="true"
+                data-testid="timeline-future"
+                className="absolute inset-x-0 bottom-0 cursor-auto"
+                style={{ top: nowMinute * MINUTE_PX }}
+              />
               {blocks.map((block) => {
                 const name = block.taskName || t.untitled;
                 const range = rangeText(block);
