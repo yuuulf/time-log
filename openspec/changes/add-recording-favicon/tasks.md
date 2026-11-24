@@ -3,7 +3,7 @@
 ## 1. 画像
 
 - [x] 1.1 `~/Downloads/TimeLog/l_デフォルト.png`・`d_デフォルト.png` を `sharp` で透過・512×512px に縮小し、`public/icon-light.png`・`public/icon-dark.png` を置き換える（design「画像はユーザーの画像を透過・縮小して public/ に置く」）。512px でアルファがあること、四隅と輪の内側が透明なこと、チェックと青緑の部分が残っていることを確かめる。既存の `AppLogo.test.tsx`・`app/layout.test.tsx` が通ることを確かめる（コミット: TimeLog のロゴをストップウォッチの絵に変える）
-- [ ] 1.2 `~/Downloads/TimeLog/l_記録中.png`・`d_記録中.png` を同じ手順で処理し、`public/icon-recording-light.png`・`public/icon-recording-dark.png` として置く。512px でアルファがあること、四隅が透明なこと、赤い四角が残っていることを確かめる（コミット: 記録中のファビコンの画像を追加）
+- [x] 1.2 `~/Downloads/TimeLog/l_記録中.png`・`d_記録中.png` を同じ手順で処理し、`public/icon-recording-light.png`・`public/icon-recording-dark.png` として置く。512px でアルファがあること、四隅が透明なこと、赤い四角が残っていることを確かめる（コミット: 記録中のファビコンの画像を追加）
 
 ## 2. ファビコンの切り替え
 
