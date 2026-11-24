@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { darkFaviconMedia, favicons } from "@/components/layout/favicons";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { messages } from "@/lib/messages";
 import "./globals.css";
@@ -19,14 +20,15 @@ export const metadata: Metadata = {
   title: messages.app.name,
   description: messages.app.description,
   // ファビコンはブラウザ・OS のライト・ダークに合わせて出し分ける。
-  // media に対応していないブラウザでもロゴが出るよう、ライト用は media なしにする
+  // media に対応していないブラウザでもロゴが出るよう、ライト用は media なしにする。
+  // 記録中は RecordingFavicon がこの href を記録中用に書き換える
   icons: {
     icon: [
-      { url: "/icon-light.png", type: "image/png" },
+      { url: favicons.normal.light, type: "image/png" },
       {
-        url: "/icon-dark.png",
+        url: favicons.normal.dark,
         type: "image/png",
-        media: "(prefers-color-scheme: dark)",
+        media: darkFaviconMedia,
       },
     ],
   },
