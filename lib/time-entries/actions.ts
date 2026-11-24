@@ -7,6 +7,7 @@ import { getProject } from "@/lib/projects/repository";
 import { parseProjectId } from "@/lib/projects/validation";
 import type { Db } from "@/lib/db/client";
 import {
+  createEntry,
   deleteEntry,
   getEntry,
   startEntry,
@@ -14,6 +15,7 @@ import {
   updateEntry,
 } from "./repository";
 import {
+  validateCreateInput,
   validateStartInput,
   validateUpdateInput,
   type FieldErrors,
@@ -64,6 +66,30 @@ export async function startEntryAction(
     projectId,
     now: new Date(),
   });
+  refresh();
+  return { ok: true };
+}
+
+/** 終了済みの記録を追加する（タイムラインの入力欄から）。記録中の記録は変えない */
+export async function createEntryAction(
+  _prev: ActionState,
+  formData: FormData,
+): Promise<ActionState> {
+  const now = new Date();
+  const result = validateCreateInput(
+    {
+      taskName: formData.get("taskName"),
+      startedAt: formData.get("startedAt"),
+      endedAt: formData.get("endedAt"),
+    },
+    now,
+  );
+  if (!result.ok) return { errors: result.errors };
+  const db = getDb();
+  const projectId = readProjectId(db, formData.get("projectId"));
+  if (projectId === undefined) return projectNotFound;
+
+  createEntry(db, { ...result.value, projectId }, now);
   refresh();
   return { ok: true };
 }

@@ -3,7 +3,7 @@
 ## 1. 記録の追加と位置の計算
 
 - [x] 1.1 `lib/time-entries/validation.ts` に `validateCreateInput`（`validateUpdateInput` の終了した記録と同じ確かめ方）を、`repository.ts` に `createEntry(db, { taskName, projectId, startedAt, endedAt }, now)`（日をまたぐときは `splitByJstDay` で日ごとに足し、開始日の記録を返す。記録中の記録には触れない）を作る（design「終了済みの記録の追加は `createEntry`・`createEntryAction` を新しく作る」）。`validation.test.ts` で誤り（長いタスク名・終了が開始より前・未来・空）を、`repository.test.ts` で、同じ日の記録が 1 件足されること、日をまたぐと日ごとに分かれること、記録中の記録が変わらないことをテストする（コミット: 終了済みの記録を追加する処理を追加）
-- [ ] 1.2 `lib/time-entries/actions.ts` に `createEntryAction(prev, formData)` を作る。入力を確かめ、プロジェクトを読み（削除されていれば誤り）、`createEntry` で保存して `refresh()` する（design 同上）。`actions.test.ts` で、保存できること、プロジェクトを紐づけられること、入力の誤りと削除されたプロジェクトでは保存しないことをテストする（コミット: 記録を追加する Server Action を追加）
+- [x] 1.2 `lib/time-entries/actions.ts` に `createEntryAction(prev, formData)` を作る。入力を確かめ、プロジェクトを読み（削除されていれば誤り）、`createEntry` で保存して `refresh()` する（design 同上）。`actions.test.ts` で、保存できること、プロジェクトを紐づけられること、入力の誤りと削除されたプロジェクトでは保存しないことをテストする（コミット: 記録を追加する Server Action を追加）
 - [ ] 1.3 `lib/time-entries/timeline.ts` に `minuteOfDay`・`layoutTimeline`・`rangeFromClick`・`rangeBeforeNow` を作る（design「帯の位置と重なり、初期の時刻は `lib/time-entries/timeline.ts` の純粋な関数で求める」）。`timeline.test.ts` で、帯の分（記録中は開始から 30 分ぶん、翌日に終わる記録は 24 時で切る）、重なる記録の段、spec「追加の入力欄の初期の時刻」のシナリオ（15 分の切り捨て、次の記録の手前、前の記録の終わりから、今の時刻の手前、今より後は `null`、「記録の追加」ボタンの 30 分）をテストする（コミット: タイムラインの位置を計算する関数を追加）
 
 ## 2. タイムラインの画面
