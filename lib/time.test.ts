@@ -2,6 +2,8 @@
 import { afterEach, describe, expect, test } from "vitest";
 import {
   addMonths,
+  calendarWeeks,
+  dayOfMonth,
   compareMonths,
   currentMonth,
   dayRange,
@@ -356,5 +358,30 @@ describe("週", () => {
     expect(formatShortDayHeading(jst("2026-11-22T23:00:00"))).toBe(
       "11/22（日）",
     );
+  });
+});
+
+describe("月のカレンダーの週", () => {
+  const jst = (value: string) => new Date(`${value}+09:00`);
+
+  test("2026年11月は 10月26日（月）の週から 11月30日（月）の週までの 6 行", () => {
+    const weeks = calendarWeeks({ year: 2026, month: 11 });
+
+    expect(weeks).toHaveLength(6);
+    expect(weeks[0][0]).toEqual(jst("2026-10-26T00:00:00"));
+    expect(weeks[0][6]).toEqual(jst("2026-11-01T00:00:00"));
+    expect(weeks[5][0]).toEqual(jst("2026-11-30T00:00:00"));
+    expect(weeks.every((w) => w.length === 7)).toBe(true);
+  });
+
+  test("1 日が月曜日の月はその週から始まる（2026年6月）", () => {
+    const weeks = calendarWeeks({ year: 2026, month: 6 });
+
+    expect(weeks[0][0]).toEqual(jst("2026-06-01T00:00:00"));
+    expect(weeks.at(-1)![6]).toEqual(jst("2026-07-05T00:00:00"));
+  });
+
+  test("日付の日", () => {
+    expect(dayOfMonth(jst("2026-11-16T23:00:00"))).toBe(16);
   });
 });

@@ -138,6 +138,13 @@ export const messages = {
     weekNav: "表示する週",
     prevWeek: "前の週",
     nextWeek: "次の週",
+    /** 週の指定の入力欄（自前の月のカレンダー） */
+    weekPicker: {
+      label: "表示する週",
+      prevMonth: "前の月",
+      nextMonth: "次の月",
+      weekdays: ["月", "火", "水", "木", "金", "土", "日"],
+    },
     rangeHeading: "期間の指定",
     from: "開始日",
     to: "終了日",

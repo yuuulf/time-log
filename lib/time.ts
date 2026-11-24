@@ -241,3 +241,27 @@ export function formatRangeHeading(first: Date, last: Date): string {
   };
   return `${day(first)}〜${day(last)}`;
 }
+
+/** 月のカレンダーの行（週）。月曜日始まりで、その月の日を含む週ごとに 7 日ずつの 0 時（日本時間） */
+export function calendarWeeks(ym: YearMonth): Date[][] {
+  const { from, to } = monthRange(ym);
+  const weeks: Date[][] = [];
+  for (
+    let first = weekStart(from);
+    first < to;
+    first = new Date(first.getTime() + 7 * DAY_MS)
+  ) {
+    weeks.push(
+      Array.from(
+        { length: 7 },
+        (_, i) => new Date(first.getTime() + i * DAY_MS),
+      ),
+    );
+  }
+  return weeks;
+}
+
+/** 日付の日（1〜31） */
+export function dayOfMonth(date: Date): number {
+  return Number(jstParts(date).day);
+}
