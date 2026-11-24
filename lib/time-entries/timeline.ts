@@ -4,6 +4,12 @@ export const DAY_MINUTES = 24 * 60;
 /** 記録中の記録の帯の長さ（分）。終了するまでは今の時刻に合わせて伸ばさない */
 export const RUNNING_BLOCK_MINUTES = 30;
 
+/**
+ * 帯の最小の長さ（分）。短い記録も選べるよう、帯はこの長さぶんの高さ以上で描く。
+ * 重なりもこの長さで判断し、上下に重なって見える帯を横に並べる
+ */
+export const MIN_BLOCK_MINUTES = 25;
+
 /** 空いている場所を選んだときの開始時刻の切り捨ての単位（分） */
 const SNAP_MINUTES = 15;
 
@@ -30,7 +36,7 @@ export function minuteOfDay(date: Date, dayStart: Date): number {
 }
 
 /**
- * 記録の帯の位置と、重なる記録を横に並べる段を求める。返す順は開始の早い順。
+ * 記録の帯の位置と、重なる記録（描く高さで上下に重なって見えるものを含む）を横に並べる段を求める。返す順は開始の早い順。
  * 記録中の記録は開始から RUNNING_BLOCK_MINUTES 分の帯にする
  */
 export function layoutTimeline<T extends TimelineEntry>(
@@ -58,13 +64,18 @@ export function layoutTimeline<T extends TimelineEntry>(
     columnEnds = [];
   };
   for (const block of blocks) {
+    // 描く高さでの終わり。短い記録は最小の高さで描くので、その終わりで重なりを判断する
+    const drawnEnd = Math.max(
+      block.endMinute,
+      block.startMinute + MIN_BLOCK_MINUTES,
+    );
     if (block.startMinute >= groupEnd) closeGroup();
     let column = columnEnds.findIndex((end) => end <= block.startMinute);
     if (column === -1) column = columnEnds.length;
-    columnEnds[column] = block.endMinute;
+    columnEnds[column] = drawnEnd;
     block.column = column;
     group.push(block);
-    groupEnd = Math.max(groupEnd, block.endMinute);
+    groupEnd = Math.max(groupEnd, drawnEnd);
   }
   closeGroup();
   return blocks;

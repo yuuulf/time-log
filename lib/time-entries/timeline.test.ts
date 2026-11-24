@@ -86,6 +86,29 @@ describe("layoutTimeline", () => {
     ]);
   });
 
+  test("短い記録が続くときは、描く高さで重なるので別の段に置く", () => {
+    const blocks = layoutTimeline(
+      [entry("09:00:00", "09:05:00"), entry("09:05:00", "09:10:00")],
+      dayStart,
+    );
+
+    expect(blocks.map(({ column, columns }) => [column, columns])).toEqual([
+      [0, 2],
+      [1, 2],
+    ]);
+    // 帯の分は実際の時刻のまま
+    expect(blocks[0].endMinute).toBe(min(9, 5));
+  });
+
+  test("短い記録でも、描く高さより離れていれば同じ段", () => {
+    const blocks = layoutTimeline(
+      [entry("09:00:00", "09:05:00"), entry("09:25:00", "09:30:00")],
+      dayStart,
+    );
+
+    expect(blocks.map((b) => b.columns)).toEqual([1, 1]);
+  });
+
   test("続けて並ぶ記録（終了と開始が同じ）は重ならない", () => {
     const blocks = layoutTimeline(
       [entry("09:00:00", "10:00:00"), entry("10:00:00", "11:00:00")],

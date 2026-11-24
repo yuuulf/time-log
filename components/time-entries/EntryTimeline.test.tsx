@@ -128,6 +128,31 @@ describe("タイムラインの表示", () => {
     expect(blockStyle(/^A /).width).toBe("calc(50% - 4px)");
   });
 
+  test("短い記録が続くときは、上下に重ならないよう横に並べる", () => {
+    render(
+      <EntryTimeline
+        now={now}
+        entries={[
+          {
+            id: 1,
+            taskName: "A",
+            startedAt: at("09:00:00"),
+            endedAt: at("09:05:00"),
+          },
+          {
+            id: 2,
+            taskName: "B",
+            startedAt: at("09:05:00"),
+            endedAt: at("09:10:00"),
+          },
+        ]}
+      />,
+    );
+
+    expect(blockStyle(/^A /).left).toBe("0%");
+    expect(blockStyle(/^B /).left).toBe("50%");
+  });
+
   test("短い記録も選べる高さにする", () => {
     render(
       <EntryTimeline

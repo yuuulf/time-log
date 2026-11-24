@@ -19,6 +19,7 @@ import {
 } from "@/lib/time";
 import {
   DAY_MINUTES,
+  MIN_BLOCK_MINUTES,
   layoutTimeline,
   minuteOfDay,
   rangeFromClick,
@@ -32,8 +33,8 @@ const t = messages.timeEntries;
 
 /** 1 分の高さ（px）。1 時間 48px */
 export const MINUTE_PX = 0.8;
-/** 帯の最小の高さ（px）。短い記録も選べるようにする */
-const MIN_BLOCK_PX = 20;
+/** 帯の最小の高さ（px）。短い記録も選べるようにする（重なりの判断と同じ長さ） */
+const MIN_BLOCK_PX = MIN_BLOCK_MINUTES * MINUTE_PX;
 /** 開いたときに、今の時刻より何分前を枠の上端にするか */
 const SCROLL_LEAD_MINUTES = 60;
 

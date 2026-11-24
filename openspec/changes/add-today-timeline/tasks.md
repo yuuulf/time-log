@@ -22,7 +22,7 @@
 
 - [x] 2.9 「記録の追加」ボタン（＋）と `rangeBeforeNow` をなくす。入力欄の中のポインタを `cursor-auto` に戻す。`controlVariants` に `ghost` を足し、`DropdownMenu` に `variant` を渡せるようにして、入力欄の「閉じる」「その他の操作」を枠のない見た目にする（design「空いている場所の選択はポインタで扱う」「入力欄は 1 つの `TimelineEntryEditor` を…」）。`IconButton.test.tsx`・`DropdownMenu.test.tsx`・`EntryTimeline.test.tsx`・`timeline.test.ts` を合わせ、README から「記録の追加」ボタンの説明を消す（コミット: タイムラインの追加ボタンをなくし、入力欄の見た目を直す）
 
-- [ ] 2.10 `layoutTimeline` の重なりの判断を、描く高さ（最小 `MIN_BLOCK_MINUTES` 分）で行い、短い記録が上下に重なって見えるときも別の段に置く。`EntryTimeline` の最小の高さを `MIN_BLOCK_MINUTES` から求める（design「帯の位置と重なり…」）。`timeline.test.ts`・`EntryTimeline.test.tsx` で spec「タイムラインの表示」の「短い記録が続くとき」をテストする（コミット: 短い記録の帯が重ならないようにする）
+- [x] 2.10 `layoutTimeline` の重なりの判断を、描く高さ（最小 `MIN_BLOCK_MINUTES` 分）で行い、短い記録が上下に重なって見えるときも別の段に置く。`EntryTimeline` の最小の高さを `MIN_BLOCK_MINUTES` から求める（design「帯の位置と重なり…」）。`timeline.test.ts`・`EntryTimeline.test.tsx` で spec「タイムラインの表示」の「短い記録が続くとき」をテストする（コミット: 短い記録の帯が重ならないようにする）
 
 ## 3. 確認
 
