@@ -9,6 +9,7 @@ import {
   dayRange,
   entryDurationMs,
   formatDateHeading,
+  formatDateInput,
   formatDuration,
   formatMonthDay,
   formatMonthDayWithWeekday,
@@ -18,6 +19,7 @@ import {
   formatTime,
   jstWeekdayFromMonday,
   monthRange,
+  parseDateInput,
   parseDateTimeLocalValue,
   parseDateValue,
   parseMonthValue,
@@ -383,5 +385,33 @@ describe("月のカレンダーの週", () => {
 
   test("日付の日", () => {
     expect(dayOfMonth(jst("2026-11-16T23:00:00"))).toBe(16);
+  });
+});
+
+describe("日付の入力", () => {
+  const jst = (value: string) => new Date(`${value}+09:00`);
+  const oct1 = jst("2026-10-01T00:00:00");
+
+  test.each([
+    ["2026/10/1"],
+    ["2026/10/01"],
+    ["2026-10-01"],
+    ["2026.10.1"],
+    [" 2026/10/1 "],
+    ["２０２６／１０／１"],
+    ["2026年10月1日"],
+  ])("%j は 2026年10月1日", (text) => {
+    expect(parseDateInput(text)).toEqual(oct1);
+  });
+
+  test.each([["abc"], [""], ["2026/13/1"], ["2026/2/30"], ["26/10/1"]])(
+    "%j は読めない",
+    (text) => {
+      expect(parseDateInput(text)).toBeNull();
+    },
+  );
+
+  test("編集するときの文字は「2026/10/01」", () => {
+    expect(formatDateInput(oct1)).toBe("2026/10/01");
   });
 });

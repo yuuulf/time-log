@@ -144,6 +144,8 @@ export const messages = {
       prevMonth: "前の月",
       nextMonth: "次の月",
       weekdays: ["月", "火", "水", "木", "金", "土", "日"],
+      /** 入力欄の右端の、月のカレンダーを開くボタンの名前 */
+      calendar: (label: string) => `${label}のカレンダー`,
     },
     rangeHeading: "期間の指定",
     from: "開始日",

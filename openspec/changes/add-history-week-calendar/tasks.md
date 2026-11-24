@@ -20,7 +20,7 @@
 - [x] 2.8 月のカレンダーを `components/ui/MonthCalendar.tsx` に切り出して `WeekPicker` で使い、開いたカレンダーを `z-40` にする（design「月のカレンダーを `MonthCalendar` にまとめ…」）。`WeekPicker.test.tsx` を通し、隠れないこと（`z-40`）を確かめる（コミット: 月のカレンダーを部品に切り出し、隠れないようにする）
 - [x] 2.9 `components/ui/DatePicker.tsx` を作り、`PeriodControls` の開始日・終了日を置き換える。`DatePicker.test.tsx` で spec「期間の日付の入力欄」のシナリオを、`PeriodControls.test.tsx`・`HistoryContent.test.tsx`・`SummaryContent.test.tsx` を合わせて値・誤りの表示・送り方をテストし、README を合わせる（コミット: 期間の日付を週の指定と同じカレンダーで選べるようにする）
 
-- [ ] 2.10 `lib/time.ts` に `parseDateInput` を足して `time.test.ts` でテストし、`components/ui/CalendarField.tsx`（直接入力・フォーカスで編集の形・Enter で受け取って送る・Escape で取り消し・カレンダーのボタン）を作って `WeekPicker`・`DatePicker` をその上に作り直す（design「月のカレンダーを `MonthCalendar` にまとめ…」）。`CalendarField.test.tsx`・`WeekPicker.test.tsx`・`DatePicker.test.tsx`・`PeriodControls.test.tsx`・`HistoryContent.test.tsx`・`WeekControls.test.tsx` で spec「日付の直接入力」と、週・期間の入力のシナリオをテストし、README を合わせる（コミット: 週と期間の日付を直接入力できるようにする）
+- [x] 2.10 `lib/time.ts` に `parseDateInput` を足して `time.test.ts` でテストし、`components/ui/CalendarField.tsx`（直接入力・フォーカスで編集の形・Enter で受け取って送る・Escape で取り消し・カレンダーのボタン）を作って `WeekPicker`・`DatePicker` をその上に作り直す（design「月のカレンダーを `MonthCalendar` にまとめ…」）。`CalendarField.test.tsx`・`WeekPicker.test.tsx`・`DatePicker.test.tsx`・`PeriodControls.test.tsx`・`HistoryContent.test.tsx`・`WeekControls.test.tsx` で spec「日付の直接入力」と、週・期間の入力のシナリオをテストし、README を合わせる（コミット: 週と期間の日付を直接入力できるようにする）
 
 ## 3. 確認
 

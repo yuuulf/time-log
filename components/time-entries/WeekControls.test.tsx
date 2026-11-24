@@ -40,7 +40,8 @@ test("週の入力欄に表示中の週を出し、「表示」で /history に�
   );
 
   expect(
-    screen.getByRole("button", { name: /^表示する週：/ }).textContent,
+    screen.getByRole<HTMLInputElement>("textbox", { name: t.weekPicker.label })
+      .value,
   ).toBe("2026年11月16日〜2026年11月22日");
   const form = container.querySelector("form")!;
   expect(form.getAttribute("action")).toBe("/history");

@@ -52,8 +52,7 @@ test("期間の指定中は「月ごとの表示」で渡したパスに戻る",
   ).toBe("/summary");
   expect(screen.queryByRole("link", { name: t.prevMonth })).toBeNull();
   expect(
-    screen.getByRole("combobox", { name: new RegExp(`^${t.from}`) })
-      .textContent,
+    screen.getByRole<HTMLInputElement>("textbox", { name: t.from }).value,
   ).toBe("2026年10月1日");
   expect(
     (document.querySelector('input[name="from"]') as HTMLInputElement).value,
@@ -65,9 +64,7 @@ test("入力の誤りは理由を表示し、入力欄を誤りとして示す",
 
   const alert = screen.getByRole("alert");
   expect(alert.textContent).toBe(t.errors.endBeforeStart);
-  const from = screen.getByRole("combobox", {
-    name: new RegExp(`^${t.from}`),
-  });
+  const from = screen.getByRole("textbox", { name: t.from });
   expect(from.getAttribute("aria-invalid")).toBe("true");
   expect(from.getAttribute("aria-describedby")).toBe(alert.id);
 });
@@ -76,9 +73,14 @@ test("開始日・終了日は週の指定と同じ月のカレンダーで選�
   renderControls({});
 
   for (const label of [t.from, t.to]) {
-    const field = screen.getByRole("combobox", { name: label });
-    expect(field.className).toContain("focus-visible:border-primary");
-    expect(field.textContent).toBe(label);
+    const field = screen.getByRole<HTMLInputElement>("textbox", {
+      name: label,
+    });
+    expect(field.className).toContain("focus:border-primary");
+    expect(field.placeholder).toBe(label);
+    expect(
+      screen.getByRole("button", { name: t.weekPicker.calendar(label) }),
+    ).toBeDefined();
   }
   expect(document.querySelector('input[type="date"]')).toBeNull();
 });

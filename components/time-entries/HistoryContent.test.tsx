@@ -124,7 +124,7 @@ describe("期間の表示", () => {
     expect(dateValue("from")).toBe("2026-10-15");
     expect(
       screen
-        .getByRole("combobox", { name: new RegExp(`^${t.from}`) })
+        .getByRole("textbox", { name: t.from })
         .getAttribute("aria-invalid"),
     ).toBe("true");
     expect(screen.getByRole("link", { name: t.monthView })).toBeDefined();

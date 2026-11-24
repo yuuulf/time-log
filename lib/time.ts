@@ -265,3 +265,30 @@ export function calendarWeeks(ym: YearMonth): Date[][] {
 export function dayOfMonth(date: Date): number {
   return Number(jstParts(date).day);
 }
+
+/** 日付を「2026/10/01」の形にする（日付の入力欄で編集するときの文字） */
+export function formatDateInput(date: Date): string {
+  return toDateKey(date).replaceAll("-", "/");
+}
+
+const DATE_INPUT = /^(\d{4})[/.-](\d{1,2})[/.-](\d{1,2})$/;
+const DATE_INPUT_JA = /^(\d{4})年(\d{1,2})月(\d{1,2})日$/;
+
+/**
+ * 日付の入力欄に入力した文字を、その日の日本時間 0 時として読む。
+ * 「2026/10/1」「2026-10-01」「2026.10.1」「2026年10月1日」の形を受け取り、全角の数字・記号も読む。
+ * 読めない、または存在しない日付なら null
+ */
+export function parseDateInput(text: string): Date | null {
+  const normalized = text
+    .trim()
+    .replace(/[０-９／－．]/g, (c) =>
+      String.fromCharCode(c.charCodeAt(0) - 0xfee0),
+    );
+  const match = DATE_INPUT.exec(normalized) ?? DATE_INPUT_JA.exec(normalized);
+  if (!match) return null;
+  const [, year, month, day] = match;
+  return parseDateValue(
+    `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`,
+  );
+}
