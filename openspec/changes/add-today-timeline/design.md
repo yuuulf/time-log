@@ -44,7 +44,6 @@ DOM から切り離してテストできるよう、計算はすべて純粋な�
 - `minuteOfDay(date, dayStart)`: 0 時からの分（範囲外は 0〜1440 に丸める。この変更より前に保存された翌日に終わる記録は 24 時で切る）
 - `layoutTimeline(entries, dayStart)`: 各記録の `startMinute`・`endMinute`（記録中は開始の 30 分後。`RUNNING_BLOCK_MINUTES = 30`）と、重なりの段 `column`・`columns` を返す。開始の早い順に並べ、時間が続けて重なる記録をひとまとまりにし、まとまりの中で空いている最も左の段に置く。帯の幅は `1 / columns`
 - `rangeFromClick(minute, entries, now, dayStart)`: 選んだ分から入力欄の初期の開始・終了の日時を返す。今の時刻より後なら `null`。開始は 15 分単位に切り捨て、選んだ位置より前で終わる記録の終了のほうが遅ければそこにする。終了は開始の 30 分後と、選んだ位置より後で始まる記録の開始と、今の時刻（分に切り捨て）のうち最も早いもの。記録中の記録は終了時刻がないので「前で終わる記録」には数えない（その開始時刻は「後で始まる記録」として数える）
-- `rangeBeforeNow(now)`: 「記録の追加」ボタン用。今の時刻（分に切り捨て）の 30 分前〜今の時刻
 
 ### タイムラインは 1 時間 48px の縦の格子を、高さを決めた枠の中でスクロールさせる
 
@@ -52,21 +51,21 @@ DOM から切り離してテストできるよう、計算はすべて純粋な�
 
 帯は `<button>` にし、中身はタスク名と時刻を 1 行に並べ（「資料作成 09:15〜10:30」。時刻は控えめな色）、帯の幅に入らない部分は `truncate` で省略する。読み上げ名と `title` も同じ文言（記録中は「資料作成 13:00〜記録中」）にする。
 
-### 空いている場所の選択はポインタで扱い、キーボードは「記録の追加」ボタンで代える
+### 空いている場所の選択はポインタで扱う
 
-帯を置く領域の背景の `onClick` で、`event.clientY` と領域の `getBoundingClientRect()` から分を求めて `rangeFromClick` に渡す。帯の `<button>` は `stopPropagation` して背景のクリックにしない。背景はフォーカスできる部品にしない（1 分ずつ選べるキーボード操作は重く、読み上げでも分かりにくい）代わりに、見出しの近くに `Plus` の `IconButton`「記録の追加」を置く。jsx-a11y のルールに背景の `onClick` を指摘されたら、キーボードの代わりがあることをコメントに書き、そのルールだけをその行で外す。
+帯を置く領域の背景の `onClick` で、`event.clientY` と領域の `getBoundingClientRect()` から分を求めて `rangeFromClick` に渡す。帯の `<button>` は `stopPropagation` して背景のクリックにしない。背景はフォーカスできる部品にしない（1 分ずつ選べるキーボード操作は重く、読み上げでも分かりにくい）。キーボードだけでの追加は、ユーザーの判断で今回は設けない（「記録の追加」ボタンは置かない）。背景には追加できることが分かるよう `cursor-copy` を付け、中に置く入力欄では `cursor-auto` に戻す。
 
 ### 入力欄は 1 つの `TimelineEntryEditor` を追加と修正で使い分け、Server Action に送る
 
 `EntryTimeline` が「開いている入力欄」の状態（`{ mode: "create", startedAt, endedAt, top }` か `{ mode: "edit", entry, top }`、または閉じている）を 1 つだけ持つ。入力欄は帯の領域の中に絶対位置で置き、`top` は選んだ位置（帯ならその帯）に合わせ、下にはみ出さないよう格子の高さで丸める。
 
-入力欄の上の行の右端に「その他の操作」（`MoreVertical` の `DropdownMenu`、修正のときだけ。項目は `Trash2` の「削除」で、一覧の行と同じ形）と「閉じる」（`X` の `IconButton`）を置き、その下にタスク名（`datalist` で候補）・`ProjectPicker`（`variant="field"`）・開始時刻・終了時刻（`datetime-local`、`step=1`）を並べる。修正のプロジェクトの初期値は記録の `project` をそのまま渡し、アーカイブしたプロジェクトも名前を出す（`EntryItem` と同じ）。削除は `window.confirm(t.confirmDelete)` のあとで `deleteEntryAction` を呼び、できたら閉じる。
+入力欄の上の行の右端に「その他の操作」（`MoreVertical` の `DropdownMenu`、修正のときだけ。項目は `Trash2` の「削除」で、一覧の行と同じ形）と「閉じる」（`X` の `IconButton`）を置く。この 2 つは枠を出さず、ポインタを合わせたときだけ背景を付ける見た目にするため、`controlVariants` に `ghost`（`text-foreground hover:bg-border/40`）を足し、`DropdownMenu` にも `variant` を渡せるようにする。その下にタスク名（`datalist` で候補）・`ProjectPicker`（`variant="field"`）・開始時刻・終了時刻（`datetime-local`、`step=1`）を並べる。修正のプロジェクトの初期値は記録の `project` をそのまま渡し、アーカイブしたプロジェクトも名前を出す（`EntryItem` と同じ）。削除は `window.confirm(t.confirmDelete)` のあとで `deleteEntryAction` を呼び、できたら閉じる。
 
 **追加**のときは、下に「追加」の文字のボタン（`TextButton`、`primary`）を置き、`onSubmit` で `createEntryAction` に送る（`useActionState`）。`ok` なら閉じ、誤りは欄ごとに表示して入力した値を残す。
 
 **修正**のときは保存のボタンを置かず、一覧の行（`EntryItem`）と同じ保存の仕方にする。値は state で持ち、タスク名・時刻は値を変えてフォーカスが外れたとき（Enter キーは確定として `blur`）に、プロジェクトは選んだときに、今の値をすべて `updateEntryAction(id, {}, formData)` に送る。値を変えていなければ送らない。比べ方（時刻は日時として比べる）は `EntryItem` の `sameValue`・`toValues` を書き出して共通にする。記録中の記録の修正では終了時刻の欄を出さず、`endedAt` を送らない。保存のあと `refresh()` で新しくなった記録は、`EntryTimeline` が今の `entries` から id で探して入力欄に渡し、保存済みの値として比べる（記録が消えていたら入力欄を閉じる）。
 
-閉じ方は `usePopover` と同じ考え方（`pointerdown` が入力欄の外なら閉じる、Escape で閉じる）を入力欄の中で持つ。ボタンで開くとは限らないため `usePopover` の `triggerRef` は使わず、開く直前の `document.activeElement`（帯か「記録の追加」ボタン、背景のクリックなら `body`）を覚えておき、Escape・「閉じる」で閉じたときにそこへフォーカスを戻す。開いたらタスク名の入力欄にフォーカスする。背景の別の場所を選んだときは、外側の `pointerdown` で閉じたあと、その場所の入力欄を開く。修正の入力欄では、Escape は変えている値を保存せずに閉じる（続く `blur` で保存しない）。「閉じる」と外側の `pointerdown` は、保存していない値があればまず保存し、成功したら閉じ、誤りなら開いたまま理由を出す。「閉じる」は `mousedown` の既定の動き（フォーカスの移動）を止め、入力欄の `blur` による保存と二重にならないようにする。
+閉じ方は `usePopover` と同じ考え方（`pointerdown` が入力欄の外なら閉じる、Escape で閉じる）を入力欄の中で持つ。ボタンで開くとは限らないため `usePopover` の `triggerRef` は使わず、開く直前の `document.activeElement`（帯、背景のクリックなら `body`）を覚えておき、Escape・「閉じる」で閉じたときにそこへフォーカスを戻す。開いたらタスク名の入力欄にフォーカスする。背景の別の場所を選んだときは、外側の `pointerdown` で閉じたあと、その場所の入力欄を開く。修正の入力欄では、Escape は変えている値を保存せずに閉じる（続く `blur` で保存しない）。「閉じる」と外側の `pointerdown` は、保存していない値があればまず保存し、成功したら閉じ、誤りなら開いたまま理由を出す。「閉じる」は `mousedown` の既定の動き（フォーカスの移動）を止め、入力欄の `blur` による保存と二重にならないようにする。
 
 ### 終了済みの記録の追加は `createEntry`・`createEntryAction` を新しく作る
 
@@ -81,7 +80,7 @@ DOM から切り離してテストできるよう、計算はすべて純粋な�
 
 `lib/messages.ts` の `timeEntries` に足す。
 - `view`: `{ label: "表示", list: "一覧", timeline: "カレンダー" }`
-- `timeline`: `{ add: "記録の追加", editorLabel: "記録の入力", create: "追加", close: "閉じる", entryLabel: (taskName, range) => ... }`
+- `timeline`: `{ editorLabel: "記録の入力", create: "追加", close: "閉じる", entryLabel: (taskName, range) => ... }`
 
 ## Risks / Trade-offs
 
