@@ -56,7 +56,7 @@ export function ProjectForm() {
     >
       <div className="space-y-2">
         <BackLink />
-        <h1 className="text-3xl font-bold text-foreground">{t.formHeading}</h1>
+        <h1 className="text-xl font-bold text-foreground">{t.formHeading}</h1>
       </div>
       <ProjectFields
         idPrefix={id}

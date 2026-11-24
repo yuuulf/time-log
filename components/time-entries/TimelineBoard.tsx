@@ -25,6 +25,10 @@ export const MINUTE_PX = 0.8;
 const MIN_BLOCK_PX = MIN_BLOCK_MINUTES * MINUTE_PX;
 /** 開いたときに、見せる時刻より何分前を枠の上端にするか */
 const SCROLL_LEAD_MINUTES = 60;
+/** 枠の高さの最小（max-h-[35rem] と同じ） */
+const MIN_FRAME_PX = 560;
+/** ページの下の余白（<main> の py-6） */
+const PAGE_BOTTOM_PX = 24;
 /** 入力欄が下にはみ出さないよう、上端をこの高さ（px）ぶん上に収める */
 const EDITOR_HEIGHT_PX = 300;
 
@@ -91,6 +95,24 @@ export function TimelineBoard({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // 枠の高さ。最小は 560px（クラスの max-h-[35rem]）で、画面が高ければ枠の下端を画面の下端
+  // （<main> の下の余白を除く）まで広げる。枠の上にある要素の高さはページで違うので、位置を測る
+  useEffect(() => {
+    const scroller = scrollRef.current;
+    if (!scroller) return;
+    const fit = () => {
+      const top = scroller.getBoundingClientRect().top + window.scrollY;
+      const height = Math.max(
+        MIN_FRAME_PX,
+        window.innerHeight - top - PAGE_BOTTOM_PX,
+      );
+      scroller.style.maxHeight = `${height}px`;
+    };
+    fit();
+    window.addEventListener("resize", fit);
+    return () => window.removeEventListener("resize", fit);
+  }, []);
+
   const [editor, setEditor] = useState<EditorState | null>(null);
   const editingEntry =
     editor?.mode === "edit"
@@ -142,7 +164,7 @@ export function TimelineBoard({
       ref={scrollRef}
       role="group"
       aria-label={t.timeline.label}
-      className="max-h-[32rem] overflow-y-auto border-b border-border"
+      className="max-h-[35rem] overflow-y-auto border-b border-border"
     >
       {dayHeaders && (
         // スクロールしても日付が見えるよう、枠の上に固定する。目盛りの列と幅をそろえる
@@ -291,7 +313,8 @@ function DayColumn({
             aria-label={label}
             title={label}
             data-entry-id={block.id}
-            className={`absolute overflow-hidden rounded-sm border-l-4 px-2 py-0.5 text-left text-xs text-foreground hover:brightness-95 focus-visible:z-10 focus-visible:outline-2 focus-visible:outline-primary ${projectColorBlockClass(block.project?.color ?? null)}`}
+            // ボタンは既定で中身を上下の真ん中に置くので、長い帯でも文字を上端（開始時刻の近く）に寄せる
+            className={`absolute flex items-start overflow-hidden rounded-sm border-l-4 px-2 py-0.5 text-left text-xs text-foreground hover:brightness-95 focus-visible:z-10 focus-visible:outline-2 focus-visible:outline-primary ${projectColorBlockClass(block.project?.color ?? null)}`}
             style={{
               top: block.startMinute * MINUTE_PX,
               height,
@@ -300,7 +323,7 @@ function DayColumn({
               width: `calc((100% - ${gutter}) / ${block.columns} - 4px)`,
             }}
           >
-            <span className="block truncate">
+            <span className="block w-full min-w-0 truncate">
               <span className="font-medium">{name}</span>{" "}
               <span className="text-muted tabular-nums">{range}</span>
             </span>

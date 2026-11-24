@@ -21,3 +21,12 @@ test("ページ見出しの下にプロジェクトを置き、タイトルに�
 test("タブのタイトルはページで設定せず、レイアウトの「TimeLog」だけにする", () => {
   expect("metadata" in page).toBe(false);
 });
+
+test("見出しと余白は過去の記録と同じ大きさ", () => {
+  const { container } = render(<ProjectsPage />);
+
+  expect(screen.getByRole("heading", { level: 1 }).className).toContain(
+    "text-xl",
+  );
+  expect(container.querySelector("main")?.className).toContain("py-6");
+});

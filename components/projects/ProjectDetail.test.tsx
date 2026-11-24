@@ -239,3 +239,11 @@ describe("その場の編集", () => {
     ).toBeDefined();
   });
 });
+
+test("見出しはほかのページと同じ 20px の太字", () => {
+  render(<ProjectDetail project={project} />);
+
+  expect(
+    screen.getByRole("heading", { level: 1, name: "社内ツール" }).className,
+  ).toContain("text-xl");
+});

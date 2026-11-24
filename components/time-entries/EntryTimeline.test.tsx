@@ -61,6 +61,9 @@ describe("タイムラインの表示", () => {
     expect(block.textContent).toBe("資料作成 09:15〜10:30");
     expect(block.querySelectorAll(":scope > span")).toHaveLength(1);
     expect(block.firstElementChild?.className).toContain("truncate");
+    // 長い帯でも文字は上下の真ん中ではなく上端に寄せる
+    expect(block.className).toContain("flex");
+    expect(block.className).toContain("items-start");
     expect(block.title).toBe("資料作成 09:15〜10:30");
     expect(block.style.top).toBe(`${(9 * 60 + 15) * MINUTE_PX}px`);
     expect(block.style.height).toBe(`${75 * MINUTE_PX}px`);
@@ -249,6 +252,54 @@ describe("タイムラインの表示", () => {
     expect(screen.getByRole("heading", { level: 2 }).textContent).toBe(
       t.listHeading,
     );
+  });
+
+  describe("枠の高さ", () => {
+    /** 画面の高さと、枠の上端の位置（ページの上から。スクロールしていない状態）を決めて描く */
+    const renderWith = (innerHeight: number, top: number) => {
+      vi.stubGlobal("innerHeight", innerHeight);
+      const original = HTMLElement.prototype.getBoundingClientRect;
+      vi.spyOn(
+        HTMLElement.prototype,
+        "getBoundingClientRect",
+      ).mockImplementation(function (this: HTMLElement) {
+        return this.getAttribute("role") === "group"
+          ? ({ top } as DOMRect)
+          : original.call(this);
+      });
+      render(<EntryTimeline now={now} entries={[]} />);
+      return screen.getByRole("group", { name: t.timeline.label });
+    };
+
+    afterEach(() => {
+      vi.unstubAllGlobals();
+      vi.restoreAllMocks();
+    });
+
+    test("最小は 560px（35rem）で、枠の中でスクロールする", () => {
+      const timeline = renderWith(700, 300);
+
+      expect(timeline.className).toContain("max-h-[35rem]");
+      expect(timeline.className).toContain("overflow-y-auto");
+      expect(timeline.style.maxHeight).toBe("560px");
+    });
+
+    test("画面が高いときは、枠の下端を画面の下端（下の余白 24px を除く）まで広げる", () => {
+      const timeline = renderWith(1200, 200);
+
+      expect(timeline.style.maxHeight).toBe("976px");
+    });
+
+    test("画面の大きさが変わったら合わせ直す", () => {
+      const timeline = renderWith(1200, 200);
+
+      act(() => {
+        vi.stubGlobal("innerHeight", 1000);
+        window.dispatchEvent(new Event("resize"));
+      });
+
+      expect(timeline.style.maxHeight).toBe("776px");
+    });
   });
 
   test("開いたときは今の時刻の 1 時間前までスクロールする", () => {

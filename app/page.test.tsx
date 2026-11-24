@@ -27,3 +27,8 @@ test("Next.js の初期テンプレートの表示が残っていない", () => 
   expect(container.querySelector("img")).toBeNull();
   expect(container.textContent).not.toMatch(/To get started|Deploy Now/);
 });
+
+test("本文の上下の余白はほかのページと同じ 24px", () => {
+  const { container } = render(<Home />);
+  expect(container.querySelector("main")?.className).toContain("py-6");
+});
