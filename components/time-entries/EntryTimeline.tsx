@@ -69,12 +69,9 @@ type Props = {
 };
 
 /** 開いている入力欄。returnFocus は Escape・「閉じる」で閉じたときにフォーカスを戻す場所 */
-type EditorState = {
-  mode: "create";
-  range: TimeRange;
-  top: number;
-  returnFocus: HTMLElement | null;
-};
+type EditorState = (
+  { mode: "create"; range: TimeRange } | { mode: "edit"; entry: EntryItemData }
+) & { top: number; returnFocus: HTMLElement | null };
 
 /**
  * 今日の記録のタイムライン。上から 0 時〜24 時の目盛りを並べ、記録をプロジェクトの色の帯で置く。
@@ -108,13 +105,16 @@ export function EntryTimeline({
 
   const [editor, setEditor] = useState<EditorState | null>(null);
 
-  /** 入力欄を開く。top は分から求めた位置を、入力欄が下にはみ出さないよう収める */
-  const openCreate = (range: TimeRange) => {
-    const minute = minuteOfDay(range.startedAt, dayStart);
+  /** 入力欄を開く。上端は minute の位置にし、入力欄が下にはみ出さないよう収める */
+  const openEditor = (
+    target:
+      | { mode: "create"; range: TimeRange }
+      | { mode: "edit"; entry: EntryItemData },
+    minute: number,
+  ) => {
     const active = document.activeElement;
     setEditor({
-      mode: "create",
-      range,
+      ...target,
       top: Math.max(
         0,
         Math.min(
@@ -128,6 +128,11 @@ export function EntryTimeline({
           : null,
     });
   };
+  const openCreate = (range: TimeRange) =>
+    openEditor(
+      { mode: "create", range },
+      minuteOfDay(range.startedAt, dayStart),
+    );
 
   const closeEditor = useCallback(
     (returnFocus: boolean) => {
@@ -206,6 +211,14 @@ export function EntryTimeline({
                   <button
                     key={block.id}
                     type="button"
+                    onClick={(event) => {
+                      // クリックではフォーカスしないブラウザがあるので、閉じたときに戻す先として先にフォーカスする
+                      event.currentTarget.focus();
+                      openEditor(
+                        { mode: "edit", entry: block },
+                        block.startMinute,
+                      );
+                    }}
                     aria-label={label}
                     title={label}
                     data-entry-id={block.id}
@@ -232,13 +245,27 @@ export function EntryTimeline({
               />
               {editor && (
                 <TimelineEntryEditor
-                  key={`${editor.range.startedAt.getTime()}-${editor.top}`}
-                  initial={{
-                    taskName: "",
-                    startedAt: editor.range.startedAt,
-                    endedAt: editor.range.endedAt,
-                    project: null,
-                  }}
+                  key={
+                    editor.mode === "edit"
+                      ? `edit-${editor.entry.id}`
+                      : `create-${editor.range.startedAt.getTime()}`
+                  }
+                  entryId={editor.mode === "edit" ? editor.entry.id : undefined}
+                  initial={
+                    editor.mode === "edit"
+                      ? {
+                          taskName: editor.entry.taskName,
+                          startedAt: editor.entry.startedAt,
+                          endedAt: editor.entry.endedAt,
+                          project: editor.entry.project ?? null,
+                        }
+                      : {
+                          taskName: "",
+                          startedAt: editor.range.startedAt,
+                          endedAt: editor.range.endedAt,
+                          project: null,
+                        }
+                  }
                   projects={projects}
                   suggestions={suggestions}
                   top={editor.top}

@@ -8,13 +8,15 @@ import {
   useState,
   useTransition,
 } from "react";
-import { Check, X } from "lucide-react";
+import { Check, Trash2, X } from "lucide-react";
 import { ProjectPicker } from "@/components/projects/ProjectPicker";
 import type { EntryProject } from "@/components/projects/types";
 import { IconButton } from "@/components/ui/IconButton";
 import { fieldFocusClassName } from "@/components/ui/fieldStyles";
 import {
   createEntryAction,
+  deleteEntryAction,
+  updateEntryAction,
   type ActionState,
 } from "@/lib/time-entries/actions";
 import { messages } from "@/lib/messages";
@@ -26,12 +28,15 @@ const t = messages.timeEntries;
 export type EditorInitial = {
   taskName: string;
   startedAt: Date;
-  endedAt: Date;
+  /** 記録中の記録の修正なら null（終了時刻の欄を出さない） */
+  endedAt: Date | null;
   project: EntryProject | null;
 };
 
 type Props = {
   initial: EditorInitial;
+  /** 修正する記録の id。なければ追加 */
+  entryId?: number;
   /** プロジェクトの選択肢（登録順） */
   projects: EntryProject[];
   /** タスク名の入力候補 */
@@ -48,11 +53,13 @@ type Props = {
 const fieldClassName = `w-full min-w-0 rounded-md border border-border bg-background px-2 py-1.5 text-sm text-foreground aria-[invalid=true]:border-danger ${fieldFocusClassName}`;
 
 /**
- * タイムラインの記録の入力欄。タスク名・プロジェクト・開始時刻・終了時刻を入れて「追加」で終了済みの記録を足す。
+ * タイムラインの記録の入力欄。タスク名・プロジェクト・開始時刻・終了時刻を入れて、
+ * 追加なら「追加」で終了済みの記録を足し、修正なら「保存」で保存する。修正では「削除」で確認してから削除する。
  * 「閉じる」・Escape・外側を選んだときは保存せずに閉じる。開いたらタスク名にフォーカスする
  */
 export function TimelineEntryEditor({
   initial,
+  entryId,
   projects,
   suggestions,
   top,
@@ -64,12 +71,33 @@ export function TimelineEntryEditor({
   const [projectId, setProjectId] = useState<number | null>(
     initial.project?.id ?? null,
   );
+  // 開いている間は追加か修正かが変わらないので、最初に決めた Server Action を使い続ける
+  const [submitAction] = useState(() =>
+    entryId === undefined
+      ? createEntryAction
+      : updateEntryAction.bind(null, entryId),
+  );
   const [state, action, saving] = useActionState<ActionState, FormData>(
-    createEntryAction,
+    submitAction,
     {},
   );
   const [, startTransition] = useTransition();
+  const [deleting, startDelete] = useTransition();
+  const [deleteError, setDeleteError] = useState<string>();
   const errors = state.errors ?? {};
+  const fields =
+    initial.endedAt === null
+      ? (["startedAt"] as const)
+      : (["startedAt", "endedAt"] as const);
+
+  const handleDelete = () => {
+    if (entryId === undefined || !window.confirm(t.confirmDelete)) return;
+    startDelete(async () => {
+      const result = await deleteEntryAction(entryId);
+      if (result.ok) onClose(false);
+      else setDeleteError(result.errors?.form);
+    });
+  };
 
   // 開いたらタスク名にフォーカスし、入力欄が見える位置までスクロールする
   useEffect(() => {
@@ -169,7 +197,7 @@ export function TimelineEntryEditor({
           />
           {fieldError("projectId")}
         </div>
-        {(["startedAt", "endedAt"] as const).map((field) => (
+        {fields.map((field) => (
           <div key={field} className="space-y-1">
             <label htmlFor={`${id}-${field}`} className="text-xs text-muted">
               {t[field]}
@@ -179,7 +207,7 @@ export function TimelineEntryEditor({
               name={field}
               type="datetime-local"
               step={1}
-              defaultValue={toDateTimeLocalValue(initial[field])}
+              defaultValue={toDateTimeLocalValue(initial[field]!)}
               aria-invalid={errors[field] ? true : undefined}
               aria-describedby={errors[field] ? errorId(field) : undefined}
               className={fieldClassName}
@@ -187,12 +215,22 @@ export function TimelineEntryEditor({
             {fieldError(field)}
           </div>
         ))}
-        {errors.form && (
+        {(errors.form ?? deleteError) && (
           <p role="alert" className="text-xs text-danger">
-            {errors.form}
+            {errors.form ?? deleteError}
           </p>
         )}
         <div className="flex justify-end gap-2 pt-1">
+          {entryId !== undefined && (
+            <IconButton
+              icon={Trash2}
+              label={t.actions.delete}
+              variant="danger"
+              className="mr-auto"
+              disabled={deleting}
+              onClick={handleDelete}
+            />
+          )}
           <IconButton
             icon={X}
             label={t.timeline.close}
@@ -202,7 +240,7 @@ export function TimelineEntryEditor({
             type="submit"
             variant="primary"
             icon={Check}
-            label={t.timeline.create}
+            label={entryId === undefined ? t.timeline.create : t.timeline.save}
             disabled={saving}
           />
         </div>
