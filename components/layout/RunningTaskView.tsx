@@ -2,6 +2,7 @@ import { ProjectIcon } from "@/components/projects/ProjectIcon";
 import type { EntryProject } from "@/components/projects/types";
 import { messages } from "@/lib/messages";
 import { formatTime } from "@/lib/time";
+import { RecordingFavicon } from "./RecordingFavicon";
 import { RunningTaskLink } from "./RunningTaskLink";
 
 const t = messages.timeEntries;
@@ -19,6 +20,8 @@ type Props = {
 export function RunningTaskView({ running }: Props) {
   return (
     <section aria-labelledby="sidebar-running-heading">
+      {/* 記録中はファビコンも記録中用にする。記録の操作の後にこの部品が描き直されるのに合わせて切り替わる */}
+      <RecordingFavicon recording={running !== null} />
       <RunningTaskLink>
         <h2 id="sidebar-running-heading" className="text-xs text-muted">
           {t.runningHeading}

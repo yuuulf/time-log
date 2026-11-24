@@ -20,7 +20,8 @@ export const metadata: Metadata = {
   title: messages.app.name,
   description: messages.app.description,
   // ファビコンはブラウザ・OS のライト・ダークに合わせて出し分ける。
-  // media に対応していないブラウザでもロゴが出るよう、ライト用は media なしにする
+  // media に対応していないブラウザでもロゴが出るよう、ライト用は media なしにする。
+  // 記録中は RecordingFavicon がこの href を記録中用に書き換える
   icons: {
     icon: [
       { url: favicons.normal.light, type: "image/png" },

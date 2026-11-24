@@ -1,6 +1,7 @@
 import { render, screen, within } from "@testing-library/react";
-import { beforeEach, expect, test, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 import { messages } from "@/lib/messages";
+import { darkFaviconMedia, favicons } from "./favicons";
 import { RunningTaskView } from "./RunningTaskView";
 
 const t = messages.timeEntries;
@@ -141,4 +142,40 @@ test("トップページでは枠が選ばれている表示になり、ほか�
   navigation.pathname = "/summary";
   render(<RunningTaskView running={running} />);
   expect(screen.getByRole("link").hasAttribute("aria-current")).toBe(false);
+});
+
+describe("ファビコン", () => {
+  beforeEach(() => {
+    document.head.innerHTML = `
+      <link rel="icon" href="${favicons.normal.light}">
+      <link rel="icon" href="${favicons.normal.dark}" media="${darkFaviconMedia}">
+    `;
+  });
+  afterEach(() => {
+    document.head.innerHTML = "";
+  });
+
+  const hrefs = () =>
+    [...document.head.querySelectorAll('link[rel="icon"]')].map((link) =>
+      link.getAttribute("href"),
+    );
+
+  test("記録中ならファビコンを記録中用にする", () => {
+    render(<RunningTaskView running={running} />);
+    expect(hrefs()).toEqual([
+      favicons.recording.light,
+      favicons.recording.dark,
+    ]);
+  });
+
+  test("記録中でなければファビコンは通常用のまま", () => {
+    render(<RunningTaskView running={null} />);
+    expect(hrefs()).toEqual([favicons.normal.light, favicons.normal.dark]);
+  });
+
+  test("記録を終了して記録中でなくなると、ファビコンが通常用に戻る", () => {
+    const { rerender } = render(<RunningTaskView running={running} />);
+    rerender(<RunningTaskView running={null} />);
+    expect(hrefs()).toEqual([favicons.normal.light, favicons.normal.dark]);
+  });
 });
