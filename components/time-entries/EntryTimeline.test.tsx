@@ -61,6 +61,9 @@ describe("タイムラインの表示", () => {
     expect(block.textContent).toBe("資料作成 09:15〜10:30");
     expect(block.querySelectorAll(":scope > span")).toHaveLength(1);
     expect(block.firstElementChild?.className).toContain("truncate");
+    // 長い帯でも文字は上下の真ん中ではなく上端に寄せる
+    expect(block.className).toContain("flex");
+    expect(block.className).toContain("items-start");
     expect(block.title).toBe("資料作成 09:15〜10:30");
     expect(block.style.top).toBe(`${(9 * 60 + 15) * MINUTE_PX}px`);
     expect(block.style.height).toBe(`${75 * MINUTE_PX}px`);

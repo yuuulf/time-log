@@ -2,7 +2,7 @@
 
 ## 1. 見た目の調整
 
-- [ ] 1.1 `TimelineBoard` の帯の `<button>` を `flex items-start` にして文字を上端に寄せる（design「帯の `<button>` を `flex items-start` にして…」）。`EntryTimeline.test.tsx` で帯が上端寄せのクラスを持ち、文字が 1 行で省略されることをテストする（コミット: カレンダーの帯の文字を上に寄せる）
+- [x] 1.1 `TimelineBoard` の帯の `<button>` を `flex items-start` にして文字を上端に寄せる（design「帯の `<button>` を `flex items-start` にして…」）。`EntryTimeline.test.tsx` で帯が上端寄せのクラスを持ち、文字が 1 行で省略されることをテストする（コミット: カレンダーの帯の文字を上に寄せる）
 - [ ] 1.2 `HistoryContent` の「CSV 出力」を `ml-auto` で見出しの行の右端に寄せる（design「『CSV 出力』は `ml-auto` で…」）。`HistoryContent.test.tsx` で一覧・週とも「CSV 出力」が見出しの行の最後にあり右端に寄ることをテストし、README の「見出しの横」を直す（コミット: CSV 出力のボタンを見出しの行の右端に移す）
 - [ ] 1.3 各ページの見出しを `text-xl`、`<main>` を `py-6`、見出しの下を `mt-4` にする（design「見出しは `text-xl`…」）。各ページのテスト（`app/*/page.test.tsx`・`ProjectDetail.test.tsx`・`ProjectForm.test.tsx`）で見出しのクラスを確かめる（コミット: ページの見出しと余白を小さくする）
 

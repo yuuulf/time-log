@@ -291,7 +291,8 @@ function DayColumn({
             aria-label={label}
             title={label}
             data-entry-id={block.id}
-            className={`absolute overflow-hidden rounded-sm border-l-4 px-2 py-0.5 text-left text-xs text-foreground hover:brightness-95 focus-visible:z-10 focus-visible:outline-2 focus-visible:outline-primary ${projectColorBlockClass(block.project?.color ?? null)}`}
+            // ボタンは既定で中身を上下の真ん中に置くので、長い帯でも文字を上端（開始時刻の近く）に寄せる
+            className={`absolute flex items-start overflow-hidden rounded-sm border-l-4 px-2 py-0.5 text-left text-xs text-foreground hover:brightness-95 focus-visible:z-10 focus-visible:outline-2 focus-visible:outline-primary ${projectColorBlockClass(block.project?.color ?? null)}`}
             style={{
               top: block.startMinute * MINUTE_PX,
               height,
@@ -300,7 +301,7 @@ function DayColumn({
               width: `calc((100% - ${gutter}) / ${block.columns} - 4px)`,
             }}
           >
-            <span className="block truncate">
+            <span className="block w-full min-w-0 truncate">
               <span className="font-medium">{name}</span>{" "}
               <span className="text-muted tabular-nums">{range}</span>
             </span>
