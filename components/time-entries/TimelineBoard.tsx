@@ -296,7 +296,11 @@ function DayColumn({
       {blocks.map((block) => {
         const name = block.taskName || t.untitled;
         const range = rangeText(block);
-        const label = t.timeline.entryLabel(name, range);
+        const label = t.timeline.entryLabel(
+          name,
+          block.project?.name ?? null,
+          range,
+        );
         const height = Math.max(
           MIN_BLOCK_PX,
           (block.endMinute - block.startMinute) * MINUTE_PX,

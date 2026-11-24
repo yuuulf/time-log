@@ -52,8 +52,12 @@ export const messages = {
       close: "閉じる",
       /** 帯の時刻（例: 「09:15〜10:30」） */
       range: (start: string, end: string) => `${start}〜${end}`,
-      /** 帯の読み上げ名（例: 「資料作成 09:15〜10:30」） */
-      entryLabel: (taskName: string, range: string) => `${taskName} ${range}`,
+      /** 帯の名前（例: 「資料作成 社内ツール 09:15〜10:30」）。プロジェクトがなければ「資料作成 09:15〜10:30」 */
+      entryLabel: (
+        taskName: string,
+        projectName: string | null,
+        range: string,
+      ) => [taskName, projectName, range].filter(Boolean).join(" "),
     },
     actions: {
       start: "開始",

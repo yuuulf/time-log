@@ -54,8 +54,9 @@ describe("タイムラインの表示", () => {
       />,
     );
 
+    // 帯の名前はタスク名・プロジェクト名・時刻
     const block = screen.getByRole("button", {
-      name: "資料作成 09:15〜10:30",
+      name: "資料作成 社内ツール 09:15〜10:30",
     });
     // タスク名と時刻を 1 行に並べる
     expect(block.textContent).toBe("資料作成 09:15〜10:30");
@@ -64,7 +65,7 @@ describe("タイムラインの表示", () => {
     // 長い帯でも文字は上下の真ん中ではなく上端に寄せる
     expect(block.className).toContain("flex");
     expect(block.className).toContain("items-start");
-    expect(block.title).toBe("資料作成 09:15〜10:30");
+    expect(block.title).toBe("資料作成 社内ツール 09:15〜10:30");
     expect(block.style.top).toBe(`${(9 * 60 + 15) * MINUTE_PX}px`);
     expect(block.style.height).toBe(`${75 * MINUTE_PX}px`);
     expect(block.className).toContain("bg-project-teal/15");
@@ -86,6 +87,7 @@ describe("タイムラインの表示", () => {
       />,
     );
 
+    // プロジェクトがなければ、帯の名前にプロジェクト名は入れない
     const block = screen.getByRole("button", {
       name: `${t.untitled} 09:00〜10:00`,
     });
