@@ -98,6 +98,7 @@ TimelineBoard props:
 
 - `MonthCalendar` props: `mode`（`"week"` は行ごとに強調して週を選ぶ、`"day"` は日ごとに強調して日を選ぶ）、`selected`（日の 0 時、または未選択の `null`）、`max`（選べるいちばん後の日。省略で制限なし）、`onSelect(date)`、文言。月の切り替え・曜日の見出し・キーボード操作（矢印・Enter）・開いたときのフォーカスを持つ
 - 入力欄は直接入力もできるよう（ユーザーの指摘）、共通の `CalendarField`（`components/ui/CalendarField.tsx`）にする。文字の `<input type="text">` と、右端のカレンダーのアイコンのボタン（`IconButton`、`ghost`。押すとカレンダーを開く）と hidden の `<input name>` を持つ。フォーカスしていないときは見やすい文字（日付は「2026年10月1日」、週は期間）、フォーカスすると「2026/10/01」（週は月曜日）の編集できる文字にする（一覧の時刻と同じ考え方）。フォーカスが外れたとき・Enter で `parseDateInput`（`lib/time.ts`。「2026/10/1」「2026-10-01」「2026.10.1」、全角の数字も可）で読み、読めなければ前の値に戻す（期間の日付で空にしたら未入力）。週は今週より先なら前の値に戻す。Enter はフォームの送信を止めずに、hidden の値を `flushSync` で先に新しくしてから送らせる。Escape はカレンダーを開いていなければ編集を取り消す
+- `WeekPicker`・`DatePicker` は `WeekControls`・`PeriodControls`（サーバー部品）から使うので、渡す文言は文字だけにする（クライアント部品には関数を渡せない）。カレンダーのボタンの名前（「開始日のカレンダー」）は `messages.history.calendarButton(label)` をサーバー部品で呼んで渡す。入力欄の名前は、週の切り替えのまとまり（「表示する週」）と区別できるよう「週の指定」にする
 - `WeekPicker`（週の月曜日を値にする）と `DatePicker`（日を値にする）は `CalendarField` に表示と値の変え方を渡すだけにする。`DatePicker` は今までの `role="combobox"` のボタンをやめ、文字の入力欄で `aria-invalid` を持つ。値は今の `type="date"` と同じ「2026-10-01」の形なので、`PeriodControls` のフォームと `resolveHistoryQuery` は変えない。`aria-invalid` のときは枠を `border-danger` にする
 - 開いたカレンダー（`WeekPicker`・`DatePicker`）は `z-40` にする。週のカレンダーの列の見出し（`sticky`、`z-30`）に隠れていたため
 
