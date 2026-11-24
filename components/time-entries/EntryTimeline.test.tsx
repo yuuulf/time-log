@@ -26,6 +26,13 @@ function clickArea(minute: number) {
   fireEvent.click(area, { clientY: minute * MINUTE_PX });
 }
 
+/** jsdom が calc() を書き換えるので、期待する値も同じく書き換えて比べる */
+function css(property: "left" | "width", value: string) {
+  const element = document.createElement("div");
+  element.style[property] = value;
+  return element.style[property];
+}
+
 function blockStyle(name: RegExp) {
   return screen.getByRole("button", { name }).style;
 }
@@ -123,9 +130,13 @@ describe("タイムラインの表示", () => {
       />,
     );
 
-    expect(blockStyle(/^A /).left).toBe("0%");
-    expect(blockStyle(/^B /).left).toBe("50%");
-    expect(blockStyle(/^A /).width).toBe("calc(50% - 4px)");
+    expect(blockStyle(/^A /).left).toBe(css("left", "calc((100% - 2rem) * 0)"));
+    expect(blockStyle(/^B /).left).toBe(
+      css("left", "calc((100% - 2rem) * 0.5)"),
+    );
+    expect(blockStyle(/^A /).width).toBe(
+      css("width", "calc((100% - 2rem) / 2 - 4px)"),
+    );
   });
 
   test("短い記録が続くときは、上下に重ならないよう横に並べる", () => {
@@ -149,8 +160,33 @@ describe("タイムラインの表示", () => {
       />,
     );
 
-    expect(blockStyle(/^A /).left).toBe("0%");
-    expect(blockStyle(/^B /).left).toBe("50%");
+    expect(blockStyle(/^A /).left).toBe(css("left", "calc((100% - 2rem) * 0)"));
+    expect(blockStyle(/^B /).left).toBe(
+      css("left", "calc((100% - 2rem) * 0.5)"),
+    );
+  });
+
+  test("帯は右端まで届かず、追加のために選べる幅を残す", () => {
+    render(
+      <EntryTimeline
+        now={now}
+        entries={[
+          {
+            id: 1,
+            taskName: "A",
+            startedAt: at("09:00:00"),
+            endedAt: at("10:00:00"),
+          },
+        ]}
+      />,
+    );
+
+    expect(blockStyle(/^A /).width).toBe(
+      css("width", "calc((100% - 2rem) / 1 - 4px)"),
+    );
+    // 右端の 2rem は帯で埋めない
+    expect(blockStyle(/^A /).width).toContain("2rem");
+    expect(blockStyle(/^A /).width).not.toBe("calc(100% - 4px)");
   });
 
   test("短い記録も選べる高さにする", () => {
@@ -272,6 +308,22 @@ describe("タイムラインからの記録の追加", () => {
     expect(time(field(t.endedAt).value)).toBe("2026-11-18T11:00:00");
     expect(document.activeElement).toBe(field(t.taskName));
     expect(field(t.taskName).value).toBe("");
+  });
+
+  test("記録のある時間でも、右端の帯のない幅を選ぶと入力欄が開く", () => {
+    renderTimeline([
+      {
+        id: 1,
+        taskName: "A",
+        startedAt: at("09:00:00"),
+        endedAt: at("10:00:00"),
+      },
+    ]);
+
+    clickAt(9 * 60 + 20);
+
+    expect(time(field(t.startedAt).value)).toBe("2026-11-18T09:15:00");
+    expect(time(field(t.endedAt).value)).toBe("2026-11-18T09:45:00");
   });
 
   test("次の記録の手前までにする", () => {

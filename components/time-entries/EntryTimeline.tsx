@@ -38,6 +38,9 @@ const MIN_BLOCK_PX = MIN_BLOCK_MINUTES * MINUTE_PX;
 /** 開いたときに、今の時刻より何分前を枠の上端にするか */
 const SCROLL_LEAD_MINUTES = 60;
 
+/** 帯の右に残す幅。記録のある時間でも、ここを選んで記録を追加できる */
+const ADD_GUTTER = "2rem";
+
 /** 入力欄が下にはみ出さないよう、上端をこの高さ（px）ぶん上に収める */
 const EDITOR_HEIGHT_PX = 300;
 
@@ -228,8 +231,9 @@ export function EntryTimeline({
                     style={{
                       top: block.startMinute * MINUTE_PX,
                       height,
-                      left: `${(block.column / block.columns) * 100}%`,
-                      width: `calc(${100 / block.columns}% - 4px)`,
+                      // 右端に追加のために選べる幅を残し、残りを段の数で分ける
+                      left: `calc((100% - ${ADD_GUTTER}) * ${block.column / block.columns})`,
+                      width: `calc((100% - ${ADD_GUTTER}) / ${block.columns} - 4px)`,
                     }}
                   >
                     <span className="block truncate">
